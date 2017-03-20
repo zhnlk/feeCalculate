@@ -5,15 +5,22 @@ from asyncio import Event
 import psutil as psutil
 from PyQt5.QtCore import QSettings
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QAbstractItemView
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QDialog
 from PyQt5.QtWidgets import QDockWidget
+from PyQt5.QtWidgets import QGroupBox
+from PyQt5.QtWidgets import QHBoxLayout
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QSpinBox
+from PyQt5.QtWidgets import QTableWidget
+from PyQt5.QtWidgets import QTableWidgetItem
 from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QWidget
 
-from BasicWidget import AddCashDetail, OutPutData
+from BasicWidget import AddCashDetail, AboutWidget, OutCashData
 
 
 class MainWindow(QMainWindow):
@@ -34,34 +41,60 @@ class MainWindow(QMainWindow):
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('feeCalc')
-        # self.initCentral()
+        self.initCentral()
         self.initMenu()
         self.initStatusBar()
 
     # ----------------------------------------------------------------------
     def initCentral(self):
-        """初始化中心区域"""
-        # widgetMarketM, dockMarketM = self.createDock(MarketMonitor, u'行情', QtCore.Qt.RightDockWidgetArea)
-        # widgetLogM, dockLogM = self.createDock(LogMonitor, u'日志', QtCore.Qt.BottomDockWidgetArea)
-        # widgetErrorM, dockErrorM = self.createDock(ErrorMonitor, u'错误', QtCore.Qt.BottomDockWidgetArea)
-        # widgetTradeM, dockTradeM = self.createDock(TradeMonitor, u'成交', QtCore.Qt.BottomDockWidgetArea)
-        # widgetOrderM, dockOrderM = self.createDock(OrderMonitor, u'委托', QtCore.Qt.RightDockWidgetArea)
-        # widgetPositionM, dockPositionM = self.createDock(PositionMonitor, u'持仓', QtCore.Qt.BottomDockWidgetArea)
-        # widgetAccountM, dockAccountM = self.createDock(AccountMonitor, u'资金', QtCore.Qt.BottomDockWidgetArea)
-        # widgetTradingW, dockTradingW = self.createDock(TradingWidget, u'交易', QtCore.Qt.LeftDockWidgetArea)
+        """总估值与费用"""
+        # 垂直布局
+        vbox = QVBoxLayout()
+        # groupBox = QGroupBox()
+        # groupBox.setLayout(vbox)
 
-        # self.tabifyDockWidget(dockTradeM, dockErrorM)
-        # self.tabifyDockWidget(dockTradeM, dockLogM)
-        # self.tabifyDockWidget(dockPositionM, dockAccountM)
+        count = QWidget()
+        hbox = QHBoxLayout()
+        # countLabel = QLabel("细节数目:")
+        # hbox.addWidget(countLabel)
+        self.countSpineBox = QSpinBox()
+        self.countSpineBox.setRange(0, 10)
+        # self.countSpineBox.valueChanged.connect(self.countSpineValueChanged)
+        hbox.addWidget(self.countSpineBox)
+        hbox.addStretch()
+        count.setLayout(hbox)
+        # vbox.addWidget(count)  # 垂直布局，添加widget1
 
-        # dockTradeM.raise_()
-        # dockPositionM.raise_()
+        self.detailTable = QTableWidget()
+        colList = list()
+        colList = ['计算日', '总资产净值', '现金', '协存', '货基', '资管', '流动资产比例', '当日总收益', '费用1', '费用2', '费用3', '费用4', '当日产品收益', '费用计提']
+        # 设置不可编辑
+        self.detailTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.detailTable.setColumnCount(len(colList))
+        self.detailTable.setRowCount(20)
+
+        # self.detailTable.setItem()
+        self.detailTable.setHorizontalHeaderLabels(colList)
+
+        for i in range(self.detailTable.rowCount()):
+            for j in range(self.detailTable.columnCount()):
+                cnt = '(%d,%d)' % (i, j)
+                newItem = QTableWidgetItem(cnt)
+                self.detailTable.setItem(i, j, newItem)
+        # self.setCentralWidget(self.table)
+
+        vbox.addWidget(self.detailTable)  # 垂直布局，添加widget2
 
         # 连接组件之间的信号
         # widgetPositionM.itemDoubleClicked.connect(widgetTradingW.closePosition)
 
         # 保存默认设置
         self.saveWindowSettings('default')
+        widget = QWidget()
+        widget.setLayout(vbox)
+
+        self.setCentralWidget(widget)
+
 
     # ----------------------------------------------------------------------
     def initMenu(self):
@@ -70,30 +103,33 @@ class MainWindow(QMainWindow):
         menubar = self.menuBar()
 
         # 设计为只显示存在的接口
-        sysMenu = menubar.addMenu(u'系统')
+        sysMenu = menubar.addMenu('系统')
 
         sysMenu.addSeparator()
-        sysMenu.addAction(self.createAction(u'退出', self.close))
+        sysMenu.addAction(self.createAction('退出', self.close))
 
         cashDetailMenu = menubar.addMenu('现金明细')
         cashDetailMenu.addAction(self.createAction('增加记录', self.openAddCashDetail))
-        cashDetailMenu.addAction(self.createAction('导出数据', self.openOutPutData))
+        cashDetailMenu.addAction(self.createAction('导出数据', self.openOutCashData))
 
         # 协议存款
         protocolMenu = menubar.addMenu('协议存款')
-        protocolMenu.addAction(self.createAction('CTA策略', self.openCta))
+        protocolMenu.addAction(self.createAction('增加记录', self.openAbout))
+        protocolMenu.addAction(self.createAction('导出记录', self.openAbout))
         # protocolMenu.addAction()
 
         # 货基
         moneyFundMenu = menubar.addMenu('货基明细')
-        moneyFundMenu.addAction(self.createAction('关于', self.openAbout))
+        moneyFundMenu.addAction(self.createAction('增加记录', self.openAbout))
+        moneyFundMenu.addAction(self.createAction('导出记录', self.openAbout))
 
         # 资管
         assertMgtMenu = menubar.addMenu('资管明细')
-        assertMgtMenu.addAction(self.createAction('关于', self.openAbout))
+        assertMgtMenu.addAction(self.createAction('增加记录', self.openAbout))
+        assertMgtMenu.addAction(self.createAction('导出记录', self.openAbout))
 
         # 帮助
-        helpMenu = menubar.addMenu(u'帮助')
+        helpMenu = menubar.addMenu('帮助')
         helpMenu.addAction(self.createAction('关于', self.openAbout))
 
     # ----------------------------------------------------------------------
@@ -148,7 +184,7 @@ class MainWindow(QMainWindow):
     def createAction(self, actionName, function):
         """创建操作功能"""
         action = QAction(actionName, self)
-        action.triggered.connect(function)
+        # action.triggered.connect(function)
         return action
 
     # ----------------------------------------------------------------------
@@ -161,14 +197,6 @@ class MainWindow(QMainWindow):
             self.widgetDict['aboutW'].show()
 
     # ----------------------------------------------------------------------
-    def openContract(self):
-        """打开合约查询"""
-        try:
-            self.widgetDict['contractM'].show()
-        except KeyError:
-            # self.widgetDict['contractM'] = ContractMonitor(self.mainEngine)
-            self.widgetDict['contractM'].show()
-
 
     def openAddCashDetail(self):
         """打开现金明细"""
@@ -179,41 +207,15 @@ class MainWindow(QMainWindow):
             self.widgetDict['addCashDetail'].show()
 
     # ----------------------------------------------------------------------
-    def openOutPutData(self):
+    def openOutCashData(self):
         """打开导出数据"""
         try:
-            self.widgetDict['outPutData'].show()
+            self.widgetDict['OutCashData'].show()
         except KeyError:
-            self.widgetDict['outPutData'] = OutPutData()
-            self.widgetDict['outPutData'].show()
-
-    def openCta(self):
-        """打开CTA组件"""
-        try:
-            self.widgetDict['ctaM'].showMaximized()
-        except KeyError:
-            # self.widgetDict['ctaM'] = CtaEngineManager(self.mainEngine.ctaEngine, self.eventEngine)
-            self.widgetDict['ctaM'].showMaximized()
+            self.widgetDict['OutCashData'] = OutCashData()
+            self.widgetDict['OutCashData'].show()
 
     # ----------------------------------------------------------------------
-    def openDr(self):
-        """打开行情数据记录组件"""
-        try:
-            self.widgetDict['drM'].showMaximized()
-        except KeyError:
-            # self.widgetDict['drM'] = DrEngineManager(self.mainEngine.drEngine, self.eventEngine)
-            self.widgetDict['drM'].showMaximized()
-
-    # ----------------------------------------------------------------------
-    def openRm(self):
-        """打开组件"""
-        try:
-            self.widgetDict['rmM'].show()
-        except KeyError:
-            # self.widgetDict['rmM'] = RmEngineManager(self.mainEngine.rmEngine, self.eventEngine)
-            self.widgetDict['rmM'].show()
-
-            # ----------------------------------------------------------------------
 
     def closeEvent(self, event):
         """关闭事件"""
@@ -228,18 +230,6 @@ class MainWindow(QMainWindow):
             event.accept()
         else:
             event.ignore()
-
-    # ----------------------------------------------------------------------
-    def createDock(self, widgetClass, widgetName, widgetArea):
-        """创建停靠组件"""
-        # widget = widgetClass(self.mainEngine, self.eventEngine)
-        widget = widgetClass()
-        dock = QDockWidget(widgetName)
-        dock.setWidget(widget)
-        dock.setObjectName(widgetName)
-        dock.setFeatures(dock.DockWidgetFloatable | dock.DockWidgetMovable)
-        self.addDockWidget(widgetArea, dock)
-        return widget, dock
 
     # ----------------------------------------------------------------------
     def saveWindowSettings(self, settingName):
@@ -270,41 +260,5 @@ class MainWindow(QMainWindow):
         self.loadWindowSettings('default')
         self.showMaximized()
         ########################################################################
-
-
-class AboutWidget(QDialog):
-    """显示关于信息"""
-
-    # ----------------------------------------------------------------------
-    def __init__(self, parent=None):
-        """Constructor"""
-        super(AboutWidget, self).__init__(parent)
-
-        self.initUi()
-
-    # ----------------------------------------------------------------------
-    def initUi(self):
-        """"""
-        self.setWindowTitle('About Fee Calculate')
-
-        text = """
-                Developed by zhnlk.
-
-                License：MIT
-
-                Mail：yanan.zhang@creditcloud.com
-
-                Github：www.github.com/zhnlk
-
-                """
-
-        label = QLabel()
-        label.setText(text)
-        label.setMinimumWidth(500)
-
-        vbox = QVBoxLayout()
-        vbox.addWidget(label)
-
-        self.setLayout(vbox)
 
 

@@ -4,7 +4,10 @@
 import os
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QAction
+from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QTableWidget
+from PyQt5.QtWidgets import QVBoxLayout
 
 from pandas import json
 
@@ -30,13 +33,50 @@ BASIC_FONT = loadFont()
 
 
 
+class AboutWidget(QDialog):
+    """显示关于信息"""
+
+    # ----------------------------------------------------------------------
+    def __init__(self, parent=None):
+        """Constructor"""
+        super(AboutWidget, self).__init__(parent)
+
+        self.initUi()
+
+    # ----------------------------------------------------------------------
+    def initUi(self):
+        """"""
+        self.setWindowTitle('About Fee Calculate')
+
+        text = """
+                Developed by zhnlk.
+
+                License：MIT
+
+                Mail：yanan.zhang@creditcloud.com
+
+                Github：www.github.com/zhnlk
+
+                """
+
+        label = QLabel()
+        label.setText(text)
+        label.setMinimumWidth(500)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(label)
+
+        self.setLayout(vbox)
 
 
-class OutPutData(QTableWidget):
+
+
+
+class OutCashData(QTableWidget):
 
     def __init__(self, parent=None):
 
-        super(OutPutData,self).__init__(parent=parent)
+        super(OutCashData,self).__init__(parent=parent)
 
         self.initUI()
     def initUI(self):
@@ -44,11 +84,8 @@ class OutPutData(QTableWidget):
         self.setWindowTitle('导出数据')
         self.setMinimumSize(800, 800)
         self.setFont(BASIC_FONT)
-        self.initTable()
-        self.addMenuAction()
-
-
-
+        # self.initTable()
+        # self.addMenuAction()
 
 
 class AddCashDetail(QTableWidget):
@@ -80,7 +117,7 @@ class AddCashDetail(QTableWidget):
         self.setWindowTitle('增加现金明细')
         self.setMinimumSize(800, 800)
         self.setFont(BASIC_FONT)
-        self.initTable()
+        # self.initTable()
         self.addMenuAction()
 
     # ----------------------------------------------------------------------
@@ -112,7 +149,7 @@ class AddCashDetail(QTableWidget):
     # ----------------------------------------------------------------------
     def refresh(self):
         """刷新"""
-        self.menu.close()  # 关闭菜单
+        # self.menu.close()  # 关闭菜单
         self.clearContents()
         self.setRowCount(0)
         # self.showAllContracts()
@@ -123,7 +160,7 @@ class AddCashDetail(QTableWidget):
         refreshAction = QAction(u'刷新', self)
         refreshAction.triggered.connect(self.refresh)
 
-        self.menu.addAction(refreshAction)
+        # self.menu.addAction(refreshAction)
 
     # ----------------------------------------------------------------------
     def show(self):

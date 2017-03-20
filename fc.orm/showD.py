@@ -4,9 +4,11 @@ from PyQt5.QtCore import *
 from PyQt5.QtSql import *
 import sys
 
+from PyQt5.QtWidgets import QAbstractItemView
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtWidgets import QTableView
+from PyQt5.QtWidgets import QTableWidget
 from PyQt5.QtWidgets import QVBoxLayout
 from PyQt5.QtWidgets import QWidget
 
@@ -43,11 +45,29 @@ class teastDBWidget(QWidget):
         self.view.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         vbox.addWidget(self.view)
 
+class testDetailTb(QWidget):
+    def __init__(self):
+        QWidget.__init__(self)
+        vbox = QVBoxLayout(self)
+
+        detailTable = QTableWidget()
+        colList = list()
+        colList = ['计算日', '总资产净值', '现金', '协存', '货基', '资管', '流动资产比例', '当日总收益', '费用1', '费用2', '费用3', '费用4', '当日产品收益', '费用计提']
+        # 设置不可编辑
+        detailTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        detailTable.setColumnCount(len(colList))
+        detailTable.setHorizontalHeaderLabels(colList)
+
+        vbox.addWidget(detailTable)
+
+
+
 
 if __name__ == "__main__":
     a = QApplication(sys.argv)
     createConnection()
     # createTable()
     w = teastDBWidget()
+    # w = testDetailTb()
     w.show()
     sys.exit(a.exec_())
