@@ -9,10 +9,12 @@ from pandas import json
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication
 
-import MainWindow
 from BasicWidget import BASIC_FONT
 
 # 图标文件路径名
+from MainEngine import MainEngine
+from MainWindow import MainWindow
+
 path = os.path.abspath(os.path.dirname(__file__))
 ICON_FILENAME = 'zhnlk.ico'
 ICON_FILENAME = os.path.join(path, ICON_FILENAME)
@@ -22,7 +24,6 @@ SETTING_FILENAME = os.path.join(path, SETTING_FILENAME)
 
 
 def main():
-
     # 设置windows下的地步任务栏图标
     if 'Windows' in platform.uname():
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('feeCalculate')
@@ -43,7 +44,8 @@ def main():
         pass
 
     # 初始化主窗口
-    mainWindow = MainWindow.MainWindow()
+    mainEngine = MainEngine()
+    mainWindow = MainWindow(mainEngine, mainEngine.eventEngine)
     mainWindow.showMaximized()
 
     sys.exit(app.exec_())

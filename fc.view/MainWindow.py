@@ -1,36 +1,38 @@
 # -*- coding: utf-8 -*-
+from collections import OrderedDict
+
 from PyQt5 import QtCore
 from asyncio import Event
 
 import psutil as psutil
 from PyQt5.QtCore import QSettings
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QAbstractItemView
 from PyQt5.QtWidgets import QAction
-from PyQt5.QtWidgets import QDialog
 from PyQt5.QtWidgets import QDockWidget
-from PyQt5.QtWidgets import QGroupBox
-from PyQt5.QtWidgets import QHBoxLayout
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtWidgets import QSpinBox
-from PyQt5.QtWidgets import QTableWidget
-from PyQt5.QtWidgets import QTableWidgetItem
-from PyQt5.QtWidgets import QVBoxLayout
-from PyQt5.QtWidgets import QWidget
 
-from BasicWidget import AddCashDetail, AboutWidget, OutCashData
+from BasicWidget import BasicCell, BasicFcView, BASIC_FONT
+from EventType import EVENT_TICK
+from assertmgtView.AssertMgtMain import AssertMgtListView
+from cashView.CashMain import CashListView
+from miscView.AboutMain import AboutWidget
+from moneyfundView.MoneyFundMain import MoneyFundListView
+from protocolView.ProtocolMain import ProtocolListView
 
 
-class MainWindow(QMainWindow):
+class MainWindow(QMainWindow, BasicFcView):
     """主窗口"""
     signalStatusBar = pyqtSignal(type(Event()))
 
     # ----------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, mainEngine, eventEngine):
         """Constructor"""
         super(MainWindow, self).__init__()
+
+        self.mainEngine = mainEngine
+        self.eventEngine = eventEngine
 
         self.widgetDict = {}  # 用来保存子窗口的字典
 
@@ -42,92 +44,59 @@ class MainWindow(QMainWindow):
         """初始化界面"""
         self.setWindowTitle('feeCalc')
         self.initCentral()
-        self.initMenu()
+        self.initTopMenu()
         self.initStatusBar()
 
     # ----------------------------------------------------------------------
     def initCentral(self):
         """总估值与费用"""
-        # 垂直布局
-        vbox = QVBoxLayout()
-        # groupBox = QGroupBox()
-        # groupBox.setLayout(vbox)
 
-        count = QWidget()
-        hbox = QHBoxLayout()
-        # countLabel = QLabel("细节数目:")
-        # hbox.addWidget(countLabel)
-        self.countSpineBox = QSpinBox()
-        self.countSpineBox.setRange(0, 10)
-        # self.countSpineBox.valueChanged.connect(self.countSpineValueChanged)
-        hbox.addWidget(self.countSpineBox)
-        hbox.addStretch()
-        count.setLayout(hbox)
-        # vbox.addWidget(count)  # 垂直布局，添加widget1
+        # 增加主界面显示
+        widgetMainView, dockMainView = self.createDock(DateMainView, '今日资金成本', QtCore.Qt.LeftDockWidgetArea)
+        widgetMainView, dockMainView = self.createDock(FeeTotalView, '费用详情统计', QtCore.Qt.RightDockWidgetArea)
+        widgetMainView, dockMainView = self.createDock(AssertTotalView, '存量资产详情', QtCore.Qt.BottomDockWidgetArea)
+        # self.tabifyDockWidget(widgetMainView,dockMainView)
 
-        self.detailTable = QTableWidget()
-        colList = list()
-        colList = ['计算日', '总资产净值', '现金', '协存', '货基', '资管', '流动资产比例', '当日总收益', '费用1', '费用2', '费用3', '费用4', '当日产品收益', '费用计提']
-        # 设置不可编辑
-        self.detailTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.detailTable.setColumnCount(len(colList))
-        self.detailTable.setRowCount(20)
-
-        # self.detailTable.setItem()
-        self.detailTable.setHorizontalHeaderLabels(colList)
-
-        for i in range(self.detailTable.rowCount()):
-            for j in range(self.detailTable.columnCount()):
-                cnt = '(%d,%d)' % (i, j)
-                newItem = QTableWidgetItem(cnt)
-                self.detailTable.setItem(i, j, newItem)
-        # self.setCentralWidget(self.table)
-
-        vbox.addWidget(self.detailTable)  # 垂直布局，添加widget2
-
-        # 连接组件之间的信号
-        # widgetPositionM.itemDoubleClicked.connect(widgetTradingW.closePosition)
+        dockMainView.raise_()
 
         # 保存默认设置
         self.saveWindowSettings('default')
-        widget = QWidget()
-        widget.setLayout(vbox)
-
-        self.setCentralWidget(widget)
-
 
     # ----------------------------------------------------------------------
-    def initMenu(self):
+    def initTopMenu(self):
         """初始化菜单"""
         # 创建菜单
         menubar = self.menuBar()
 
         # 设计为只显示存在的接口
         sysMenu = menubar.addMenu('系统')
-
-        sysMenu.addSeparator()
+        # sysMenu.addAction(self.createAction('增加大类产品(暂未支持)',self.openAddCate))
         sysMenu.addAction(self.createAction('退出', self.close))
+        sysMenu.addSeparator()
 
         cashDetailMenu = menubar.addMenu('现金明细')
+        cashDetailMenu.addAction(self.createAction('显示明细', self.openCashListDetail))
         cashDetailMenu.addAction(self.createAction('增加记录', self.openAddCashDetail))
-        cashDetailMenu.addAction(self.createAction('导出数据', self.openOutCashData))
-
+        # cashDetailMenu.addAction(self.createAction('导出数据', self.openOutCashData))
+        sysMenu.addSeparator()
         # 协议存款
         protocolMenu = menubar.addMenu('协议存款')
-        protocolMenu.addAction(self.createAction('增加记录', self.openAbout))
-        protocolMenu.addAction(self.createAction('导出记录', self.openAbout))
-        # protocolMenu.addAction()
-
+        protocolMenu.addAction(self.createAction('显示明细', self.openProtocolListDetail))
+        protocolMenu.addAction(self.createAction('增加记录', self.openAddProtocolDetail))
+        # protocolMenu.addAction(self.createAction('导出记录', self.openOutProtocolData))
+        sysMenu.addSeparator()
         # 货基
         moneyFundMenu = menubar.addMenu('货基明细')
-        moneyFundMenu.addAction(self.createAction('增加记录', self.openAbout))
-        moneyFundMenu.addAction(self.createAction('导出记录', self.openAbout))
-
+        moneyFundMenu.addAction(self.createAction('显示明细', self.openMoneyFundListDetail))
+        moneyFundMenu.addAction(self.createAction('增加记录', self.openAddMoneyFundDetail))
+        # moneyFundMenu.addAction(self.createAction('导出记录', self.openOutMoneFundData))
+        sysMenu.addSeparator()
         # 资管
         assertMgtMenu = menubar.addMenu('资管明细')
-        assertMgtMenu.addAction(self.createAction('增加记录', self.openAbout))
-        assertMgtMenu.addAction(self.createAction('导出记录', self.openAbout))
-
+        assertMgtMenu.addAction(self.createAction('显示明细', self.openAssertMgtListDetail))
+        assertMgtMenu.addAction(self.createAction('增加记录', self.oepnAddAssertMgtDetail))
+        # assertMgtMenu.addAction(self.createAction('导出记录', self.openOutAssertMgtData))
+        sysMenu.addSeparator()
         # 帮助
         helpMenu = menubar.addMenu('帮助')
         helpMenu.addAction(self.createAction('关于', self.openAbout))
@@ -162,31 +131,6 @@ class MainWindow(QMainWindow):
         memoryPercent = psutil.virtual_memory().percent
         return u'CPU使用率：%d%%   内存使用率：%d%%' % (cpuPercent, memoryPercent)
 
-        # ----------------------------------------------------------------------
-
-    def addConnectAction(self, menu, gatewayName, displayName=''):
-        """增加连接功能"""
-
-        # if gatewayName not in self.mainEngine.getAllGatewayNames():
-        #     return
-
-        def connect():
-            pass
-            # self.mainEngine.connect(gatewayName)
-
-        if not displayName:
-            displayName = gatewayName
-        actionName = u'连接' + displayName
-
-        menu.addAction(self.createAction(actionName, connect))
-
-    # ----------------------------------------------------------------------
-    def createAction(self, actionName, function):
-        """创建操作功能"""
-        action = QAction(actionName, self)
-        # action.triggered.connect(function)
-        return action
-
     # ----------------------------------------------------------------------
     def openAbout(self):
         """打开关于"""
@@ -198,24 +142,64 @@ class MainWindow(QMainWindow):
 
     # ----------------------------------------------------------------------
 
-    def openAddCashDetail(self):
+    def openCashListDetail(self):
         """打开现金明细"""
+        try:
+            self.widgetDict['showCashListDetail'].show()
+        except KeyError:
+            self.widgetDict['showCashListDetail'] = CashListView(self.mainEngine)
+            self.widgetDict['showCashListDetail'].show()
+
+    def openProtocolListDetail(self):
+        """打开协存明细"""
+        try:
+            self.widgetDict['openProtocolListDetail'].show()
+        except KeyError:
+            self.widgetDict['openProtocolListDetail'] = ProtocolListView(self.mainEngine)
+            self.widgetDict['openProtocolListDetail'].show()
+
+    def openMoneyFundListDetail(self):
+        """打开货基明细"""
+        try:
+            self.widgetDict['openMoneyFundListDetail'].show()
+        except KeyError:
+            self.widgetDict['openMoneyFundListDetail'] = MoneyFundListView(self.mainEngine)
+            self.widgetDict['openMoneyFundListDetail'].show()
+
+    def openAssertMgtListDetail(self):
+        """打开资管明细"""
+        try:
+            self.widgetDict['openAssertMgtListDetail'].show()
+        except KeyError:
+            self.widgetDict['openAssertMgtListDetail'] = AssertMgtListView(self.mainEngine)
+            self.widgetDict['openAssertMgtListDetail'].show()
+
+    def openAddCashDetail(self):
+        """打开现金输入界面"""
         try:
             self.widgetDict['addCashDetail'].show()
         except KeyError:
-            self.widgetDict['addCashDetail'] = AddCashDetail()
+            self.widgetDict['addCashDetail'] = CashListView(self.mainEngine)
             self.widgetDict['addCashDetail'].show()
 
     # ----------------------------------------------------------------------
     def openOutCashData(self):
-        """打开导出数据"""
+        """打开现金导出"""
         try:
             self.widgetDict['OutCashData'].show()
         except KeyError:
-            self.widgetDict['OutCashData'] = OutCashData()
+            self.widgetDict['OutCashData'] = CashListView(self.mainEngine)
             self.widgetDict['OutCashData'].show()
 
     # ----------------------------------------------------------------------
+
+    # ----------------------------------------------------------------------
+    def createAction(self, actionName, function):
+        """创建操作功能"""
+        action = QAction(actionName, self)
+        # action.triggered.connect(self.close)
+        action.triggered.connect(function)
+        return action
 
     def closeEvent(self, event):
         """关闭事件"""
@@ -230,6 +214,16 @@ class MainWindow(QMainWindow):
             event.accept()
         else:
             event.ignore()
+
+    def createDock(self, widgetClass, widgetName, widgetArea):
+        """创建停靠组件"""
+        widget = widgetClass(self.mainEngine, self.eventEngine)
+        dock = QDockWidget(widgetName)
+        dock.setWidget(widget)
+        dock.setObjectName(widgetName)
+        dock.setFeatures(dock.DockWidgetFloatable | dock.DockWidgetMovable)
+        self.addDockWidget(widgetArea, dock)
+        return widget, dock
 
     # ----------------------------------------------------------------------
     def saveWindowSettings(self, settingName):
@@ -262,3 +256,108 @@ class MainWindow(QMainWindow):
         ########################################################################
 
 
+class DateMainView(BasicFcView):
+    """"""
+
+    def __init__(self, mainEngine, eventEngine, parant=None):
+        """Constructor"""
+        super(DateMainView, self).__init__(mainEngine, eventEngine, parant)
+        # 设置表头有序字典
+        d = OrderedDict()
+        d['date'] = {'chinese': '填表日', 'cellType': BasicCell}
+        d['total_assert'] = {'chinese': '计算日', 'cellType': BasicCell}
+        d['cash'] = {'chinese': '今日资金成本', 'cellType': BasicCell}
+
+        self.setHeaderDict(d)
+        # 设置数据键
+        self.setDataKey('fcSymbol')
+
+        # 设置监控事件类型
+        self.setEventType(EVENT_TICK)
+
+        # 设置字体
+        self.setFont(BASIC_FONT)
+
+        # 设置允许排序
+        self.setSorting(True)
+
+        # 初始化表格
+        self.initTable()
+
+        # 注册事件监听
+        self.registerEvent()
+
+
+class FeeTotalView(BasicFcView):
+    """"""
+
+    def __init__(self, mainEngine, eventEngine, parant=None):
+        """Constructor"""
+        super(FeeTotalView, self).__init__(mainEngine, eventEngine, parant)
+        # 设置表头有序字典
+        d = OrderedDict()
+        d['date'] = {'chinese': '--', 'cellType': BasicCell}
+        d['fee_1'] = {'chinese': '费用1', 'cellType': BasicCell}
+        d['fee_2'] = {'chinese': '费用2', 'cellType': BasicCell}
+        d['fee_3'] = {'chinese': '费用3', 'cellType': BasicCell}
+        d['fee_4'] = {'chinese': '超额费用', 'cellType': BasicCell}
+
+        self.setHeaderDict(d)
+        # 设置数据键
+        self.setDataKey('fcSymbol')
+
+        # 设置监控事件类型
+        self.setEventType(EVENT_TICK)
+
+        # 设置字体
+        self.setFont(BASIC_FONT)
+
+        # 设置允许排序
+        self.setSorting(True)
+
+        # 初始化表格
+        self.initTable()
+
+        # 注册事件监听
+        self.registerEvent()
+
+
+class AssertTotalView(BasicFcView):
+    """主界面"""
+
+    # ----------------------------------------------------------------------
+    def __init__(self, mainEngine, eventEngine, parent=None):
+        """Constructor"""
+        super(AssertTotalView, self).__init__(mainEngine, eventEngine, parent)
+
+        # 设置表头有序字典
+        d = OrderedDict()
+        d['date'] = {'chinese': '存量资产详情', 'cellType': BasicCell}
+        d['total_assert'] = {'chinese': '--', 'cellType': BasicCell}
+        d['cash'] = {'chinese': '--', 'cellType': BasicCell}
+        d['money_fund'] = {'chinese': '比例', 'cellType': BasicCell}
+        d['assert_mgt'] = {'chinese': '净值/价格', 'cellType': BasicCell}
+        d['liquid_assert_ratio'] = {'chinese': '份额', 'cellType': BasicCell}
+        d['today_total_revenue'] = {'chinese': '金额', 'cellType': BasicCell}
+        d['fee_1'] = {'chinese': '本金', 'cellType': BasicCell}
+        d['fee_2'] = {'chinese': '累计收益', 'cellType': BasicCell}
+        d['fee_3'] = {'chinese': '今日收益', 'cellType': BasicCell}
+
+        self.setHeaderDict(d)
+        # 设置数据键
+        self.setDataKey('fcSymbol')
+
+        # 设置监控事件类型
+        self.setEventType(EVENT_TICK)
+
+        # 设置字体
+        self.setFont(BASIC_FONT)
+
+        # 设置允许排序
+        self.setSorting(True)
+
+        # 初始化表格
+        self.initTable()
+
+        # 注册事件监听
+        self.registerEvent()

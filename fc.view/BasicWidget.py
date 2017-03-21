@@ -1,20 +1,28 @@
 # -*- coding: utf-8 -*-
 
 # ----------------------------------------------------------------------
+import csv
 import os
+from collections import OrderedDict
+
 from PyQt5 import QtGui
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QAction
-from PyQt5.QtWidgets import QDialog
-from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QHeaderView
+from PyQt5.QtWidgets import QMenu
 from PyQt5.QtWidgets import QTableWidget
-from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QTableWidgetItem
 
 from pandas import json
+
+from EventEngine import Event
 
 
 def loadFont():
     """载入字体设置"""
-    fileName = 'VT_setting.json'
+    fileName = 'fc_setting.json'
     path = os.path.abspath(os.path.dirname(__file__))
     fileName = os.path.join(path, fileName)
 
@@ -25,145 +33,251 @@ def loadFont():
         size = setting['fontSize']
         font = QtGui.QFont(family, size)
     except:
-        font = QtGui.QFont(u'微软雅黑', 12)
+        font = QtGui.QFont('微软雅黑', 12)
     return font
 
 
 BASIC_FONT = loadFont()
 
 
+########################################################################
+class BasicFcView(QTableWidget):
+    """
+    基础监控
 
-class AboutWidget(QDialog):
-    """显示关于信息"""
+    headerDict中的值对应的字典格式如下
+    {'chinese': u'中文名', 'cellType': BasicCell}
+
+    """
+    signal = pyqtSignal(type(Event()))
 
     # ----------------------------------------------------------------------
-    def __init__(self, parent=None):
+    def __init__(self, mainEngine=None, eventEngine=None, parent=None):
         """Constructor"""
-        super(AboutWidget, self).__init__(parent)
+        super(BasicFcView, self).__init__(parent)
 
-        self.initUi()
+        self.mainEngine = mainEngine
+        self.eventEngine = eventEngine
+
+        # 保存表头标签用
+        self.headerDict = OrderedDict()  # 有序字典，key是英文名，value是对应的配置字典
+        self.headerList = []  # 对应self.headerDict.keys()
+
+        # 保存相关数据用
+        self.dataDict = {}  # 字典，key是字段对应的数据，value是保存相关单元格的字典
+        self.dataKey = ''  # 字典键对应的数据字段
+
+        # 监控的事件类型
+        self.eventType = ''
+
+        # 字体
+        self.font = None
+
+        # 保存数据对象到单元格
+        self.saveData = False
+
+        # 默认不允许根据表头进行排序，需要的组件可以开启
+        self.sorting = False
+
+        # 初始化右键菜单
+        self.initPopMenu()
 
     # ----------------------------------------------------------------------
-    def initUi(self):
-        """"""
-        self.setWindowTitle('About Fee Calculate')
+    def setHeaderDict(self, headerDict):
+        """设置表头有序字典"""
+        self.headerDict = headerDict
+        self.headerList = headerDict.keys()
 
-        text = """
-                Developed by zhnlk.
-
-                License：MIT
-
-                Mail：yanan.zhang@creditcloud.com
-
-                Github：www.github.com/zhnlk
-
-                """
-
-        label = QLabel()
-        label.setText(text)
-        label.setMinimumWidth(500)
-
-        vbox = QVBoxLayout()
-        vbox.addWidget(label)
-
-        self.setLayout(vbox)
-
-
-
-
-
-class OutCashData(QTableWidget):
-
-    def __init__(self, parent=None):
-
-        super(OutCashData,self).__init__(parent=parent)
-
-        self.initUI()
-    def initUI(self):
-        """导出数据"""
-        self.setWindowTitle('导出数据')
-        self.setMinimumSize(800, 800)
-        self.setFont(BASIC_FONT)
-        # self.initTable()
-        # self.addMenuAction()
-
-
-class AddCashDetail(QTableWidget):
     # ----------------------------------------------------------------------
-    def __init__(self,parent=None):
+    def setDataKey(self, dataKey):
+        """设置数据字典的键"""
+        self.dataKey = dataKey
+
+    # ----------------------------------------------------------------------
+    def setEventType(self, eventType):
+        """设置监控的事件类型"""
+        self.eventType = eventType
+
+    # ----------------------------------------------------------------------
+    def setFont(self, font):
+        """设置字体"""
+        self.font = font
+
+    # ----------------------------------------------------------------------
+    def setSaveData(self, saveData):
+        """设置是否要保存数据到单元格"""
+        self.saveData = saveData
+
+    # ----------------------------------------------------------------------
+    def initTable(self):
+        """初始化表格"""
+        # 设置表格的列数
+        col = len(self.headerDict)
+        self.setColumnCount(col)
+
+        # 设置列表头
+        labels = [d['chinese'] for d in self.headerDict.values()]
+        self.setHorizontalHeaderLabels(labels)
+
+        # 关闭左边的垂直表头
+        self.verticalHeader().setVisible(False)
+
+        # 设为不可编辑
+        self.setEditTriggers(self.NoEditTriggers)
+
+        # 设为行交替颜色
+        self.setAlternatingRowColors(True)
+
+        # 设置允许排序
+        self.setSortingEnabled(self.sorting)
+
+    # ----------------------------------------------------------------------
+    def registerEvent(self):
+        """注册GUI更新相关的事件监听"""
+        self.signal.connect(self.updateEvent)
+        self.eventEngine.register(self.eventType, self.signal.emit)
+
+    # ----------------------------------------------------------------------
+    def updateEvent(self, event):
+        """收到事件更新"""
+        data = event.dict_['data']
+        self.updateData(data)
+
+    # ----------------------------------------------------------------------
+    def updateData(self, data):
+        """将数据更新到表格中"""
+        # 如果允许了排序功能，则插入数据前必须关闭，否则插入新的数据会变乱
+        if self.sorting:
+            self.setSortingEnabled(False)
+
+        # 如果设置了dataKey，则采用存量更新模式
+        if self.dataKey:
+            key = data.__getattribute__(self.dataKey)
+            # 如果键在数据字典中不存在，则先插入新的一行，并创建对应单元格
+            if key not in self.dataDict:
+                self.insertRow(0)
+                d = {}
+                for n, header in enumerate(self.headerList):
+                    content = data.__getattribute__(header)
+                    cellType = self.headerDict[header]['cellType']
+                    cell = cellType(content, self.mainEngine)
+
+                    if self.font:
+                        cell.setFont(self.font)  # 如果设置了特殊字体，则进行单元格设置
+
+                    if self.saveData:  # 如果设置了保存数据对象，则进行对象保存
+                        cell.data = data
+
+                    self.setItem(0, n, cell)
+                    d[header] = cell
+                self.dataDict[key] = d
+            # 否则如果已经存在，则直接更新相关单元格
+            else:
+                d = self.dataDict[key]
+                for header in self.headerList:
+                    content = data.__getattribute__(header)
+                    cell = d[header]
+                    cell.setContent(content)
+
+                    if self.saveData:  # 如果设置了保存数据对象，则进行对象保存
+                        cell.data = data
+                        # 否则采用增量更新模式
+        else:
+            self.insertRow(0)
+            for n, header in enumerate(self.headerList):
+                content = data.__getattribute__(header)
+                cellType = self.headerDict[header]['cellType']
+                cell = cellType(content, self.mainEngine)
+
+                if self.font:
+                    cell.setFont(self.font)
+
+                if self.saveData:
+                    cell.data = data
+
+                self.setItem(0, n, cell)
+
+                # 调整列宽
+        self.resizeColumns()
+
+        # 重新打开排序
+        if self.sorting:
+            self.setSortingEnabled(True)
+
+    # ----------------------------------------------------------------------
+    def resizeColumns(self):
+        """调整各列的大小"""
+        self.horizontalHeader().resizeSections(QHeaderView.ResizeToContents)
+
+    # ----------------------------------------------------------------------
+    def setSorting(self, sorting):
+        """设置是否允许根据表头排序"""
+        self.sorting = sorting
+
+    # ----------------------------------------------------------------------
+    def saveToCsv(self):
+        """保存表格内容到CSV文件"""
+        # 先隐藏右键菜单
+        self.menu.close()
+
+        # 获取想要保存的文件名
+        path = QFileDialog.getSaveFileName(self, '保存数据', '', 'CSV(*.csv)')
+
+        try:
+            if not path.isEmpty():
+                with open(path, 'wb') as f:
+                    writer = csv.writer(f)
+
+                    # 保存标签
+                    headers = [header.encode('gbk') for header in self.headerList]
+                    writer.writerow(headers)
+
+                    # 保存每行内容
+                    for row in range(self.rowCount()):
+                        rowdata = []
+                        for column in range(self.columnCount()):
+                            item = self.item(row, column)
+                            if item is not None:
+                                rowdata.append(
+                                    item.text().encode('gbk'))
+                            else:
+                                rowdata.append('')
+                        writer.writerow(rowdata)
+        except IOError:
+            pass
+
+    # ----------------------------------------------------------------------
+    def initPopMenu(self):
+        """初始化右键菜单"""
+        self.menu = QMenu(self)
+
+        saveAction = QAction('保存内容', self)
+        saveAction.triggered.connect(self.saveToCsv)
+
+        self.menu.addAction(saveAction)
+
+    # ----------------------------------------------------------------------
+    def contextMenuEvent(self, event):
+        """右键点击事件"""
+        self.menu.popup(QCursor.pos())
+
+
+########################################################################
+class BasicCell(QTableWidgetItem):
+    """基础的单元格"""
+
+    # ----------------------------------------------------------------------
+    def __init__(self, text=None, mainEngine=None):
         """Constructor"""
-        super(AddCashDetail, self).__init__(parent=parent)
-
-        # self.mainEngine = mainEngine
-
-        # d = OrderedDict()
-        # d['symbol'] = {'chinese': u'合约代码', 'cellType': BasicCell}
-        # d['exchange'] = {'chinese': u'交易所', 'cellType': BasicCell}
-        # d['vtSymbol'] = {'chinese': u'vt系统代码', 'cellType': BasicCell}
-        # d['name'] = {'chinese': u'名称', 'cellType': BasicCell}
-        # d['productClass'] = {'chinese': u'合约类型', 'cellType': BasicCell}
-        # d['size'] = {'chinese': u'大小', 'cellType': BasicCell}
-        # d['priceTick'] = {'chinese': u'最小价格变动', 'cellType': BasicCell}
-        # d['strikePrice'] = {'chinese':u'期权行权价', 'cellType':BasicCell}
-        # d['underlyingSymbol'] = {'chinese':u'期权标的物', 'cellType':BasicCell}
-        # d['optionType'] = {'chinese':u'期权类型', 'cellType':BasicCell}
-        # self.setHeaderDict(d)
-
-        self.initUI()
+        super(BasicCell, self).__init__()
+        self.data = None
+        if text:
+            self.setContent(text)
 
     # ----------------------------------------------------------------------
-    def initUI(self):
-        """初始化界面"""
-        self.setWindowTitle('增加现金明细')
-        self.setMinimumSize(800, 800)
-        self.setFont(BASIC_FONT)
-        # self.initTable()
-        self.addMenuAction()
-
-    # ----------------------------------------------------------------------
-    def showAllContracts(self):
-        """显示所有合约数据"""
-        # l = self.mainEngine.getAllContracts()
-        # d = {'.'.join([contract.exchange, contract.symbol]): contract for contract in l}
-        # l2 = d.keys()
-        # l2.sort(reverse=True)
-        #
-        # self.setRowCount(len(l2))
-        # row = 0
-        #
-        # for key in l2:
-        #     contract = d[key]
-        #
-        #     for n, header in enumerate(self.headerList):
-        #         content = safeUnicode(contract.__getattribute__(header))
-        #         cellType = self.headerDict[header]['cellType']
-        #         cell = cellType(content)
-        #
-        #         if self.font:
-        #             cell.setFont(self.font)  # 如果设置了特殊字体，则进行单元格设置
-        #
-        #         self.setItem(row, n, cell)
-        #
-        #     row = row + 1
-
-    # ----------------------------------------------------------------------
-    def refresh(self):
-        """刷新"""
-        # self.menu.close()  # 关闭菜单
-        self.clearContents()
-        self.setRowCount(0)
-        # self.showAllContracts()
-
-    # ----------------------------------------------------------------------
-    def addMenuAction(self):
-        """增加右键菜单内容"""
-        refreshAction = QAction(u'刷新', self)
-        refreshAction.triggered.connect(self.refresh)
-
-        # self.menu.addAction(refreshAction)
-
-    # ----------------------------------------------------------------------
-    def show(self):
-        """显示"""
-        super(AddCashDetail, self).show()
-        self.refresh()
+    def setContent(self, text):
+        """设置内容"""
+        if text == '0' or text == '0.0':
+            self.setText('')
+        else:
+            self.setText(text)
