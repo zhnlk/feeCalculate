@@ -26,6 +26,7 @@ class ProtocolListView(BasicFcView):
         d['cash_to_investor'] = {'chinese': '总额', 'cellType': BasicCell}
         d['assert_mgt_to_cash'] = {'chinese': '协存本金', 'cellType': BasicCell}
         d['money_fund_to_cash'] = {'chinese': '协存利息', 'cellType': BasicCell}
+        # 协存项目 输入项
         d['protocol_deposit_to_cash'] = {'chinese': '利息转结本金', 'cellType': BasicCell}
         d['investor_to_cash'] = {'chinese': '投资人资金->协存', 'cellType': BasicCell}
         d['investor_to_cash'] = {'chinese': '现金->协存', 'cellType': BasicCell}
@@ -39,7 +40,7 @@ class ProtocolListView(BasicFcView):
     # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
-        self.setWindowTitle('现金明细')
+        self.setWindowTitle('协存明细')
         self.setMinimumSize(800, 800)
         self.setFont(BASIC_FONT)
         self.initTable()
@@ -77,7 +78,7 @@ class ProtocolListView(BasicFcView):
         self.menu.close()  # 关闭菜单
         self.clearContents()
         self.setRowCount(0)
-        self.showProtocolListDetail()
+        # self.showProtocolListDetail()
 
     # ----------------------------------------------------------------------
     def addMenuAction(self):

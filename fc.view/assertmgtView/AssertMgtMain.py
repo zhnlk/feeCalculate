@@ -17,16 +17,47 @@ class AssertMgtListView(BasicFcView):
         self.mainEngine = mainEngine
 
         d = OrderedDict()
-        d['date'] = {'chinese': '计算日', 'cellType': BasicCell}
-        d['total_cash'] = {'chinese': '现金总额', 'cellType': BasicCell}
-        d['cash_to_assert_mgt'] = {'chinese': '现金->资管', 'cellType': BasicCell}
-        d['cash_to_money_fund'] = {'chinese': '现金->货基', 'cellType': BasicCell}
-        d['cash_to_protocol_deposit'] = {'chinese': '现金->协存', 'cellType': BasicCell}
-        d['cash_to_investor'] = {'chinese': '现金->兑付投资人', 'cellType': BasicCell}
-        d['assert_mgt_to_cash'] = {'chinese': '资管->现金', 'cellType': BasicCell}
-        d['money_fund_to_cash'] = {'chinese': '货基->现金', 'cellType': BasicCell}
-        d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
-        d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': BasicCell}
+        d['retained_amount'] = {'chinese': '存量总额', 'cellType': BasicCell}
+        d['retained_pricipal'] = {'chinese': '存量本金', 'cellType': BasicCell}
+        d['today_revenue'] = {'chinese': '今日收益', 'cellType': BasicCell}
+        d['total_input'] = {'chinese': '总流入', 'cellType': BasicCell}
+        d['total_output'] = {'chinese': '总流出', 'cellType': BasicCell}
+        d['normal_input'] = {'chinese': '正常流入', 'cellType': BasicCell}
+        d['cash_input'] = {'chinese': '现金流入', 'cellType': BasicCell}
+        d['expire_output'] = {'chinese': '砍头息/到期流出', 'cellType': BasicCell}
+        # 资管项目 委贷要素
+        d['short_borrower'] = {'chinese': '借款人简称', 'cellType': BasicCell}
+        d['fund_source'] = {'chinese': '资金来源', 'cellType': BasicCell}
+        d['loan_amount'] = {'chinese': '放款金额', 'cellType': BasicCell}
+        d['delegate_rate'] = {'chinese': '委贷利率', 'cellType': BasicCell}
+        d['bearing_days'] = {'chinese': '计息天数', 'cellType': BasicCell}
+        d['value_date'] = {'chinese': '起息日', 'cellType': BasicCell}
+        d['due_date'] = {'chinese': '到期日', 'cellType': BasicCell}
+        d['duration'] = {'chinese': '期限', 'cellType': BasicCell}
+        d['delegate_interest'] = {'chinese': '委贷利息', 'cellType': BasicCell}
+        # 资管项目 委贷银行费用
+        d['delegate_bank_rate'] = {'chinese': '委贷银行费率', 'cellType': BasicCell}
+        d['delegate_bearing_days'] = {'chinese': '计息天数/次数', 'cellType': BasicCell}
+        d['delegate_bank_fee'] = {'chinese': '委贷银行费用', 'cellType': BasicCell}
+        # 资管项目 资管计划费用
+        d['assert_mgt_channel_rate'] = {'chinese': '资管通道费率', 'cellType': BasicCell}
+        d['assert_mgt_bearing_rate'] = {'chinese': '计息天数/次数', 'cellType': BasicCell}
+        d['assert_mgt_fee'] = {'chinese': '资管费用', 'cellType': BasicCell}
+        # 资管项目 资管计划收益
+        d['assert_mgt_total_revenue'] = {'chinese': '资管计划总收益', 'cellType': BasicCell}
+        d['assert_mgt_daily_revenue'] = {'chinese': '资管计划每日收益', 'cellType': BasicCell}
+        # 资管计划 估值调整
+        d['normal_assert_mgt_daily_revenue_valuation'] = {'chinese': '正常资管每日收益估值', 'cellType': BasicCell}
+        # 资管计划 估值调整 调整项
+        d['adjust_date'] = {'chinese': '调整日期', 'cellType': BasicCell}
+        d['trans_fee'] = {'chinese': '转账费用', 'cellType': BasicCell}
+        d['check_fee'] = {'chinese': '支票费用', 'cellType': BasicCell}
+        d['total_adjust_fee'] = {'chinese': '总调整费用', 'cellType': BasicCell}
+        d['adjust_result'] = {'chinese': '调整结果', 'cellType': BasicCell}
+        # 资管计划 估值调整
+        d['expire_out_to_fund'] = {'chinese': '砍头息转入货基部分', 'cellType': BasicCell}
+        d['delegate_to_assert'] = {'chinese': '委贷户到资管托管户', 'cellType': BasicCell}
+
 
         self.setHeaderDict(d)
 
@@ -35,7 +66,7 @@ class AssertMgtListView(BasicFcView):
     # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
-        self.setWindowTitle('现金明细')
+        self.setWindowTitle('资管明细')
         self.setMinimumSize(800, 800)
         self.setFont(BASIC_FONT)
         self.initTable()
@@ -73,7 +104,7 @@ class AssertMgtListView(BasicFcView):
         self.menu.close()  # 关闭菜单
         self.clearContents()
         self.setRowCount(0)
-        self.showAssertMgtListDetail()
+        # self.showAssertMgtListDetail()
 
     # ----------------------------------------------------------------------
     def addMenuAction(self):

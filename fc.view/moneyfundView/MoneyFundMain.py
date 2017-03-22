@@ -18,15 +18,23 @@ class MoneyFundListView(BasicFcView):
 
         d = OrderedDict()
         d['date'] = {'chinese': '计算日', 'cellType': BasicCell}
-        d['total_cash'] = {'chinese': '现金总额', 'cellType': BasicCell}
-        d['cash_to_assert_mgt'] = {'chinese': '现金->资管', 'cellType': BasicCell}
-        d['cash_to_money_fund'] = {'chinese': '现金->货基', 'cellType': BasicCell}
-        d['cash_to_protocol_deposit'] = {'chinese': '现金->协存', 'cellType': BasicCell}
-        d['cash_to_investor'] = {'chinese': '现金->兑付投资人', 'cellType': BasicCell}
-        d['assert_mgt_to_cash'] = {'chinese': '资管->现金', 'cellType': BasicCell}
-        d['money_fund_to_cash'] = {'chinese': '货基->现金', 'cellType': BasicCell}
-        d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
-        d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': BasicCell}
+        d['money_fund_amount'] = {'chinese': '货基总额', 'cellType': BasicCell}
+        d['money_fund_revenue'] = {'chinese': '货基收益', 'cellType': BasicCell}
+        # 货基项目
+        d['mf_amount'] = {'chinese': '金额', 'cellType': BasicCell}
+        d['mf_revenue'] = {'chinese': '收益', 'cellType': BasicCell}
+        d['mf_subscribe_amount'] = {'chinese': '申购总额', 'cellType': BasicCell}
+        d['mf_redeem_amount'] = {'chinese': '赎回总额', 'cellType': BasicCell}
+        # 货基项目 输入项
+        d['mf_subscribe_normal'] = {'chinese': '正常申购', 'cellType': BasicCell}
+        d['mf_subscribe_from_assert_mgt'] = {'chinese': '申购(资管)', 'cellType': BasicCell}
+        d['mf_subscribe_from_cash'] = {'chinese': '申购(现金)', 'cellType': BasicCell}
+        d['mf_redeem_normal'] = {'chinese': '正常赎回', 'cellType': BasicCell}
+        d['mf_redeem_to_assert_mgt'] = {'chinese': '赎回(进资管)', 'cellType': BasicCell}
+        d['mf_redeem_to_cash'] = {'chinese': '赎回(进现金)', 'cellType': BasicCell}
+        d['mf_redeem_fee'] = {'chinese': '赎回(费用)', 'cellType': BasicCell}
+        d['mf_not_carry_forward_revenue'] = {'chinese': '未结转收益', 'cellType': BasicCell}
+        d['mf_carry_forward_revenue'] = {'chinese': '结转金额', 'cellType': BasicCell}
 
         self.setHeaderDict(d)
 
@@ -35,7 +43,7 @@ class MoneyFundListView(BasicFcView):
     # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
-        self.setWindowTitle('现金明细')
+        self.setWindowTitle('货基明细')
         self.setMinimumSize(800, 800)
         self.setFont(BASIC_FONT)
         self.initTable()
@@ -73,7 +81,7 @@ class MoneyFundListView(BasicFcView):
         self.menu.close()  # 关闭菜单
         self.clearContents()
         self.setRowCount(0)
-        self.showMoneyFundListDetail()
+        # self.showMoneyFundListDetail()
 
     # ----------------------------------------------------------------------
     def addMenuAction(self):

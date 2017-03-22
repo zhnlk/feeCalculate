@@ -181,6 +181,29 @@ class MainWindow(QMainWindow, BasicFcView):
         except KeyError:
             self.widgetDict['addCashDetail'] = CashListView(self.mainEngine)
             self.widgetDict['addCashDetail'].show()
+    def openAddProtocolDetail(self):
+        """打开协存输入界面"""
+        try:
+            self.widgetDict['openAddProtocolDetail'].show()
+        except KeyError:
+            self.widgetDict['openAddProtocolDetail'] = CashListView(self.mainEngine)
+            self.widgetDict['openAddProtocolDetail'].show()
+
+    def openAddMoneyFundDetail(self):
+        """打开货基输入界面"""
+        try:
+            self.widgetDict['openAddMoneyFundDetail'].show()
+        except KeyError:
+            self.widgetDict['openAddMoneyFundDetail'] = CashListView(self.mainEngine)
+            self.widgetDict['openAddMoneyFundDetail'].show()
+
+    def oepnAddAssertMgtDetail(self):
+        """打开资管输入界面"""
+        try:
+            self.widgetDict['oepnAddAssertMgtDetail'].show()
+        except KeyError:
+            self.widgetDict['oepnAddAssertMgtDetail'] = CashListView(self.mainEngine)
+            self.widgetDict['oepnAddAssertMgtDetail'].show()
 
     # ----------------------------------------------------------------------
     def openOutCashData(self):

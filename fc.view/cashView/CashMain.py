@@ -74,7 +74,7 @@ class CashListView(BasicFcView):
         self.menu.close()  # 关闭菜单
         self.clearContents()
         self.setRowCount(0)
-        self.showCashListDetail()
+        # self.showCashListDetail()
 
     # ----------------------------------------------------------------------
     def addMenuAction(self):

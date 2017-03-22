@@ -47,7 +47,7 @@ def main():
     mainEngine = MainEngine()
     mainWindow = MainWindow(mainEngine, mainEngine.eventEngine)
     mainWindow.showMaximized()
-
+    # mainWindow.showNormal()
     sys.exit(app.exec_())
 
 
