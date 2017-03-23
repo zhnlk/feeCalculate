@@ -1,27 +1,26 @@
 # -*- coding: utf-8 -*-
 import ctypes
+import json
 import os
 import platform
 
 import sys
-from pandas import json
 
+import qdarkstyle
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication
 
 from BasicWidget import BASIC_FONT
 
-# 图标文件路径名
 from MainEngine import MainEngine
 from MainWindow import MainWindow
+from fcConstant import ICON_FILENAME
+from fcConstant import SETTING_FILENAME
 
+# 设置路径
 path = os.path.abspath(os.path.dirname(__file__))
-ICON_FILENAME = 'zhnlk.ico'
 ICON_FILENAME = os.path.join(path, ICON_FILENAME)
-
-SETTING_FILENAME = 'FC_setting.json'
 SETTING_FILENAME = os.path.join(path, SETTING_FILENAME)
-
 
 def main():
     # 设置windows下的地步任务栏图标
@@ -39,7 +38,7 @@ def main():
         setting = json.load(f)
         if setting['darkStyle']:
             import qdarkStyle
-            app.setStyleSheet(qdarkStyle.load_stylesheet(pyside=False))
+            app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     except:
         pass
 
@@ -47,9 +46,20 @@ def main():
     mainEngine = MainEngine()
     mainWindow = MainWindow(mainEngine, mainEngine.eventEngine)
     mainWindow.showMaximized()
-    # mainWindow.showNormal()
     sys.exit(app.exec_())
+
+def tpath():
+    print(ICON_FILENAME)
+    try:
+        f = open(SETTING_FILENAME)
+        setting = json.load(f)
+        print(setting)
+        print(setting['darkStyle'])
+    except:
+        pass
+
 
 
 if __name__ == '__main__':
     main()
+    # tpath()

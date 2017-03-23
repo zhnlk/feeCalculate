@@ -15,8 +15,12 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 # 初始化数据库连接:/Users/eranchang/PycharmProjects/feeCalculate/fc.misc/cashdb.db
-SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                                                      'data-test.db')
+import fcFunction
+from fcConstant import DB_FILENAME
+
+# SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,DB_FILENAME))
+
+SQLALCHEMY_DATABASE_URI ,logging = fcFunction.loadSqliteSetting()
 
 engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
 
@@ -26,7 +30,8 @@ engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
 
 # 创建对象的基类:
 Base = declarative_base()
-
+# 创建DBSession类型:
+DBSession = sessionmaker(bind=engine)
 
 # # 建表
 # metadata = MetaData()
@@ -57,16 +62,14 @@ class User(Base):
     protocol_deposit_to_cash = Column(Float)
     investor_to_cash = Column(Float)
 
+    Base.metadata.create_all(engine)
+
     def __repr__(self):
         return "<User(uuid='%s', date='%s')>" % (self.uuid, self.date)
 
 
-# 创建DBSession类型:
-DBSession = sessionmaker(bind=engine)
-
-
 def insertDB():
-    Base.metadata.create_all(engine)
+    # Base.metadata.create_all(engine)
 
     # 创建session对象:
     session = DBSession()
@@ -93,6 +96,16 @@ def queryDB():
     session.close()
 
 
+def tPath():
+    print(SQLALCHEMY_DATABASE_URI)
+    print(os.path.join(os.path.dirname(__file__), os.pardir,DB_FILENAME))
+    print(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,DB_FILENAME)))
+    print(os.path.dirname(__file__))
+    print(os.path.abspath(os.path.dirname(__file__)))
+    print(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
+    print(os.path.join(os.path.abspath(os.path.dirname(__file__)),os.pardir,DB_FILENAME))
+
 if __name__ == '__main__':
     # insertDB()
-    queryDB()
+    # queryDB()
+    tPath()

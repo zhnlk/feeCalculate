@@ -82,5 +82,10 @@ CURRENCY_HKD = 'HKD'            # 港币
 CURRENCY_UNKNOWN = 'UNKNOWN'    # 未知货币
 CURRENCY_NONE = ''              # 空货币
 
+# 程序相关设置
+ICON_FILENAME = 'fc.misc/zhnlk.ico'
+SETTING_FILENAME = 'fc.misc/FC_setting.json'
+DB_FILENAME = 'fc.misc/data-test.db'
+
 # 数据库
 LOG_DB_NAME = 'FC_LOG_DB'

@@ -2,15 +2,12 @@
 
 import time
 
-from eventEngine import *
+# from eventEngine import *
+from fcConstant import *
+# from vtConstant import *
 
-from vtConstant import *
-
-
-########################################################################
 from EventEngine import Event
 from EventType import *
-from fcConstant import *
 
 
 class FcGateway(object):

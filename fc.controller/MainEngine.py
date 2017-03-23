@@ -1,18 +1,14 @@
 # encoding: UTF-8
 
-import shelve
 from collections import OrderedDict
 from datetime import datetime
 
+from fcConstant import LOG_DB_NAME
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 
+from DataEngine import DataEngine
 from EventEngine import *
-
-
-########################################################################
-from fcConstant import STATUS_ALLTRADED, LOG_DB_NAME
-from fcConstant import STATUS_CANCELLED
 
 
 class MainEngine(object):
@@ -141,86 +137,9 @@ class MainEngine(object):
         self.dataEngine.saveContracts()
 
     # ----------------------------------------------------------------------
-    def writeLog(self, content):
-        """快速发出日志事件"""
-        log = VtLogData()
-        log.logContent = content
-        event = Event(type_=EVENT_LOG)
-        event.dict_['data'] = log
-        self.eventEngine.put(event)
 
-        # ----------------------------------------------------------------------
 
-    def dbConnect(self):
-        """连接MongoDB数据库"""
-        if not self.dbClient:
-            # 读取MongoDB的设置
-            host, port, logging = loadMongoSetting()
 
-            try:
-                # 设置MongoDB操作的超时时间为0.5秒
-                self.dbClient = MongoClient(host, port, connectTimeoutMS=500)
-
-                # 调用server_info查询服务器状态，防止服务器异常并未连接成功
-                self.dbClient.server_info()
-
-                self.writeLog('MongoDB连接成功')
-
-                # 如果启动日志记录，则注册日志事件监听函数
-                if logging:
-                    self.eventEngine.register(EVENT_LOG, self.dbLogging)
-
-            except ConnectionFailure:
-                self.writeLog('MongoDB连接失败')
-
-    # ----------------------------------------------------------------------
-    def dbInsert(self, dbName, collectionName, d):
-        """向MongoDB中插入数据，d是具体数据"""
-        if self.dbClient:
-            db = self.dbClient[dbName]
-            collection = db[collectionName]
-            collection.insert_one(d)
-        else:
-            self.writeLog('数据插入失败，MongoDB没有连接')
-
-    # ----------------------------------------------------------------------
-    def dbQuery(self, dbName, collectionName, d):
-        """从MongoDB中读取数据，d是查询要求，返回的是数据库查询的指针"""
-        if self.dbClient:
-            db = self.dbClient[dbName]
-            collection = db[collectionName]
-            cursor = collection.find(d)
-            if cursor:
-                return list(cursor)
-            else:
-                return []
-        else:
-            self.writeLog('数据查询失败，MongoDB没有连接')
-            return []
-
-    # ----------------------------------------------------------------------
-    def dbUpdate(self, dbName, collectionName, d, flt, upsert=False):
-        """向MongoDB中更新数据，d是具体数据，flt是过滤条件，upsert代表若无是否要插入"""
-        if self.dbClient:
-            db = self.dbClient[dbName]
-            collection = db[collectionName]
-            collection.replace_one(flt, d, upsert)
-        else:
-            self.writeLog('数据更新失败，MongoDB没有连接')
-
-            # ----------------------------------------------------------------------
-
-    def dbLogging(self, event):
-        """向MongoDB中插入日志"""
-        log = event.dict_['data']
-        d = {
-            'content': log.logContent,
-            'time': log.logTime,
-            'gateway': log.gatewayName
-        }
-        self.dbInsert(LOG_DB_NAME, self.todayDate, d)
-
-    # ----------------------------------------------------------------------
     def getContract(self, vtSymbol):
         """查询合约"""
         return self.dataEngine.getContract(vtSymbol)
@@ -245,101 +164,6 @@ class MainEngine(object):
         """查询引擎中所有可用接口的名称"""
         return self.gatewayDict.keys()
 
-
-########################################################################
-class DataEngine(object):
-    """数据引擎"""
-    cashFileName = 'DataEngineFile.fc'
-
-    # ----------------------------------------------------------------------
-    def __init__(self, eventEngine):
-        """Constructor"""
-        self.eventEngine = eventEngine
-
-        # 保存合约详细信息的字典
-        self.contractDict = {}
-
-        # 保存委托数据的字典
-        self.orderDict = {}
-
-        # 保存活动委托数据的字典（即可撤销）
-        self.workingOrderDict = {}
-
-        # 读取保存在硬盘的合约数据
-        self.loadContracts()
-
-        # 注册事件监听
-        self.registerEvent()
-
-    # ----------------------------------------------------------------------
-    def updateContract(self, event):
-        """更新合约数据"""
-        contract = event.dict_['data']
-        self.contractDict[contract.vtSymbol] = contract
-        self.contractDict[contract.symbol] = contract  # 使用常规代码（不包括交易所）可能导致重复
-
-    # ----------------------------------------------------------------------
-    def getContract(self, vtSymbol):
-        """查询合约对象"""
-        try:
-            return self.contractDict[vtSymbol]
-        except KeyError:
-            return None
-
-    # ----------------------------------------------------------------------
-    def getAllContracts(self):
-        """查询所有合约对象（返回列表）"""
-        return self.contractDict.values()
-
-    # ----------------------------------------------------------------------
-    def saveContracts(self):
-        """保存所有合约对象到硬盘"""
-        f = shelve.open(self.cashFileName)
-        f['data'] = self.contractDict
-        f.close()
-
-    # ----------------------------------------------------------------------
-    def loadContracts(self):
-        """从硬盘读取合约对象"""
-        f = shelve.open(self.cashFileName)
-        if 'data' in f:
-            d = f['data']
-            for key, value in d.items():
-                self.contractDict[key] = value
-        f.close()
-
-    # ----------------------------------------------------------------------
-    def updateOrder(self, event):
-        """更新委托数据"""
-        order = event.dict_['data']
-        self.orderDict[order.vtOrderID] = order
-
-        # 如果订单的状态是全部成交或者撤销，则需要从workingOrderDict中移除
-        if order.status == STATUS_ALLTRADED or order.status == STATUS_CANCELLED:
-            if order.vtOrderID in self.workingOrderDict:
-                del self.workingOrderDict[order.vtOrderID]
-        # 否则则更新字典中的数据
-        else:
-            self.workingOrderDict[order.vtOrderID] = order
-
-    # ----------------------------------------------------------------------
-    def getOrder(self, vtOrderID):
-        """查询委托"""
-        try:
-            return self.orderDict[vtOrderID]
-        except KeyError:
-            return None
-
-    # ----------------------------------------------------------------------
-    def getAllWorkingOrders(self):
-        """查询所有活动委托（返回列表）"""
-        return self.workingOrderDict.values()
-
-    # ----------------------------------------------------------------------
-    def registerEvent(self):
-        """注册事件监听"""
-        self.eventEngine.register(EVENT_CONTRACT, self.updateContract)
-        self.eventEngine.register(EVENT_ORDER, self.updateOrder)
 
 
 
