@@ -3,6 +3,7 @@
 from collections import OrderedDict
 from datetime import datetime
 
+from Cash import Cash
 from fcConstant import LOG_DB_NAME
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
@@ -137,7 +138,10 @@ class MainEngine(object):
         self.dataEngine.saveContracts()
 
     # ----------------------------------------------------------------------
-
+    def getCashDetail(self):
+        """查询现金明细"""
+        self.dataEngine.dbConnect()
+        return self.dataEngine.dbQuery(Cash)
 
 
     def getContract(self, vtSymbol):

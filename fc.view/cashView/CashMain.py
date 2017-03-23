@@ -3,7 +3,9 @@ from collections import OrderedDict
 
 from PyQt5.QtWidgets import QAction
 
+import Cash
 from BasicWidget import BASIC_FONT, BasicFcView, BasicCell
+from MainEngine import MainEngine
 
 
 class CashListView(BasicFcView):
@@ -15,6 +17,7 @@ class CashListView(BasicFcView):
         super(CashListView, self).__init__(parent=parent)
 
         self.mainEngine = mainEngine
+        # self.dataEngine = dataEngine
 
         d = OrderedDict()
         d['date'] = {'chinese': '计算日', 'cellType': BasicCell}
@@ -44,20 +47,17 @@ class CashListView(BasicFcView):
     # ----------------------------------------------------------------------
     def showCashListDetail(self):
         """显示所有合约数据"""
-        l = self.mainEngine.getAllContracts
-        # l = self.mainEngine.getCashDetail
-        d = {'.'.join([contract.exchange, contract.symbol]): contract for contract in l}
-        l2 = d.keys()
-        # l2.sort(reverse=True)
 
-        self.setRowCount(len(l2))
+        result = self.mainEngine.getCashDetail()
+
+        # print(type(result))
+        # print(result)
         row = 0
-
-        for key in l2:
-            contract = d[key]
-
+        for r in result:
+            print(r)
+            # 按照定义的表头，进行填充数据
             for n, header in enumerate(self.headerList):
-                content = contract.__getattribute__(header)
+                content = r.__getattribute__(header)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
 
@@ -72,9 +72,9 @@ class CashListView(BasicFcView):
     def refresh(self):
         """刷新"""
         self.menu.close()  # 关闭菜单
-        self.clearContents()
-        self.setRowCount(0)
-        # self.showCashListDetail()
+        # self.clearContents()
+        # self.setRowCount(0)
+        self.showCashListDetail()
 
     # ----------------------------------------------------------------------
     def addMenuAction(self):
@@ -89,3 +89,9 @@ class CashListView(BasicFcView):
         """显示"""
         super(CashListView, self).show()
         self.refresh()
+
+
+if __name__ == '__main__':
+    mainEngine = MainEngine()
+    clv = CashListView(mainEngine)
+    clv.tet()

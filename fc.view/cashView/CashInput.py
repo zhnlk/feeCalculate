@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
-from datetime import datetime
+import datetime
 
 from PyQt5.QtCore import QMetaObject
 from PyQt5.QtCore import QRect
@@ -20,6 +20,7 @@ from sqlalchemy.orm import sessionmaker
 import fcFunction
 from BasicWidget import BASIC_FONT, BasicFcView, BasicCell
 from Cash import Cash
+from DataEngine import DataEngine
 from MainEngine import MainEngine
 from MainWindow import MainWindow
 
@@ -83,9 +84,9 @@ class CashInput(BasicFcView):
         """登录"""
         cash_to_investor = str(self.cash_to_investor_Edit.text())
         invest_to_cash = str(self.invest_to_cash_Edit.text())
-        self.dbConnectt()
+        # self.dbConnectt()
         self.insertDB(cash_to_investor, invest_to_cash)
-        self.close()
+        # self.close()
 
     # ----------------------------------------------------------------------
     # def insertDB(self, editArea1, editArea2, editArea3, editArea4, editArea5):
@@ -93,27 +94,23 @@ class CashInput(BasicFcView):
         """向数据库增加数据"""
         print(cash_to_investor)
         print(invest_to_cash)
-        cash = Cash(datetime.date, cash_to_investor, invest_to_cash)
+        d = datetime.date.today()
+        cash = Cash(datetime.date(d.year, d.month, d.day), cash_to_investor, invest_to_cash)
+        # eventEngine = EventEngine()
+        dataEngine = DataEngine(self.eventEngine)
+        # init_db(dataEngine.)
+        dataEngine.dbConnect()
+        dataEngine.dbInsert(cash)
+        # result = dataEngine.dbQuery(Cash)
+        # for r in result:
+        #     print(r.uuid)
 
-        self.session.add(cash)
-
-        # 提交即保存到数据库:
-        self.session.commit()
-        # 关闭session:
-        self.session.close()
-
-    def dbConnectt(self):
-        SQLALCHEMY_DATABASE_URI, logging = fcFunction.loadSqliteSetting()
-
-        engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
-
-        print(SQLALCHEMY_DATABASE_URI)
-
-        # # 创建对象的基类:
-        # Base = declarative_base()
-        # 创建DBSession类型:
-        DBSession = sessionmaker(bind=engine)
-        self.session = DBSession()
+        # self.session.add(cash)
+        #
+        # # 提交即保存到数据库:
+        # self.session.commit()
+        # # 关闭session:
+        # self.session.close()
 
 
 if __name__ == "__main__":
