@@ -3,7 +3,7 @@ import shelve
 from datetime import datetime
 
 from pymongo.errors import ConnectionFailure
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, engine
 from sqlalchemy.orm import sessionmaker
 
 from EventEngine import Event
@@ -116,28 +116,25 @@ class DataEngine(object):
 
     def dbConnect(self):
         """连接MongoDB数据库"""
-        if not self.session:
-            # 读取sqlite3的设置
+        # 读取sqlite3的设置
+        try:
             SQLALCHEMY_DATABASE_URI, logging = loadSqliteSetting()
+            engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
+            DBSession = sessionmaker(bind=engine)
+            self.session = DBSession()
+            # 调用server_info查询服务器状态，防止服务器异常并未连接成功
+            # self.dbClient.server_info()
 
-            try:
-                # 设置MongoDB操作的超时时间为0.5秒
-                engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
-                DBSession = sessionmaker(bind=engine)
-                self.session = DBSession()
-                # 调用server_info查询服务器状态，防止服务器异常并未连接成功
-                # self.dbClient.server_info()
-                self.session.info()
+            # self.writeLog('SqliteDB连接成功')
+            print("SqliteDB连接成功")
 
-                self.writeLog('SqliteDB连接成功')
+            # 如果启动日志记录，则注册日志事件监听函数
+            if logging:
+                self.eventEngine.register(EVENT_LOG, self.dbLogging)
 
-                # 如果启动日志记录，则注册日志事件监听函数
-                if logging:
-                    self.eventEngine.register(EVENT_LOG, self.dbLogging)
-
-            except:
-                self.writeLog('SqliteDB连接失败')
-
+        except:
+            print("SqliteDB连接失败")
+            # self.writeLog('SqliteDB连接失败')
     # ----------------------------------------------------------------------
     def dbInsert(self, d):
         """向SqliteDB中插入数据，d是具体数据"""
@@ -146,6 +143,8 @@ class DataEngine(object):
             # collection = db[collectionName]
             # collection.insert_one(d)
             self.session.add(d)
+            self.session.commit()
+            self.session.close()
         else:
             self.writeLog('数据插入失败，SqliteDB没有连接')
 
@@ -153,12 +152,14 @@ class DataEngine(object):
         """向SqliteDB批量插入数据"""
         if self.session:
             self.session.add_all(dList)
+            self.session.commit()
+            self.session.close()
         else:
             self.writeLog('数据插入失败，SqliteDB没有连接')
 
     # ----------------------------------------------------------------------
     def dbQuery(self, dbName, collectionName, d):
-        """从MongoDB中读取数据，d是查询要求，返回的是数据库查询的指针"""
+        """从SqliteDB中读取数据，d是查询要求"""
         if self.session:
             db = self.session[dbName]
             collection = db[collectionName]

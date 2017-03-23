@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
+from datetime import datetime
 
 from PyQt5.QtCore import QMetaObject
 from PyQt5.QtCore import QRect
@@ -12,8 +13,13 @@ from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtWidgets import QTextEdit
 from PyQt5.QtWidgets import QWidget
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
+import fcFunction
 from BasicWidget import BASIC_FONT, BasicFcView, BasicCell
+from Cash import Cash
 from MainEngine import MainEngine
 from MainWindow import MainWindow
 
@@ -48,16 +54,10 @@ class CashInput(BasicFcView):
         """设置输入框"""
 
         # 设置组件
-        label1 = QLabel("标签1")
-        label2 = QLabel("标签2")
-        label3 = QLabel("标签3")
-        label4 = QLabel("标签4")
-        label5 = QLabel("标签5")
-        self.editArea1 = QLineEdit()
-        self.editArea2 = QLineEdit()
-        self.editArea3 = QLineEdit()
-        self.editArea4 = QLineEdit()
-        self.editArea5 = QLineEdit()
+        cash_to_investor_Label = QLabel("现金->兑付投资人")
+        investor_to_cash_Label = QLabel("投资人->现金")
+        self.cash_to_investor_Edit = QLineEdit("0.00")
+        self.invest_to_cash_Edit = QLineEdit("0.00")
         okButton = QPushButton("确定")
         cancelButton = QPushButton("取消")
         okButton.clicked.connect(self.addData)
@@ -70,42 +70,51 @@ class CashInput(BasicFcView):
         buttonHBox.addWidget(cancelButton)
 
         grid = QGridLayout()
-        grid.addWidget(label1, 0, 0)
-        grid.addWidget(label2, 1, 0)
-        grid.addWidget(label3, 2, 0)
-        grid.addWidget(label4, 3, 0)
-        grid.addWidget(label5, 4, 0)
-        grid.addWidget(self.editArea1, 0, 1)
-        grid.addWidget(self.editArea2, 1, 1)
-        grid.addWidget(self.editArea3, 2, 1)
-        grid.addWidget(self.editArea4, 3, 1)
-        grid.addWidget(self.editArea5, 4, 1)
-        grid.addLayout(buttonHBox, 5, 0, 1, 2)
+        grid.addWidget(cash_to_investor_Label, 0, 0)
+        grid.addWidget(investor_to_cash_Label, 1, 0)
+        grid.addWidget(self.cash_to_investor_Edit, 0, 1)
+        grid.addWidget(self.invest_to_cash_Edit, 1, 1)
+        grid.addLayout(buttonHBox, 3, 0, 1, 2)
 
         self.setLayout(grid)
 
     # ----------------------------------------------------------------------
     def addData(self):
         """登录"""
-        editArea1 = str(self.editArea1.text())
-        editArea2 = str(self.editArea2.text())
-        editArea3 = str(self.editArea3.text())
-        editArea4 = str(self.editArea4.text())
-        editArea5 = str(self.editArea5.text())
+        cash_to_investor = str(self.cash_to_investor_Edit.text())
+        invest_to_cash = str(self.invest_to_cash_Edit.text())
+        self.dbConnectt()
+        self.insertDB(cash_to_investor, invest_to_cash)
+        self.close()
 
-        # self.mainEngine.addCashDetail(editArea1, editArea2, editArea3, editArea4, editArea5)
-        self.insertDB(editArea1, editArea2, editArea3, editArea4, editArea5)
-        self.close()
-    def close(self):
-        self.close()
     # ----------------------------------------------------------------------
-    def insertDB(self, editArea1, editArea2, editArea3, editArea4, editArea5):
+    # def insertDB(self, editArea1, editArea2, editArea3, editArea4, editArea5):
+    def insertDB(self, cash_to_investor, invest_to_cash):
         """向数据库增加数据"""
-        print(editArea1)
-        print(editArea2)
-        print(editArea3)
-        print(editArea4)
-        print(editArea5)
+        print(cash_to_investor)
+        print(invest_to_cash)
+        cash = Cash(datetime.date, cash_to_investor, invest_to_cash)
+
+        self.session.add(cash)
+
+        # 提交即保存到数据库:
+        self.session.commit()
+        # 关闭session:
+        self.session.close()
+
+    def dbConnectt(self):
+        SQLALCHEMY_DATABASE_URI, logging = fcFunction.loadSqliteSetting()
+
+        engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
+
+        print(SQLALCHEMY_DATABASE_URI)
+
+        # # 创建对象的基类:
+        # Base = declarative_base()
+        # 创建DBSession类型:
+        DBSession = sessionmaker(bind=engine)
+        self.session = DBSession()
+
 
 if __name__ == "__main__":
     import sys
