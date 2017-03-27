@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import QMessageBox
 from BasicWidget import BasicCell, BasicFcView, BASIC_FONT
 from EventType import EVENT_TICK
 from assertmgtView.AssertMgtMain import AssertMgtListView
+from cashView.CashInput import CashInput
 from cashView.CashMain import CashListView
 from miscView.AboutMain import AboutWidget
 from moneyfundView.MfCateInput import MfCateInput
@@ -185,7 +186,7 @@ class MainWindow(QMainWindow, BasicFcView):
         try:
             self.widgetDict['addCashDetail'].show()
         except KeyError:
-            self.widgetDict['addCashDetail'] = CashListView(self.mainEngine)
+            self.widgetDict['addCashDetail'] = CashInput(self.mainEngine)
             self.widgetDict['addCashDetail'].show()
     def openAddProtocolDetail(self):
         """打开协存输入界面"""

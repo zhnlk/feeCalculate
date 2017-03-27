@@ -126,6 +126,9 @@ class BasicFcView(QTableWidget):
         # 设为不可编辑
         self.setEditTriggers(self.NoEditTriggers)
 
+        # 设置表格自适应大小
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
         # 设为行交替颜色
         self.setAlternatingRowColors(True)
 
@@ -278,10 +281,11 @@ class BasicCell(QTableWidgetItem):
     # ----------------------------------------------------------------------
     def setContent(self, text):
         """设置内容"""
-        if text == '0' or text == '0.0' or text == None:
-            self.setText('')
-        else :
-            self.setText(str(text))
+        # if text == '0' or text == '0.0' or text is None:
+        # if text is None:
+        #     self.setText('0.00')
+        # else :
+        self.setText(str(text))
 
 
 ########################################################################

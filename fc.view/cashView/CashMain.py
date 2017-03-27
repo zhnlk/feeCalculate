@@ -2,9 +2,10 @@
 from collections import OrderedDict
 
 from PyQt5.QtWidgets import QAction
+from PyQt5.QtWidgets import QApplication
 
 import Cash
-from BasicWidget import BASIC_FONT, BasicFcView, BasicCell
+from BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 from MainEngine import MainEngine
 
 
@@ -21,15 +22,15 @@ class CashListView(BasicFcView):
 
         d = OrderedDict()
         d['date'] = {'chinese': '计算日', 'cellType': BasicCell}
-        d['total_cash'] = {'chinese': '现金总额', 'cellType': BasicCell}
-        d['cash_to_assert_mgt'] = {'chinese': '现金->资管', 'cellType': BasicCell}
-        d['cash_to_money_fund'] = {'chinese': '现金->货基', 'cellType': BasicCell}
-        d['cash_to_protocol_deposit'] = {'chinese': '现金->协存', 'cellType': BasicCell}
-        d['cash_to_investor'] = {'chinese': '现金->兑付投资人', 'cellType': BasicCell}
-        d['assert_mgt_to_cash'] = {'chinese': '资管->现金', 'cellType': BasicCell}
-        d['money_fund_to_cash'] = {'chinese': '货基->现金', 'cellType': BasicCell}
-        d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
-        d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': BasicCell}
+        d['total_cash'] = {'chinese': '现金总额', 'cellType': NumCell}
+        d['cash_to_assert_mgt'] = {'chinese': '现金->资管', 'cellType': NumCell}
+        d['cash_to_money_fund'] = {'chinese': '现金->货基', 'cellType': NumCell}
+        d['cash_to_protocol_deposit'] = {'chinese': '现金->协存', 'cellType': NumCell}
+        d['cash_to_investor'] = {'chinese': '现金->兑付投资人', 'cellType': NumCell}
+        d['assert_mgt_to_cash'] = {'chinese': '资管->现金', 'cellType': NumCell}
+        d['money_fund_to_cash'] = {'chinese': '货基->现金', 'cellType': NumCell}
+        d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': NumCell}
+        d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': NumCell}
 
         self.setHeaderDict(d)
 
@@ -39,10 +40,9 @@ class CashListView(BasicFcView):
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('现金明细')
-        # self.setMinimumSize(800, 800)
-        self.resizeColumns()
-        self.resizeColumnsToContents()
-        # self.ce
+        self.setMinimumSize(800, 600)
+        # self.resizeColumnsToContents()
+
         self.setFont(BASIC_FONT)
         self.initTable()
         self.addMenuAction()
@@ -96,6 +96,13 @@ class CashListView(BasicFcView):
 
 
 if __name__ == '__main__':
+    import sys
+
+    app = QApplication(sys.argv)
     mainEngine = MainEngine()
     clv = CashListView(mainEngine)
-    clv.tet()
+    # cashInput = ProtocolInput(mainEngine, mainEngine.eventEngine)
+
+    clv.show()
+    sys.exit(app.exec_())
+

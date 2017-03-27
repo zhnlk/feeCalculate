@@ -141,7 +141,11 @@ class MainEngine(object):
     def getCashDetail(self):
         """查询现金明细"""
         self.dataEngine.dbConnect()
-        return self.dataEngine.dbQuery(Cash)
+        detail = self.dataEngine.dbQuery(Cash)
+        for d in detail:
+            d.total_cash = d.getTodayTotalCash()
+        print('get Cash Detail')
+        return detail
 
 
     def getContract(self, vtSymbol):

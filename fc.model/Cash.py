@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 import uuid
 from collections import OrderedDict
-from datetime import datetime, date
 
+import datetime
 from sqlalchemy import Column, engine
 from sqlalchemy import Date
 from sqlalchemy import Float
 from sqlalchemy import String
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker, mapper
 
 from BasicWidget import BasicCell
@@ -50,26 +51,33 @@ class Cash(BaseModel):
     uuid = Column(String(32), primary_key=True)
 
     date = Column(Date)
-    total_cash = Column(Float, nullable=True)
-    cash_to_assert_mgt = Column(Float, nullable=True)
-    cash_to_money_fund = Column(Float, nullable=True)
-    cash_to_protocol_deposit = Column(Float, nullable=True)
-    cash_to_investor = Column(Float, nullable=True)
-    assert_mgt_to_cash = Column(Float, nullable=True)
-    money_fund_to_cash = Column(Float, nullable=True)
-    protocol_deposit_to_cash = Column(Float, nullable=True)
-    investor_to_cash = Column(Float, nullable=True)
+    total_cash = Column(Float, default=0.00)
+    cash_to_assert_mgt = Column(Float, default=0.00)
+    cash_to_money_fund = Column(Float, default=0.00)
+    cash_to_protocol_deposit = Column(Float, default=0.00)
+    cash_to_investor = Column(Float, default=0.00)
+    assert_mgt_to_cash = Column(Float, default=0.00)
+    money_fund_to_cash = Column(Float, default=0.00)
+    protocol_deposit_to_cash = Column(Float, default=0.00)
+    investor_to_cash = Column(Float, default=0.00)
 
-    def getDispAttr(self):
-        var = self.__dict__
-        varr = self.values
-        print(varr)
+    def getTodayTotalCash(self):
 
-        # d = {'.'.join([contract.exchange, contract.symbol]): contract for contract in l}
+        session = Session(bind=engine)
+        today = datetime.date.today()
+        yesterday = today - datetime.timedelta(days=1)
+        print(today.strftime('%Y-%m-%d'))
+        yesterday_total_cash = session.query(Cash.total_cash).filter(Cash.date == yesterday.strftime('%Y-%m-%d')).one()
+        today_cash = session.query(Cash).filter(Cash.date == today.strftime('%Y-%m-%d')).one()
+
+        today_total_cash = yesterday_total_cash[0] - today_cash.cash_to_assert_mgt - today_cash.cash_to_money_fund - today_cash.cash_to_protocol_deposit - today_cash.cash_to_investor \
+                           + today_cash.assert_mgt_to_cash + today_cash.money_fund_to_cash + today_cash.protocol_deposit_to_cash + today_cash.investor_to_cash
+        print('today_total_cash:............:' + str(today_total_cash))
+        return today_total_cash
 
 
 if __name__ == '__main__':
-    # init_db()
+    # TEST
     d = OrderedDict()
     d['date'] = {'chinese': '计算日', 'cellType': BasicCell}
     d['total_cash'] = {'chinese': '现金总额', 'cellType': BasicCell}
@@ -81,40 +89,75 @@ if __name__ == '__main__':
     d['money_fund_to_cash'] = {'chinese': '货基->现金', 'cellType': BasicCell}
     d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
     d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': BasicCell}
-
+    #
+    init_db()
     eventEngine = EventEngine()
     dataEngine = DataEngine(eventEngine)
-    # init_db(dataEngine.)
     dataEngine.dbConnect()
+    # result = dataEngine.dbQuery(Cash)
+    #
+    # row = 0
+    # for r in result:
+    #     print(r.uuid)
+    #     # for key in l2:
+    #     #     contract = d[key]
+    #     #     按照定义的表头，进行填充数据
+    #
+    #     for n, header in enumerate(d):
+    #
+    #         content = r.__getattribute__(header)
+    #         cellType = d[header]['cellType']
+    #         cell = cellType(content)
+    #         print(header + ':' + cell.text())
+    #
+    #         # self.setItem(row, n, cell)
+    #     row = row + 1
+
+    # INSERT
+    # d = datetime.today()
+    # print(d.minute(1).__str__())
+    # cash = Cash(date=date(2017, 3, 27), cash_to_investor=22.00, investor_to_cash=16.00)
+    # dataEngine.dbInsert(cash)
+    # cash = Cash(date=date(2017, 3, 26), cash_to_investor=22.00, investor_to_cash=16.00)
+    # dataEngine.dbInsert(cash)
+    # cash = Cash(date=date(2017, 3, 25), cash_to_investor=22.00, investor_to_cash=16.00)
+    # dataEngine.dbInsert(cash)
+    # cash = Cash(date=date(2017, 3, 24), cash_to_investor=22.00, investor_to_cash=16.00)
+    # dataEngine.dbInsert(cash)
+    # cash = Cash(date=date(2017, 3, 23), cash_to_investor=22.00, investor_to_cash=16.00)
+    # dataEngine.dbInsert(cash)
+    # cash = Cash(date=date(2017, 3, 22), cash_to_investor=22.00, investor_to_cash=16.00)
+    # dataEngine.dbInsert(cash)
+    # cash = Cash(date=date(2017, 3, 21), cash_to_investor=22.00, investor_to_cash=16.00)
+    # dataEngine.dbInsert(cash)
+    # cash = Cash(date=date(2017, 3, 20), cash_to_investor=22.00, investor_to_cash=16.00)
+    # dataEngine.dbInsert(cash)
+    # cash = Cash(date=date(2017, 3, 19), cash_to_investor=22.00, investor_to_cash=16.00)
+    # dataEngine.dbInsert(cash)
+    # cash = Cash(date=date(2017, 3, 18), cash_to_investor=22.00, investor_to_cash=16.00)
+    # dataEngine.dbInsert(cash)
+    # cash = Cash(date=date(2017, 3, 17), cash_to_investor=22.00, investor_to_cash=16.00)
+    # dataEngine.dbInsert(cash)
+    # cash = Cash(date=date(2017, 3, 16), cash_to_investor=22.00, investor_to_cash=16.00)
+    # dataEngine.dbInsert(cash)
+    # cash = Cash(date=date(2017, 3, 15), cash_to_investor=22.00, investor_to_cash=16.00)
+    # dataEngine.dbInsert(cash)
+    # cash = Cash(date=date(2017, 3, 14), cash_to_investor=22.00, investor_to_cash=16.00)
+    # dataEngine.dbInsert(cash)
+    # cash = Cash(date=date(2017, 3, 13), cash_to_investor=22.00, investor_to_cash=16.00)
+    # dataEngine.dbInsert(cash)
+    # cash = Cash(date=date(2017, 3, 12), cash_to_investor=22.00, investor_to_cash=16.00)
     # dataEngine.dbInsert(cash)
 
-    result = dataEngine.dbQuery(Cash)
-
-    row = 0
-    for r in result:
-        print(r.uuid)
-        # for key in l2:
-        #     contract = d[key]
-        #     按照定义的表头，进行填充数据
-
-        for n, header in enumerate(d):
-            # content = r.date
-            # cellType = self.headerDict[header]['cellType']
-            # cell = cellType(content)
-            # self.setItem(row, n, cell)
-
-            content = r.__getattribute__(header)
-            print(content)
-            cellType = d[header]['cellType']
-            cell = cellType(content)
-
-            # self.setItem(row, n, cell)
-
-        row = row + 1
-
-    # d = datetime.today()
-    # cash = Cash(date=date(d.year, d.month, d.day), cash_to_investor=22.00, investor_to_cash=16.00)
-
+    # QUERY
+    session = Session(bind=engine)
+    Cash.getCashDetail()
+    # yesterday_total_cash = session.query(Cash.total_cash).filter(Cash.date == '2017-03-26').one()
+    # today = session.query(Cash).filter(Cash.date == '2017-03-27').first()
+    #
+    # today_total_cash = yesterday_total_cash[0] - today.cash_to_assert_mgt - today.cash_to_money_fund - today.cash_to_protocol_deposit - today.cash_to_investor \
+    #                    + today.assert_mgt_to_cash + today.money_fund_to_cash + today.protocol_deposit_to_cash + today.investor_to_cash
+    # print('today_total_cash:............:' + str(today_total_cash))
     # for r in result:
     #     print(r.date)
     #     print(r.total_cash)
@@ -127,4 +170,4 @@ if __name__ == '__main__':
     #     print(r.protocol_deposit_to_cash)
     #     print(r.investor_to_cash)
     #     print()
-
+    #
