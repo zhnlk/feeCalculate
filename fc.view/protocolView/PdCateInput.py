@@ -54,7 +54,7 @@ class PdCateInput(BasicFcView):
         self.pd_project_rate_Edit = QLineEdit("0.03")
         okButton = QPushButton("确定")
         cancelButton = QPushButton("取消")
-        okButton.clicked.connect(self.addData)
+        okButton.clicked.connect(self.insertDB)
         cancelButton.clicked.connect(self.close)
 
         # 设置布局
@@ -73,26 +73,13 @@ class PdCateInput(BasicFcView):
         self.setLayout(grid)
 
     # ----------------------------------------------------------------------
-    def addData(self):
+    def insertDB(self):
         """增加数据"""
         pd_project_name = str(self.pd_project_name_Edit.text())
         pd_project_rate = str(self.pd_project_rate_Edit.text())
-        self.insertDB(pd_project_name, pd_project_rate)
-
-    # ----------------------------------------------------------------------
-    def insertDB(self, pd_project_name, pd_project_rate):
         """向数据库增加数据"""
-        print(pd_project_name)
-        print(pd_project_rate)
-        # d = datetime.date.today()
-        # pd = ProtocolDeposit()
         pdProject = PdProject(pd_project_name, pd_project_rate)
-
-        dataEngine = DataEngine(self.eventEngine)
-        dataEngine.dbConnect()
-        # dataEngine.dbQuery()
-        dataEngine.dbInsert(pdProject)
-
+        pdProject.save()
 
 if __name__ == "__main__":
     import sys

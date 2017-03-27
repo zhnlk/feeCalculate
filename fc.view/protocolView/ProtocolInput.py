@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+from collections import OrderedDict
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QComboBox
@@ -8,12 +9,13 @@ from PyQt5.QtWidgets import QHBoxLayout
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
+from sqlalchemy.orm import Session
 
 from BasicWidget import BASIC_FONT, BasicFcView
 from Cash import Cash
 from DataEngine import DataEngine
 from MainEngine import MainEngine
-from ProtocolDeposit import ProtocolDeposit, PdProject
+from ProtocolDeposit import ProtocolDeposit, PdProject, PdProjectList
 
 
 class ProtocolInput(BasicFcView):
@@ -45,11 +47,10 @@ class ProtocolInput(BasicFcView):
     # ----------------------------------------------------------------------
     def initInput(self):
         """设置输入框"""
-
+        self.pd_ComboBox_list = list()
         # 下拉框，用来选择不同的协存项目
         pd_ComboBox_Label = QLabel("协存项目")
         self.pd_ComboBox = QComboBox()
-
 
         # 设置组件
         interest_to_principal_Label = QLabel("利息结转本金")
@@ -65,7 +66,7 @@ class ProtocolInput(BasicFcView):
         self.pd_to_cash_Edit = QLineEdit("0.00")
         okButton = QPushButton("确定")
         cancelButton = QPushButton("取消")
-        okButton.clicked.connect(self.addData)
+        okButton.clicked.connect(self.insertDB)
         cancelButton.clicked.connect(self.close)
 
         # 设置布局
@@ -75,13 +76,13 @@ class ProtocolInput(BasicFcView):
         buttonHBox.addWidget(cancelButton)
 
         grid = QGridLayout()
-        grid.addWidget(pd_ComboBox_Label,0,0)
+        grid.addWidget(pd_ComboBox_Label, 0, 0)
         grid.addWidget(interest_to_principal_Label, 1, 0)
         grid.addWidget(investor_to_pd_Label, 2, 0)
         grid.addWidget(cash_to_pd_Label, 3, 0)
         grid.addWidget(pd_to_investor_Label, 4, 0)
         grid.addWidget(pd_to_cash_Label, 5, 0)
-        grid.addWidget(self.pd_ComboBox,0,1)
+        grid.addWidget(self.pd_ComboBox, 0, 1)
         grid.addWidget(self.interest_to_principal_Edit, 1, 1)
         grid.addWidget(self.investor_to_pd_Edit, 2, 1)
         grid.addWidget(self.cash_to_pd_Edit, 3, 1)
@@ -92,41 +93,51 @@ class ProtocolInput(BasicFcView):
         self.setLayout(grid)
 
     # ----------------------------------------------------------------------
-    def addData(self):
+    def insertDB(self):
         """增加数据"""
+        pd_project_name_index = str(self.pd_ComboBox.currentIndex())
         interest_to_principal = str(self.interest_to_principal_Edit.text())
         investor_to_pd = str(self.investor_to_pd_Edit.text())
         cash_to_pd = str(self.cash_to_pd_Edit.text())
         pd_to_investor = str(self.pd_to_investor_Edit.text())
         pd_to_cash = str(self.pd_to_cash_Edit.text())
-        self.insertDB(interest_to_principal, investor_to_pd, cash_to_pd, pd_to_investor, pd_to_cash)
-
-    # ----------------------------------------------------------------------
-    def prepareData(self):
-
-        # self.pd_ComboBox.addItem('测试1')
-        # self.pd_ComboBox.addItem('测试2')
-        dataEngine = DataEngine(self.eventEngine)
-        dataEngine.dbConnect()
-        for pd in dataEngine.dbQuery(PdProject):
-
-            self.pd_ComboBox.addItem(pd.pd_project_name)
-            print(pd.pd_project_name)
-
-
-    def insertDB(self, interest_to_principal, investor_to_pd, cash_to_pd, pd_to_investor, pd_to_cash):
+        # ----------------------------------------------------------------------
         """向数据库增加数据"""
         print(interest_to_principal)
         print(investor_to_pd)
         print(cash_to_pd)
         print(pd_to_investor)
         print(pd_to_cash)
-        d = datetime.date.today()
-        pdProject = PdProject.set_params(datetime.date(d.year, d.month, d.day),interest_to_principal, investor_to_pd, cash_to_pd, pd_to_investor, pd_to_cash)
 
-        dataEngine = DataEngine(self.eventEngine)
-        dataEngine.dbConnect()
-        dataEngine.dbInsert(pdProject)
+        pd_uuid = self.pd_ComboBox_list[int(pd_project_name_index)]
+        print(pd_uuid + '..............')
+
+        pdProject = PdProject.findByUUID(pd_uuid)
+
+        d = datetime.date.today()
+        pdProjectList = PdProjectList(datetime.date(d.year, d.month, d.day), interest_to_principal, investor_to_pd, cash_to_pd, pd_to_investor,
+                                      pd_to_cash)
+        pdProjectList.pd_obj = pdProject
+        ret = pdProjectList.save(pd_uuid)
+        protocolDeposit = ProtocolDeposit(datetime.date(d.year, d.month, d.day))
+        protocolDeposit.update(datetime.date(d.year, d.month, d.day))
+        if ret:
+            print('insert success')
+        else:
+            print('failed')
+        if protocolDeposit:
+            print('synchronize success')
+
+    def prepareData(self):
+
+        result = PdProject.listAll()
+        print('prepareData running.....')
+        for pd in result:
+            self.pd_ComboBox.addItem(pd.pd_project_name)
+
+            self.pd_ComboBox_list.append(pd.uuid)
+            print(str(pd.pd_project_name) + ',' + str(pd.uuid) + ',' + str(pd.pd_project_rate))
+
 
 if __name__ == "__main__":
     import sys

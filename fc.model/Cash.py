@@ -27,6 +27,7 @@ BaseModel = declarative_base()
 # engine = create_engine(DB_CONNECT_STRING, echo=True)
 SQLALCHEMY_DATABASE_URI, logging = loadSqliteSetting()
 engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
+session = Session(bind=engine)
 
 
 def init_db():
@@ -40,6 +41,7 @@ def drop_db():
 class Cash(BaseModel):
     # 构造器
     def __init__(self, date, cash_to_investor, investor_to_cash):
+        init_db()
         self.date = date
         self.cash_to_investor = cash_to_investor
         self.investor_to_cash = investor_to_cash
@@ -61,14 +63,24 @@ class Cash(BaseModel):
     protocol_deposit_to_cash = Column(Float, default=0.00)
     investor_to_cash = Column(Float, default=0.00)
 
+    def save(self):
+        session.add(self)
+        session.flush()
+        session.commit()
+
+    @classmethod
+    def listAll(self):
+        return session.query(Cash).all()
+
     def getTodayTotalCash(self):
 
         session = Session(bind=engine)
-        today = datetime.date.today()
+        # today = datetime.date.today()
+        today = datetime.date(2017,3,27)
         yesterday = today - datetime.timedelta(days=1)
         print(today.strftime('%Y-%m-%d'))
-        yesterday_total_cash = session.query(Cash.total_cash).filter(Cash.date == yesterday.strftime('%Y-%m-%d')).one()
-        today_cash = session.query(Cash).filter(Cash.date == today.strftime('%Y-%m-%d')).one()
+        yesterday_total_cash = session.query(Cash.total_cash).filter(Cash.date == yesterday.strftime('%Y-%m-%d')).first()
+        today_cash = session.query(Cash).filter(Cash.date == today.strftime('%Y-%m-%d')).first()
 
         today_total_cash = yesterday_total_cash[0] - today_cash.cash_to_assert_mgt - today_cash.cash_to_money_fund - today_cash.cash_to_protocol_deposit - today_cash.cash_to_investor \
                            + today_cash.assert_mgt_to_cash + today_cash.money_fund_to_cash + today_cash.protocol_deposit_to_cash + today_cash.investor_to_cash
@@ -90,10 +102,6 @@ if __name__ == '__main__':
     d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
     d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': BasicCell}
     #
-    init_db()
-    eventEngine = EventEngine()
-    dataEngine = DataEngine(eventEngine)
-    dataEngine.dbConnect()
     # result = dataEngine.dbQuery(Cash)
     #
     # row = 0
@@ -150,8 +158,8 @@ if __name__ == '__main__':
     # dataEngine.dbInsert(cash)
 
     # QUERY
-    session = Session(bind=engine)
-    Cash.getCashDetail()
+    # session = Session(bind=engine)
+    # Cash.getTodayTotalCash()
     # yesterday_total_cash = session.query(Cash.total_cash).filter(Cash.date == '2017-03-26').one()
     # today = session.query(Cash).filter(Cash.date == '2017-03-27').first()
     #

@@ -4,13 +4,13 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QVBoxLayout
 
 
-class AboutWidget(QDialog):
+class ErrorWidget(QDialog):
     """显示关于信息"""
 
     # ----------------------------------------------------------------------
     def __init__(self, parent=None):
         """Constructor"""
-        super(AboutWidget, self).__init__(parent)
+        super(ErrorWidget, self).__init__(parent)
 
         self.initUi()
 
@@ -20,11 +20,7 @@ class AboutWidget(QDialog):
         self.setWindowTitle('About Fee Calculate')
 
         text = """
-                Developed by zhnlk.
-
-                Version: 0.0.1
-
-                License：MIT
+                此功能暂未开放
 
                 Mail：yanan.zhang@creditcloud.com
 

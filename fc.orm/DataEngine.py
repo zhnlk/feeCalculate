@@ -18,7 +18,7 @@ from fcGateway import FcLogData
 
 class DataEngine(object):
     """数据引擎"""
-    cashFileName = 'DataEngineFile.fc'
+    # cashFileName = 'DataEngineFile.fc'
 
     # ----------------------------------------------------------------------
 

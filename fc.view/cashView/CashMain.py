@@ -49,9 +49,10 @@ class CashListView(BasicFcView):
 
     # ----------------------------------------------------------------------
     def showCashListDetail(self):
-        """显示所有合约数据"""
+        """显示现金记录明细"""
 
         result = self.mainEngine.getCashDetail()
+
         print(len(result))
         self.setRowCount(len(result))
         # print(type(result))
@@ -101,7 +102,6 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
     clv = CashListView(mainEngine)
-    # cashInput = ProtocolInput(mainEngine, mainEngine.eventEngine)
 
     clv.show()
     sys.exit(app.exec_())
