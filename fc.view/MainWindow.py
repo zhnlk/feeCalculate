@@ -18,7 +18,11 @@ from EventType import EVENT_TICK
 from assertmgtView.AssertMgtMain import AssertMgtListView
 from cashView.CashMain import CashListView
 from miscView.AboutMain import AboutWidget
+from moneyfundView.MfCateInput import MfCateInput
+from moneyfundView.MoneyFundInput import MoneyFundInput
 from moneyfundView.MoneyFundMain import MoneyFundListView
+from protocolView.PdCateInput import PdCateInput
+from protocolView.ProtocolInput import ProtocolInput
 from protocolView.ProtocolMain import ProtocolListView
 
 
@@ -83,12 +87,14 @@ class MainWindow(QMainWindow, BasicFcView):
         protocolMenu = menubar.addMenu('协议存款')
         protocolMenu.addAction(self.createAction('显示明细', self.openProtocolListDetail))
         protocolMenu.addAction(self.createAction('增加记录', self.openAddProtocolDetail))
+        protocolMenu.addAction(self.createAction('增加协存类别', self.openAddProtocolCate))
         # protocolMenu.addAction(self.createAction('导出记录', self.openOutProtocolData))
         sysMenu.addSeparator()
         # 货基
         moneyFundMenu = menubar.addMenu('货基明细')
         moneyFundMenu.addAction(self.createAction('显示明细', self.openMoneyFundListDetail))
         moneyFundMenu.addAction(self.createAction('增加记录', self.openAddMoneyFundDetail))
+        moneyFundMenu.addAction(self.createAction('增加货基类别', self.openAddMoneyFundCate))
         # moneyFundMenu.addAction(self.createAction('导出记录', self.openOutMoneFundData))
         sysMenu.addSeparator()
         # 资管
@@ -186,16 +192,31 @@ class MainWindow(QMainWindow, BasicFcView):
         try:
             self.widgetDict['openAddProtocolDetail'].show()
         except KeyError:
-            self.widgetDict['openAddProtocolDetail'] = CashListView(self.mainEngine)
+            self.widgetDict['openAddProtocolDetail'] = ProtocolInput(self.mainEngine)
             self.widgetDict['openAddProtocolDetail'].show()
+
+    def openAddProtocolCate(self):
+        """增加协存类别增加界面"""
+        try:
+            self.widgetDict['openAddProtocolCate'].show()
+        except KeyError:
+            self.widgetDict['openAddProtocolCate'] = PdCateInput(self.mainEngine)
+            self.widgetDict['openAddProtocolCate'].show()
 
     def openAddMoneyFundDetail(self):
         """打开货基输入界面"""
         try:
             self.widgetDict['openAddMoneyFundDetail'].show()
         except KeyError:
-            self.widgetDict['openAddMoneyFundDetail'] = CashListView(self.mainEngine)
+            self.widgetDict['openAddMoneyFundDetail'] = MoneyFundInput(self.mainEngine)
             self.widgetDict['openAddMoneyFundDetail'].show()
+    def openAddMoneyFundCate(self):
+        """打开货基类别增加界面"""
+        try:
+            self.widgetDict['openAddMoneyFundCate'].show()
+        except KeyError:
+            self.widgetDict['openAddMoneyFundCate'] = MfCateInput(self.mainEngine)
+            self.widgetDict['openAddMoneyFundCate'].show()
 
     def oepnAddAssertMgtDetail(self):
         """打开资管输入界面"""

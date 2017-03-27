@@ -39,7 +39,10 @@ class CashListView(BasicFcView):
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('现金明细')
-        self.setMinimumSize(800, 800)
+        # self.setMinimumSize(800, 800)
+        self.resizeColumns()
+        self.resizeColumnsToContents()
+        # self.ce
         self.setFont(BASIC_FONT)
         self.initTable()
         self.addMenuAction()
@@ -49,15 +52,16 @@ class CashListView(BasicFcView):
         """显示所有合约数据"""
 
         result = self.mainEngine.getCashDetail()
-
+        print(len(result))
+        self.setRowCount(len(result))
         # print(type(result))
         # print(result)
         row = 0
         for r in result:
-            print(r)
             # 按照定义的表头，进行填充数据
             for n, header in enumerate(self.headerList):
                 content = r.__getattribute__(header)
+                # print(r)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
 

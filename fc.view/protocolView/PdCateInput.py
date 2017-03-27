@@ -2,6 +2,7 @@
 import datetime
 
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QHBoxLayout
 from PyQt5.QtWidgets import QLabel
@@ -12,15 +13,16 @@ from BasicWidget import BASIC_FONT, BasicFcView
 from Cash import Cash
 from DataEngine import DataEngine
 from MainEngine import MainEngine
+from ProtocolDeposit import ProtocolDeposit, PdProject
 
 
-class CashInput(BasicFcView):
-    """现金详情"""
+class PdCateInput(BasicFcView):
+    """协存输入"""
 
     # ----------------------------------------------------------------------
     def __init__(self, mainEngine, eventEngine=None, parent=None):
         """Constructor"""
-        super(CashInput, self).__init__(parent=parent)
+        super(PdCateInput, self).__init__(parent=parent)
 
         self.mainEngine = mainEngine
         self.eventEngine = eventEngine
@@ -32,7 +34,7 @@ class CashInput(BasicFcView):
     # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
-        self.setWindowTitle('输入现金明细')
+        self.setWindowTitle('输入协存项目')
         # self.setMinimumSize(800, 800)
         self.setFont(BASIC_FONT)
         # self.initTable()
@@ -43,11 +45,13 @@ class CashInput(BasicFcView):
     def initInput(self):
         """设置输入框"""
 
+        # 下拉框，用来选择不同的协存项目
         # 设置组件
-        cash_to_investor_Label = QLabel("现金->兑付投资人")
-        investor_to_cash_Label = QLabel("投资人->现金")
-        self.cash_to_investor_Edit = QLineEdit("0.00")
-        self.invest_to_cash_Edit = QLineEdit("0.00")
+        pd_project_name_Label = QLabel("协存项目名称")
+        pd_project_rate_Label = QLabel("协存项目利率(0.03)")
+
+        self.pd_project_name_Edit = QLineEdit('盛京银行协存')
+        self.pd_project_rate_Edit = QLineEdit("0.03")
         okButton = QPushButton("确定")
         cancelButton = QPushButton("取消")
         okButton.clicked.connect(self.addData)
@@ -60,37 +64,41 @@ class CashInput(BasicFcView):
         buttonHBox.addWidget(cancelButton)
 
         grid = QGridLayout()
-        grid.addWidget(cash_to_investor_Label, 0, 0)
-        grid.addWidget(investor_to_cash_Label, 1, 0)
-        grid.addWidget(self.cash_to_investor_Edit, 0, 1)
-        grid.addWidget(self.invest_to_cash_Edit, 1, 1)
-        grid.addLayout(buttonHBox, 3, 0, 1, 2)
+        grid.addWidget(pd_project_name_Label, 0, 0)
+        grid.addWidget(pd_project_rate_Label, 1, 0)
+        grid.addWidget(self.pd_project_name_Edit, 0, 1)
+        grid.addWidget(self.pd_project_rate_Edit, 1, 1)
+        grid.addLayout(buttonHBox, 2, 0, 1, 2)
 
         self.setLayout(grid)
 
     # ----------------------------------------------------------------------
     def addData(self):
         """增加数据"""
-        cash_to_investor = str(self.cash_to_investor_Edit.text())
-        invest_to_cash = str(self.invest_to_cash_Edit.text())
-        self.insertDB(cash_to_investor, invest_to_cash)
+        pd_project_name = str(self.pd_project_name_Edit.text())
+        pd_project_rate = str(self.pd_project_rate_Edit.text())
+        self.insertDB(pd_project_name, pd_project_rate)
 
     # ----------------------------------------------------------------------
-    def insertDB(self, cash_to_investor, invest_to_cash):
+    def insertDB(self, pd_project_name, pd_project_rate):
         """向数据库增加数据"""
-        print(cash_to_investor)
-        print(invest_to_cash)
-        d = datetime.date.today()
-        cash = Cash(datetime.date(d.year, d.month, d.day), cash_to_investor, invest_to_cash)
+        print(pd_project_name)
+        print(pd_project_rate)
+        # d = datetime.date.today()
+        # pd = ProtocolDeposit()
+        pdProject = PdProject(pd_project_name, pd_project_rate)
+
         dataEngine = DataEngine(self.eventEngine)
         dataEngine.dbConnect()
-        dataEngine.dbInsert(cash)
+        # dataEngine.dbQuery()
+        dataEngine.dbInsert(pdProject)
+
 
 if __name__ == "__main__":
     import sys
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    cashInput = CashInput(mainEngine, mainEngine.eventEngine)
+    cashInput = PdCateInput(mainEngine, mainEngine.eventEngine)
     cashInput.show()
     sys.exit(app.exec_())

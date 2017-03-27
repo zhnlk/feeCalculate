@@ -115,7 +115,7 @@ class DataEngine(object):
     # ----------------------------------------------------------------------
     def registerEvent(self):
         """注册事件监听"""
-        self.eventEngine.register(EVENT_CASH,self.updateCash)
+        self.eventEngine.register(EVENT_CASH, self.updateCash)
         # self.eventEngine.register(EVENT_CONTRACT, self.updateContract)
         self.eventEngine.register(EVENT_ORDER, self.updateOrder)
 
@@ -140,6 +140,7 @@ class DataEngine(object):
         except:
             print("SqliteDB连接失败")
             # self.writeLog('SqliteDB连接失败')
+
     # ----------------------------------------------------------------------
     def dbInsert(self, d):
         """向SqliteDB中插入数据，d是具体数据"""
@@ -153,6 +154,9 @@ class DataEngine(object):
         else:
             self.writeLog('数据插入失败，SqliteDB没有连接')
 
+    def getSeesion(self):
+        return self.session
+
     def dbInsertList(self, dList):
         """向SqliteDB批量插入数据"""
         if self.session:
@@ -163,16 +167,16 @@ class DataEngine(object):
             self.writeLog('数据插入失败，SqliteDB没有连接')
 
     # ----------------------------------------------------------------------
-    def dbQuery(self, D):
+    def dbQuery(self, d):
         """从SqliteDB中读取数据，d是查询要求"""
         if self.session:
             # db = self.session[dbName]
             # collection = db[collectionName]
             # cursor = collection.find(d)
             # if cursor:
-            result = self.session.query(D).all()
-            for i in result:
-                print(i)
+            result = self.session.query(d).all()
+            # for i in result:
+            #     print(i)
             return result
             # else:
             #     return []
@@ -181,16 +185,20 @@ class DataEngine(object):
             return []
 
     # ----------------------------------------------------------------------
-    def dbUpdate(self, dbName, collectionName, d, flt, upsert=False):
-        """向MongoDB中更新数据，d是具体数据，flt是过滤条件，upsert代表若无是否要插入"""
+    def dbUpdate(self, dbName, d, flt, upsert=False):
+        """向SqliteDB中更新数据，d是具体数据，flt是过滤条件，upsert代表若无是否要插入"""
         if self.session:
-            db = self.session[dbName]
-            collection = db[collectionName]
-            collection.replace_one(flt, d, upsert)
+            self.session.query()
+
         else:
             self.writeLog('数据更新失败，SqliteDB没有连接')
 
-            # ----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
+    def dbDelete(self, d):
+        if self.session:
+            self.session.delete(d)
+        else:
+            self.writeLog('数据删除失败，SqliteDB没有连接')
 
     def dbLogging(self, event):
         """向MongoDB中插入日志"""
@@ -200,7 +208,7 @@ class DataEngine(object):
             'time': log.logTime,
             'gateway': log.gatewayName
         }
-        self.dbInsert(LOG_DB_NAME, self.todayDate, d)
+        # self.dbInsert(LOG_DB_NAME, self.todayDate, d)
 
     # ----------------------------------------------------------------------
     def writeLog(self, content):

@@ -7,7 +7,7 @@ from BasicWidget import BASIC_FONT, BasicFcView, BasicCell
 
 
 class ProtocolListView(BasicFcView):
-    """现金详情"""
+    """协存详情"""
 
     # ----------------------------------------------------------------------
     def __init__(self, mainEngine, parent=None):
