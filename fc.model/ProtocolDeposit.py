@@ -60,10 +60,10 @@ class ProtocolDeposit(BaseModel):
         session.commit()
         return self
 
-    def update(self,date):
-        protocolDeposit = session.query(ProtocolDeposit).filter(ProtocolDeposit.date == date).one()
+    def update(self):
+        protocolDeposit = session.query(ProtocolDeposit).filter(ProtocolDeposit.date == self.date).one()
 
-        protocolDepositList = session.query(PdProjectList).filter(PdProjectList.date == date).all()
+        protocolDepositList = session.query(PdProjectList).filter(PdProjectList.date == self.date).all()
         for p in protocolDepositList:
             protocolDeposit.protocol_deposit_amount += p.pd_amount
             protocolDeposit.protocol_deposit_revenue += p.pd_interest
