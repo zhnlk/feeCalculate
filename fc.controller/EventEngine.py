@@ -6,9 +6,6 @@ from threading import Thread
 from time import sleep
 from collections import defaultdict
 
-# 第三方模块
-from PyQt5.QtCore import QTimer
-
 # 自己开发的模块
 from EventType import *
 

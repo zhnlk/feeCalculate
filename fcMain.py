@@ -6,7 +6,6 @@ import platform
 
 import sys
 
-import qdarkstyle
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication
 
@@ -36,9 +35,6 @@ def main():
     try:
         f = open(SETTING_FILENAME)
         setting = json.load(f)
-        if setting['darkStyle']:
-            import qdarkStyle
-            app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     except:
         pass
 

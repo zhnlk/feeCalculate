@@ -10,17 +10,9 @@ from sqlalchemy import String
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
-from sqlalchemy.orm import sessionmaker, mapper
 
 from BasicWidget import BasicCell
-from DataEngine import DataEngine
-from EventEngine import EventEngine
 from fcFunction import loadSqliteSetting
-
-# dataEngine = DataEngine(eventEngine=)
-# dataEngine.dbConnect()
-# dataEngine.
-
 
 BaseModel = declarative_base()
 

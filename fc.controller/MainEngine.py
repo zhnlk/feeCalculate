@@ -6,8 +6,6 @@ from datetime import datetime
 from Cash import Cash
 from ProtocolDeposit import ProtocolDeposit, PdProject, PdProjectList
 from fcConstant import LOG_DB_NAME
-from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
 
 from DataEngine import DataEngine
 from EventEngine import *

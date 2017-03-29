@@ -2,6 +2,7 @@
 
 # ----------------------------------------------------------------------
 import csv
+import json
 import os
 from collections import OrderedDict
 
@@ -15,8 +16,6 @@ from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtWidgets import QMenu
 from PyQt5.QtWidgets import QTableWidget
 from PyQt5.QtWidgets import QTableWidgetItem
-
-from pandas import json
 
 from EventEngine import Event
 

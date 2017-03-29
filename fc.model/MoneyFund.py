@@ -12,8 +12,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, backref
 from sqlalchemy.orm import relationship
 
-from DataEngine import DataEngine
-from EventEngine import EventEngine
 from fcFunction import loadSqliteSetting
 
 BaseModel = declarative_base()

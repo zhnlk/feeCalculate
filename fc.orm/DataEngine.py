@@ -1,16 +1,14 @@
-########################################################################
-import shelve
 from datetime import datetime
 
-from pymongo.errors import ConnectionFailure
-from sqlalchemy import create_engine, engine
+import sqlalchemy.orm
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from EventEngine import Event
-from fcConstant import STATUS_ALLTRADED, LOG_DB_NAME
+from fcConstant import STATUS_ALLTRADED
 from fcConstant import STATUS_CANCELLED
 
-from EventType import EVENT_CONTRACT, EVENT_LOG, EVENT_CASH
+from EventType import EVENT_LOG, EVENT_CASH
 from EventType import EVENT_ORDER
 from fcFunction import loadSqliteSetting
 from fcGateway import FcLogData

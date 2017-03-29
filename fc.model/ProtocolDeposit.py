@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import uuid
-from collections import OrderedDict
 
 import datetime
 from sqlalchemy import Column, engine
@@ -13,13 +12,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import relationship, backref
 
-from DataEngine import DataEngine
-from EventEngine import EventEngine
 from fcFunction import loadSqliteSetting
 
 BaseModel = declarative_base()
 
-# engine = create_engine(DB_CONNECT_STRING, echo=True)
 SQLALCHEMY_DATABASE_URI, logging = loadSqliteSetting()
 engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
 session = Session(bind=engine)

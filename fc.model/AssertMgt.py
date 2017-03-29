@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-
-# -*- coding: utf-8 -*-
 import uuid
 from collections import OrderedDict
 from datetime import datetime, date
@@ -11,7 +9,6 @@ from sqlalchemy import Float
 from sqlalchemy import String
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, mapper, relationship
 
 from BasicWidget import BasicCell
 from DataEngine import DataEngine
@@ -23,7 +20,6 @@ from fcFunction import loadSqliteSetting
 
 BaseModel = declarative_base()
 
-# engine = create_engine(DB_CONNECT_STRING, echo=True)
 SQLALCHEMY_DATABASE_URI, logging = loadSqliteSetting()
 engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
 
