@@ -5,9 +5,9 @@ block_cipher = None
 
 
 a = Analysis(['fcMain.py'],
-             pathex=['./fc.controller', './fc.view', './fc.model', './fc.orm', './fc.misc', '/Users/wangjiangbin/gitlab/feeCalculate'],
+             pathex=['./fc.controller', './fc.view', './fc.model', '/Users/wangjiangbin/gitlab/feeCalculate'],
              binaries=[],
-             datas=[('./fc.misc/data-test.db','.')],
+             datas=[('./data-test.db','~/fc/data-runtime.db')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -26,8 +26,8 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=True,
-          console=False , icon='fc.misc/zhnlk.ico')
+          console=False , icon='./zhnlk.ico')
 app = BUNDLE(exe,
              name='fcMain.app',
-             icon='./fc.misc/zhnlk.ico',
+             icon='./zhnlk.ico',
              bundle_identifier=None)

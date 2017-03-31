@@ -12,19 +12,17 @@ EMPTY_FLOAT = 0.0
 ICON_FILENAME = 'zhnlk.ico'
 DB_FILENAME = 'data-test.db'
 
-# 数据库
-LOG_DB_NAME = 'FC_LOG_DB'
-
-path = os.path.abspath(os.path.dirname(__file__))
+path = os.path.dirname(__file__)
+print('path:..' + path)
 ICON_FILENAME = os.path.join(path, ICON_FILENAME)
-SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(os.path.dirname(__file__), 'data-test.db')
-
+SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(path, 'data-test.db')
 
 def disp():
-    print(path)
-    print(ICON_FILENAME)
-    print(SQLALCHEMY_DATABASE_URI)
+    print('path:...'+path)
+    print('ICON_FILENAME:...'+ICON_FILENAME)
+    print('SQLALCHEMY_DATABASE_URI:...'+SQLALCHEMY_DATABASE_URI)
 
 
 if __name__ == '__main__':
     disp()
+
