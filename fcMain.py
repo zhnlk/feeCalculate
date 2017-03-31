@@ -1,25 +1,17 @@
 # -*- coding: utf-8 -*-
 import ctypes
 import json
-import os
 import platform
-
 import sys
 
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication
 
 from BasicWidget import BASIC_FONT
-
 from MainEngine import MainEngine
 from MainWindow import MainWindow
 from fcConstant import ICON_FILENAME
 from fcConstant import SETTING_FILENAME
-
-# 设置路径
-path = os.path.abspath(os.path.dirname(__file__))
-ICON_FILENAME = os.path.join(path, ICON_FILENAME)
-SETTING_FILENAME = os.path.join(path, SETTING_FILENAME)
 
 
 def main():

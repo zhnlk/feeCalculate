@@ -1,14 +1,10 @@
 # encoding: UTF-8
-import json
-from collections import OrderedDict
 from datetime import datetime
 
 from Cash import Cash
-from MoneyFund import MfProjectList
-from ProtocolDeposit import ProtocolDeposit, PdProject, PdProjectList
-from fcConstant import LOG_DB_NAME
-
 from EventEngine import *
+from MoneyFund import MfProjectList
+from ProtocolDeposit import PdProject, PdProjectList
 
 
 class MainEngine(object):

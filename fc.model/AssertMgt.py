@@ -11,12 +11,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 
 from BasicWidget import BasicCell
-from EventEngine import EventEngine
-
+from fcConstant import SQLALCHEMY_DATABASE_URI
 
 BaseModel = declarative_base()
 
-SQLALCHEMY_DATABASE_URI, logging = loadSqliteSetting()
 engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
 
 

@@ -12,11 +12,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, backref
 from sqlalchemy.orm import relationship
 
-from fcFunction import loadSqliteSetting
+from fcConstant import SQLALCHEMY_DATABASE_URI
 
 BaseModel = declarative_base()
 
-SQLALCHEMY_DATABASE_URI, logging = loadSqliteSetting()
 engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
 session = Session(bind=engine)
 

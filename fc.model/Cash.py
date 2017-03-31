@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import uuid
 from collections import OrderedDict
 
@@ -12,12 +13,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 
 from BasicWidget import BasicCell
-from fcFunction import loadSqliteSetting
+from fcConstant import SQLALCHEMY_DATABASE_URI
 
 BaseModel = declarative_base()
 
-# engine = create_engine(DB_CONNECT_STRING, echo=True)
-SQLALCHEMY_DATABASE_URI, logging = loadSqliteSetting()
 engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
 session = Session(bind=engine)
 
@@ -62,6 +61,7 @@ class Cash(BaseModel):
 
     @classmethod
     def listAll(self):
+        print('SQLALCHEMY_DATABASE_URI:'+SQLALCHEMY_DATABASE_URI)
         return session.query(Cash).all()
 
     def getTodayTotalCash(self):

@@ -2,15 +2,12 @@
 
 block_cipher = None
 
-added_files = [
-              ('./fc.misc/data-test.db','.'),
-              ('./fc.misc/FC_setting.json','.')
-]
+
 
 a = Analysis(['fcMain.py'],
              pathex=['./fc.controller', './fc.view', './fc.model', './fc.orm', './fc.misc', '/Users/wangjiangbin/gitlab/feeCalculate'],
              binaries=[],
-             datas=added_files,
+             datas=[('./fc.misc/data-test.db','.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
