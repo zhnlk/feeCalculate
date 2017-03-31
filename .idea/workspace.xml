@@ -2,43 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3cc739d-0434-4878-afad-20ebbd91969a" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/dataSources/77881128-a143-4a49-a042-d557f3bdd85b/_metadata_/metadata" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/dataSources/77881128-a143-4a49-a042-d557f3bdd85b/_metadata_/metadata.keystream" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/dataSources/77881128-a143-4a49-a042-d557f3bdd85b/_metadata_/metadata.keystream.len" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/dataSources/77881128-a143-4a49-a042-d557f3bdd85b/_metadata_/metadata.len" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/dataSources/77881128-a143-4a49-a042-d557f3bdd85b/_metadata_/metadata_i" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/dataSources/77881128-a143-4a49-a042-d557f3bdd85b/_metadata_/metadata_i.len" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/dataSources/77881128-a143-4a49-a042-d557f3bdd85b.xml" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/fc.controller/fcGateway.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/fc.orm/DataEngine.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/fc.view/protocolView/ProtocolCateInput.py" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/fc.orm/fcFunction.py" afterPath="$PROJECT_DIR$/fc.model/fcFunction.py" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/fcMain.spec" afterPath="$PROJECT_DIR$/fcMainApp.spec" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.misc/data-test.db" afterPath="$PROJECT_DIR$/fc.misc/data-test.db" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/feeCalculate.iml" afterPath="$PROJECT_DIR$/.idea/feeCalculate.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.controller/EventType.py" afterPath="$PROJECT_DIR$/fc.controller/EventType.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.controller/MainEngine.py" afterPath="$PROJECT_DIR$/fc.controller/MainEngine.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.misc/fcConstant.py" afterPath="$PROJECT_DIR$/fc.misc/fcConstant.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.model/AssertMgt.py" afterPath="$PROJECT_DIR$/fc.model/AssertMgt.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.model/Cash.py" afterPath="$PROJECT_DIR$/fc.model/Cash.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.model/MoneyFund.py" afterPath="$PROJECT_DIR$/fc.model/MoneyFund.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.model/ProtocolDeposit.py" afterPath="$PROJECT_DIR$/fc.model/ProtocolDeposit.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.view/BasicWidget.py" afterPath="$PROJECT_DIR$/fc.view/BasicWidget.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.view/MainWindow.py" afterPath="$PROJECT_DIR$/fc.view/MainWindow.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.view/assertmgtView/AssertMgtMain.py" afterPath="$PROJECT_DIR$/fc.view/assertmgtView/AssertMgtMain.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.view/cashView/CashInput.py" afterPath="$PROJECT_DIR$/fc.view/cashView/CashInput.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.view/cashView/CashMain.py" afterPath="$PROJECT_DIR$/fc.view/cashView/CashMain.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.view/moneyfundView/MfCateInput.py" afterPath="$PROJECT_DIR$/fc.view/moneyfundView/MfCateInput.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.view/moneyfundView/MoneyFundInput.py" afterPath="$PROJECT_DIR$/fc.view/moneyfundView/MoneyFundInput.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.view/moneyfundView/MoneyFundMain.py" afterPath="$PROJECT_DIR$/fc.view/moneyfundView/MoneyFundMain.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.view/protocolView/PdCateInput.py" afterPath="$PROJECT_DIR$/fc.view/protocolView/PdCateInput.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.view/protocolView/ProtocolInput.py" afterPath="$PROJECT_DIR$/fc.view/protocolView/ProtocolInput.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fc.view/protocolView/ProtocolMain.py" afterPath="$PROJECT_DIR$/fc.view/protocolView/ProtocolMain.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fcMain.py" afterPath="$PROJECT_DIR$/fcMain.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -53,7 +19,7 @@
     <SUITE FILE_PATH="coverage/feeCalculate$Unittests_for_EventType_test.coverage" NAME="Unittests for EventType.test Coverage Results" MODIFIED="1490938541108" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/feeCalculate$MoneyFundMain.coverage" NAME="MoneyFundMain Coverage Results" MODIFIED="1490935072091" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fc.view/moneyfundView" />
     <SUITE FILE_PATH="coverage/feeCalculate$Unittests_in_EventEngine_py.coverage" NAME="Unittests in EventEngine.py Coverage Results" MODIFIED="1490940730738" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/feeCalculate$fcMain.coverage" NAME="fcMain Coverage Results" MODIFIED="1490943353880" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/feeCalculate$fcMain.coverage" NAME="fcMain Coverage Results" MODIFIED="1490943728304" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="DatabaseView">
     <option name="SHOW_INTERMEDIATE" value="true" />
@@ -103,14 +69,34 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Cash.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Cash.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/fc.model/Cash.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="705">
-              <caret line="48" column="52" lean-forward="true" selection-start-line="48" selection-start-column="52" selection-end-line="48" selection-end-column="52" />
+            <state relative-caret-position="855">
+              <caret line="58" column="25" lean-forward="true" selection-start-line="58" selection-start-column="25" selection-end-line="58" selection-end-column="25" />
               <folding>
                 <element signature="e#24#35#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ProtocolDeposit.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/fc.model/ProtocolDeposit.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="541">
+              <caret line="72" column="0" lean-forward="true" selection-start-line="72" selection-start-column="0" selection-end-line="72" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MoneyFund.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/fc.model/MoneyFund.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="661">
+              <caret line="68" column="46" lean-forward="true" selection-start-line="68" selection-start-column="46" selection-end-line="68" selection-end-column="46" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -131,7 +117,7 @@
         <entry file="file://$PROJECT_DIR$/fc.model/fcFunction.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="390">
-              <caret line="29" column="0" lean-forward="true" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+              <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -155,18 +141,6 @@
             <state relative-caret-position="15">
               <caret line="1" column="11" lean-forward="false" selection-start-line="1" selection-start-column="11" selection-end-line="1" selection-end-column="11" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BasicWidget.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/fc.view/BasicWidget.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="583">
-              <caret line="261" column="32" lean-forward="false" selection-start-line="261" selection-start-column="32" selection-end-line="261" selection-end-column="32" />
-              <folding>
-                <element signature="e#98#108#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -253,8 +227,6 @@
         <option value="$PROJECT_DIR$/fc.view/protocolView/ProtocolInput.py" />
         <option value="$PROJECT_DIR$/fc.view/moneyfundView/MfCateInput.py" />
         <option value="$PROJECT_DIR$/fc.view/moneyfundView/MoneyFundInput.py" />
-        <option value="$PROJECT_DIR$/fc.model/MoneyFund.py" />
-        <option value="$PROJECT_DIR$/fc.model/ProtocolDeposit.py" />
         <option value="$PROJECT_DIR$/fc.view/MainWindow.py" />
         <option value="$PROJECT_DIR$/fc.controller/EventType.py" />
         <option value="$PROJECT_DIR$/fc.view/moneyfundView/MoneyFundMain.py" />
@@ -268,6 +240,8 @@
         <option value="$PROJECT_DIR$/fc.controller/MainEngine.py" />
         <option value="$PROJECT_DIR$/fc.orm/fcFunction.py" />
         <option value="$PROJECT_DIR$/fc.model/Cash.py" />
+        <option value="$PROJECT_DIR$/fc.model/ProtocolDeposit.py" />
+        <option value="$PROJECT_DIR$/fc.model/MoneyFund.py" />
       </list>
     </option>
   </component>
@@ -795,14 +769,15 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="70" y="23" width="2490" height="1417" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32981133" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32981133" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32985708" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19773585" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19773585" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32985708" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.13357843" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.13357843" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16421568" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32981133" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -848,16 +823,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/fc.controller/EventEngine.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="17" lean-forward="true" selection-start-line="0" selection-start-column="17" selection-end-line="0" selection-end-column="17" />
-          <folding>
-            <element signature="e#26#56#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/fc.controller/EventType.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -1040,22 +1005,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fc.model/MoneyFund.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="629">
-          <caret line="187" column="0" lean-forward="true" selection-start-line="187" selection-start-column="0" selection-end-line="187" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fc.model/ProtocolDeposit.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="584">
-          <caret line="207" column="0" lean-forward="false" selection-start-line="207" selection-start-column="0" selection-end-line="207" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/fc.view/protocolView/ProtocolInput.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="225">
@@ -1221,18 +1170,42 @@
     <entry file="file://$PROJECT_DIR$/fc.model/fcFunction.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="390">
-          <caret line="29" column="0" lean-forward="true" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+          <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python3.6/site-packages/sqlalchemy/orm/query.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="406">
+          <caret line="2823" column="52" lean-forward="false" selection-start-line="2823" selection-start-column="52" selection-end-line="2823" selection-end-column="52" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/fc.model/Cash.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="705">
-          <caret line="48" column="52" lean-forward="true" selection-start-line="48" selection-start-column="52" selection-end-line="48" selection-end-column="52" />
+        <state relative-caret-position="855">
+          <caret line="58" column="25" lean-forward="true" selection-start-line="58" selection-start-column="25" selection-end-line="58" selection-end-column="25" />
           <folding>
             <element signature="e#24#35#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fc.model/ProtocolDeposit.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="541">
+          <caret line="72" column="0" lean-forward="true" selection-start-line="72" selection-start-column="0" selection-end-line="72" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fc.model/MoneyFund.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="661">
+          <caret line="68" column="46" lean-forward="true" selection-start-line="68" selection-start-column="46" selection-end-line="68" selection-end-column="46" />
+          <folding />
         </state>
       </provider>
     </entry>

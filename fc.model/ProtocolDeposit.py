@@ -57,17 +57,20 @@ class ProtocolDeposit(BaseModel):
         return self
 
     def update(self):
-        protocolDeposit = session.query(ProtocolDeposit).filter(ProtocolDeposit.date == self.date).one()
+        try:
+            protocolDeposit = session.query(ProtocolDeposit).filter(ProtocolDeposit.date == self.date).one()
+            protocolDepositList = session.query(PdProjectList).filter(PdProjectList.date == self.date).all()
+            for p in protocolDepositList:
+                protocolDeposit.protocol_deposit_amount += p.pd_amount
+                protocolDeposit.protocol_deposit_revenue += p.pd_interest
+                protocolDeposit.cash_to_protocol_deposit += p.pd_cash_to_pd
+                protocolDeposit.protocol_deposit_to_cash += p.pd_pd_to_cash
 
-        protocolDepositList = session.query(PdProjectList).filter(PdProjectList.date == self.date).all()
-        for p in protocolDepositList:
-            protocolDeposit.protocol_deposit_amount += p.pd_amount
-            protocolDeposit.protocol_deposit_revenue += p.pd_interest
-            protocolDeposit.cash_to_protocol_deposit += p.pd_cash_to_pd
-            protocolDeposit.protocol_deposit_to_cash += p.pd_pd_to_cash
+            session.flush()
+            session.commit()
+        except:
+            pass
 
-        session.flush()
-        session.commit()
 
 class PdProject(BaseModel):
     """构造器"""

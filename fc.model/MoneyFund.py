@@ -45,17 +45,20 @@ class MoneyFund(BaseModel):
     money_fund_revenue = Column(Float, nullable=True)
 
     def update(self):
-        moneyFund = session.query(MoneyFund).filter(MoneyFund.date == self.date).one()
-        mfProjectList = session.query(MfProjectList).filter(MfProjectList.date == self.date).all()
+        try:
+            moneyFund = session.query(MoneyFund).filter(MoneyFund.date == self.date).one()
+            mfProjectList = session.query(MfProjectList).filter(MfProjectList.date == self.date).all()
 
-        for p in mfProjectList:
-            moneyFund.money_fund_amount += p.pd_amount
-            moneyFund.protocol_deposit_revenue += p.pd_interest
-            moneyFund.cash_to_protocol_deposit += p.pd_cash_to_pd
-            moneyFund.protocol_deposit_to_cash += p.pd_pd_to_cash
+            for p in mfProjectList:
+                moneyFund.money_fund_amount += p.pd_amount
+                moneyFund.protocol_deposit_revenue += p.pd_interest
+                moneyFund.cash_to_protocol_deposit += p.pd_cash_to_pd
+                moneyFund.protocol_deposit_to_cash += p.pd_pd_to_cash
 
-        session.flush()
-        session.commit()
+            session.flush()
+            session.commit()
+        except:
+            pass
 
 
 
