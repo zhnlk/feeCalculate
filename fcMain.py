@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import ctypes
-import json
 import platform
 import sys
 
@@ -11,7 +10,6 @@ from BasicWidget import BASIC_FONT
 from MainEngine import MainEngine
 from MainWindow import MainWindow
 from fcConstant import ICON_FILENAME
-from fcConstant import SETTING_FILENAME
 
 
 def main():
@@ -23,12 +21,6 @@ def main():
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(ICON_FILENAME))
     app.setFont(BASIC_FONT)
-
-    try:
-        f = open(SETTING_FILENAME)
-        setting = json.load(f)
-    except:
-        pass
 
     # 初始化主窗口
     mainEngine = MainEngine()
