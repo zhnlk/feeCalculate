@@ -13,7 +13,6 @@ from sqlalchemy.orm import Session
 
 from BasicWidget import BASIC_FONT, BasicFcView
 from Cash import Cash
-from DataEngine import DataEngine
 from MainEngine import MainEngine
 from ProtocolDeposit import ProtocolDeposit, PdProject, PdProjectList
 

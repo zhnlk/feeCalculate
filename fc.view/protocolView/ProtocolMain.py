@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QApplication
 
 from BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
+from EventType import EVENT_PD
 from MainEngine import MainEngine
 
 
@@ -37,6 +38,8 @@ class ProtocolListView(BasicFcView):
         d['pd_pd_to_cash'] = {'chinese': '协存->现金', 'cellType': NumCell}
 
         self.setHeaderDict(d)
+
+        self.setEventType(EVENT_PD)
 
         self.initUi()
 

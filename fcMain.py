@@ -21,6 +21,7 @@ path = os.path.abspath(os.path.dirname(__file__))
 ICON_FILENAME = os.path.join(path, ICON_FILENAME)
 SETTING_FILENAME = os.path.join(path, SETTING_FILENAME)
 
+
 def main():
     # 设置windows下的地步任务栏图标
     if 'Windows' in platform.uname():
@@ -31,7 +32,6 @@ def main():
     app.setWindowIcon(QIcon(ICON_FILENAME))
     app.setFont(BASIC_FONT)
 
-    # 设置窗口皮肤
     try:
         f = open(SETTING_FILENAME)
         setting = json.load(f)
@@ -44,18 +44,6 @@ def main():
     mainWindow.showMaximized()
     sys.exit(app.exec_())
 
-def tpath():
-    print(ICON_FILENAME)
-    try:
-        f = open(SETTING_FILENAME)
-        setting = json.load(f)
-        print(setting)
-        print(setting['darkStyle'])
-    except:
-        pass
-
-
 
 if __name__ == '__main__':
     main()
-    # tpath()

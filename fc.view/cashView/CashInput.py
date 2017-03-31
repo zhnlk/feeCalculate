@@ -10,7 +10,8 @@ from PyQt5.QtWidgets import QPushButton
 
 from BasicWidget import BASIC_FONT, BasicFcView
 from Cash import Cash
-from DataEngine import DataEngine
+from EventEngine import Event
+from EventType import EVENT_CASH
 from MainEngine import MainEngine
 
 
@@ -18,14 +19,11 @@ class CashInput(BasicFcView):
     """现金详情"""
 
     # ----------------------------------------------------------------------
-    def __init__(self, mainEngine, eventEngine=None, parent=None):
+    def __init__(self, mainEngine, parent=None):
         """Constructor"""
         super(CashInput, self).__init__(parent=parent)
 
         self.mainEngine = mainEngine
-        self.eventEngine = eventEngine
-
-        # self.setHeaderDict(d)
 
         self.initUi()
 
@@ -82,9 +80,11 @@ class CashInput(BasicFcView):
         print(invest_to_cash)
         d = datetime.date.today()
         cash = Cash(datetime.date(d.year, d.month, d.day), cash_to_investor, invest_to_cash)
-        dataEngine = DataEngine(self.eventEngine)
-        dataEngine.dbConnect()
-        dataEngine.dbInsert(cash)
+        cash.save()
+
+        # self.mainEngine.eventEngine.put(EVENT_CASH)
+        self.signal.emit(Event(EVENT_CASH))
+
 
 if __name__ == "__main__":
     import sys

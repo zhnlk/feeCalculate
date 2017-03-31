@@ -49,6 +49,7 @@ class BasicFcView(QTableWidget):
     {'chinese': u'中文名', 'cellType': BasicCell}
 
     """
+    # 定义信号
     signal = pyqtSignal(type(Event()))
 
     # ----------------------------------------------------------------------
@@ -143,7 +144,7 @@ class BasicFcView(QTableWidget):
     # ----------------------------------------------------------------------
     def updateEvent(self, event):
         """收到事件更新"""
-        data = event.dict_['data']
+        data = event.value
         self.updateData(data)
 
     # ----------------------------------------------------------------------
@@ -252,12 +253,13 @@ class BasicFcView(QTableWidget):
     # ----------------------------------------------------------------------
     def initPopMenu(self):
         """初始化右键菜单"""
+        pass
         self.menu = QMenu(self)
 
-        saveAction = QAction('保存内容', self)
-        saveAction.triggered.connect(self.saveToCsv)
+        # saveAction = QAction('保存内容', self)
+        # saveAction.triggered.connect(self.saveToCsv)
 
-        self.menu.addAction(saveAction)
+        # self.menu.addAction(saveAction)
 
     # ----------------------------------------------------------------------
     def contextMenuEvent(self, event):

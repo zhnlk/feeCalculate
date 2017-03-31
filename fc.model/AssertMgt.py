@@ -11,12 +11,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 
 from BasicWidget import BasicCell
-from DataEngine import DataEngine
 from EventEngine import EventEngine
-from fcFunction import loadSqliteSetting
 
-# dataEngine = DataEngine(eventEngine=)
-# dataEngine.dbConnect()
 
 BaseModel = declarative_base()
 
@@ -150,48 +146,3 @@ if __name__ == '__main__':
     d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
     d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': BasicCell}
 
-    eventEngine = EventEngine()
-    dataEngine = DataEngine(eventEngine)
-    # init_db(dataEngine.)
-    dataEngine.dbConnect()
-    # dataEngine.dbInsert(cash)
-
-    result = dataEngine.dbQuery(AssertMgt)
-
-    row = 0
-    for r in result:
-        print(r.uuid)
-        # for key in l2:
-        #     contract = d[key]
-        #     按照定义的表头，进行填充数据
-
-        for n, header in enumerate(d):
-            # content = r.date
-            # cellType = self.headerDict[header]['cellType']
-            # cell = cellType(content)
-            # self.setItem(row, n, cell)
-
-            content = r.__getattribute__(header)
-            print(content)
-            cellType = d[header]['cellType']
-            cell = cellType(content)
-
-            # self.setItem(row, n, cell)
-
-        row = row + 1
-
-        # d = datetime.today()
-        # cash = Cash(date=date(d.year, d.month, d.day), cash_to_investor=22.00, investor_to_cash=16.00)
-
-        # for r in result:
-        #     print(r.date)
-        #     print(r.total_cash)
-        #     print(r.cash_to_assert_mgt)
-        #     print(r.cash_to_money_fund)
-        #     print(r.cash_to_protocol_deposit)
-        #     print(r.cash_to_investor)
-        #     print(r.assert_mgt_to_cash)
-        #     print(r.money_fund_to_cash)
-        #     print(r.protocol_deposit_to_cash)
-        #     print(r.investor_to_cash)
-        #     print()

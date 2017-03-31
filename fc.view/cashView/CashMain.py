@@ -1,24 +1,25 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
 
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QApplication
 
 import Cash
 from BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
+from EventEngine import Event
+from EventType import EVENT_CASH
 from MainEngine import MainEngine
 
 
 class CashListView(BasicFcView):
     """现金详情"""
 
-    # ----------------------------------------------------------------------
     def __init__(self, mainEngine, parent=None):
         """Constructor"""
         super(CashListView, self).__init__(parent=parent)
 
         self.mainEngine = mainEngine
-        # self.dataEngine = dataEngine
 
         d = OrderedDict()
         d['date'] = {'chinese': '计算日', 'cellType': BasicCell}
@@ -32,6 +33,8 @@ class CashListView(BasicFcView):
         d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': NumCell}
         d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': NumCell}
 
+        self.setEventType(EVENT_CASH)
+
         self.setHeaderDict(d)
 
         self.initUi()
@@ -41,6 +44,10 @@ class CashListView(BasicFcView):
         """初始化界面"""
         self.setWindowTitle('现金明细')
         self.setMinimumSize(800, 600)
+
+        # 将信号连接到refresh函数
+        self.signal.connect(self.refresh)
+        self.mainEngine.eventEngine.register(EVENT_CASH, self.signal.emit)
         # self.resizeColumnsToContents()
 
         self.setFont(BASIC_FONT)
@@ -55,8 +62,6 @@ class CashListView(BasicFcView):
 
         print(len(result))
         self.setRowCount(len(result))
-        # print(type(result))
-        # print(result)
         row = 0
         for r in result:
             # 按照定义的表头，进行填充数据
@@ -93,6 +98,7 @@ class CashListView(BasicFcView):
     def show(self):
         """显示"""
         super(CashListView, self).show()
+
         self.refresh()
 
 
@@ -105,4 +111,3 @@ if __name__ == '__main__':
 
     clv.show()
     sys.exit(app.exec_())
-

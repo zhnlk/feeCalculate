@@ -14,7 +14,6 @@ from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
 from BasicWidget import BasicCell, BasicFcView, BASIC_FONT
-from EventType import EVENT_TICK
 from assertmgtView.AssertMgtMain import AssertMgtListView
 from cashView.CashInput import CashInput
 from cashView.CashMain import CashListView
@@ -64,9 +63,6 @@ class MainWindow(QMainWindow, BasicFcView):
         # self.tabifyDockWidget(widgetMainView,dockMainView)
 
         dockMainView.raise_()
-
-        # 保存默认设置
-        self.saveWindowSettings('default')
 
     # ----------------------------------------------------------------------
     def initTopMenu(self):
@@ -275,9 +271,8 @@ class MainWindow(QMainWindow, BasicFcView):
         if reply == QMessageBox.Yes:
             for widget in self.widgetDict.values():
                 widget.close()
-            self.saveWindowSettings('custom')
 
-            # self.mainEngine.exit()
+            self.mainEngine.exit()
             event.accept()
         else:
             event.ignore()
@@ -291,13 +286,6 @@ class MainWindow(QMainWindow, BasicFcView):
         dock.setFeatures(dock.DockWidgetFloatable | dock.DockWidgetMovable)
         self.addDockWidget(widgetArea, dock)
         return widget, dock
-
-    # ----------------------------------------------------------------------
-    def saveWindowSettings(self, settingName):
-        """保存窗口设置"""
-        settings = QSettings('vn.trader', settingName)
-        settings.setValue('state', self.saveState())
-        settings.setValue('geometry', self.saveGeometry())
 
     # ----------------------------------------------------------------------
     def loadWindowSettings(self, settingName):
@@ -339,9 +327,6 @@ class DateMainView(BasicFcView):
         # 设置数据键
         self.setDataKey('fcSymbol')
 
-        # 设置监控事件类型
-        self.setEventType(EVENT_TICK)
-
         # 设置字体
         self.setFont(BASIC_FONT)
 
@@ -372,9 +357,6 @@ class FeeTotalView(BasicFcView):
         self.setHeaderDict(d)
         # 设置数据键
         self.setDataKey('fcSymbol')
-
-        # 设置监控事件类型
-        self.setEventType(EVENT_TICK)
 
         # 设置字体
         self.setFont(BASIC_FONT)
@@ -415,7 +397,7 @@ class AssertTotalView(BasicFcView):
         self.setDataKey('fcSymbol')
 
         # 设置监控事件类型
-        self.setEventType(EVENT_TICK)
+        # self.setEventType(EVENT_TICK)
 
         # 设置字体
         self.setFont(BASIC_FONT)

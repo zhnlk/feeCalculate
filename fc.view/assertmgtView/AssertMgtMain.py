@@ -4,6 +4,7 @@ from collections import OrderedDict
 from PyQt5.QtWidgets import QAction
 
 from BasicWidget import BASIC_FONT, BasicFcView, BasicCell
+from EventType import EVENT_AM
 
 
 class AssertMgtListView(BasicFcView):
@@ -60,6 +61,8 @@ class AssertMgtListView(BasicFcView):
 
 
         self.setHeaderDict(d)
+
+        self.setEventType(EVENT_AM)
 
         self.initUi()
 

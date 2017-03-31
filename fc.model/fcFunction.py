@@ -9,7 +9,7 @@ from fcConstant import DB_FILENAME, SETTING_FILENAME
 def loadSqliteSetting():
     """载入Sqlite3数据库的配置"""
 
-    setting = os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir,SETTING_FILENAME))
+    setting = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, SETTING_FILENAME))
 
     try:
         f = open(setting)
@@ -17,7 +17,7 @@ def loadSqliteSetting():
         logging = setting['DBlogging']
         # SQLALCHEMY_DATABASE_URI
         uri = "sqlite:///" + os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, DB_FILENAME))
-    except :
+    except:
         uri = "sqlite:///:memory:"
         logging = False
 
@@ -25,5 +25,5 @@ def loadSqliteSetting():
 
 
 if __name__ == '__main__':
-    uri,logging = loadSqliteSetting()
+    uri, logging = loadSqliteSetting()
     print(uri)

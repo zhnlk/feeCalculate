@@ -11,7 +11,6 @@ from PyQt5.QtWidgets import QPushButton
 
 from BasicWidget import BASIC_FONT, BasicFcView
 from Cash import Cash
-from DataEngine import DataEngine
 from MainEngine import MainEngine
 from ProtocolDeposit import ProtocolDeposit, PdProject
 

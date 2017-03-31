@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
 
-from PyQt5.QtWidgets import QAction
+from PyQt5.QtWidgets import QAction, QApplication
 
-from BasicWidget import BASIC_FONT, BasicFcView, BasicCell
+from BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
+from EventType import EVENT_MF
+from MainEngine import MainEngine
 
 
 class MoneyFundListView(BasicFcView):
@@ -18,25 +20,27 @@ class MoneyFundListView(BasicFcView):
 
         d = OrderedDict()
         d['date'] = {'chinese': '计算日', 'cellType': BasicCell}
-        d['money_fund_amount'] = {'chinese': '货基总额', 'cellType': BasicCell}
-        d['money_fund_revenue'] = {'chinese': '货基收益', 'cellType': BasicCell}
+        # d['money_fund_amount'] = {'chinese': '货基总额', 'cellType': NumCell}
+        # d['money_fund_revenue'] = {'chinese': '货基收益', 'cellType': NumCell}
         # 货基项目
-        d['mf_amount'] = {'chinese': '金额', 'cellType': BasicCell}
-        d['mf_revenue'] = {'chinese': '收益', 'cellType': BasicCell}
-        d['mf_subscribe_amount'] = {'chinese': '申购总额', 'cellType': BasicCell}
-        d['mf_redeem_amount'] = {'chinese': '赎回总额', 'cellType': BasicCell}
+        d['mf_amount'] = {'chinese': '金额', 'cellType': NumCell}
+        d['mf_revenue'] = {'chinese': '收益', 'cellType': NumCell}
+        d['mf_subscribe_amount'] = {'chinese': '申购总额', 'cellType': NumCell}
+        d['mf_redeem_amount'] = {'chinese': '赎回总额', 'cellType': NumCell}
         # 货基项目 输入项
-        d['mf_subscribe_normal'] = {'chinese': '正常申购', 'cellType': BasicCell}
-        d['mf_subscribe_from_assert_mgt'] = {'chinese': '申购(资管)', 'cellType': BasicCell}
-        d['mf_subscribe_from_cash'] = {'chinese': '申购(现金)', 'cellType': BasicCell}
-        d['mf_redeem_normal'] = {'chinese': '正常赎回', 'cellType': BasicCell}
-        d['mf_redeem_to_assert_mgt'] = {'chinese': '赎回(进资管)', 'cellType': BasicCell}
-        d['mf_redeem_to_cash'] = {'chinese': '赎回(进现金)', 'cellType': BasicCell}
-        d['mf_redeem_fee'] = {'chinese': '赎回(费用)', 'cellType': BasicCell}
-        d['mf_not_carry_forward_revenue'] = {'chinese': '未结转收益', 'cellType': BasicCell}
-        d['mf_carry_forward_revenue'] = {'chinese': '结转金额', 'cellType': BasicCell}
+        d['mf_subscribe_normal'] = {'chinese': '正常申购', 'cellType': NumCell}
+        d['mf_subscribe_from_assert_mgt'] = {'chinese': '申购(资管)', 'cellType': NumCell}
+        d['mf_subscribe_from_cash'] = {'chinese': '申购(现金)', 'cellType': NumCell}
+        d['mf_redeem_normal'] = {'chinese': '正常赎回', 'cellType': NumCell}
+        d['mf_redeem_to_assert_mgt'] = {'chinese': '赎回(进资管)', 'cellType': NumCell}
+        d['mf_redeem_to_cash'] = {'chinese': '赎回(进现金)', 'cellType': NumCell}
+        d['mf_redeem_fee'] = {'chinese': '赎回(费用)', 'cellType': NumCell}
+        d['mf_not_carry_forward_amount'] = {'chinese': '未结转收益', 'cellType': NumCell}
+        d['mf_carry_forward_amount'] = {'chinese': '结转金额', 'cellType': NumCell}
 
         self.setHeaderDict(d)
+
+        self.setEventType(EVENT_MF)
 
         self.initUi()
 
@@ -52,22 +56,21 @@ class MoneyFundListView(BasicFcView):
     # ----------------------------------------------------------------------
     def showMoneyFundListDetail(self):
         """显示所有合约数据"""
-        l = self.mainEngine.getAllContracts()
-        d = {'.'.join([contract.exchange, contract.symbol]): contract for contract in l}
-        l2 = d.keys()
-        l2.sort(reverse=True)
-
-        self.setRowCount(len(l2))
+        # result0 = self.mainEngine.getProtocol()
+        result1 = self.mainEngine.getProtocolDetail()
+        result2 = self.mainEngine.getMoneyFundDetail()
+        print(len(result1) + len(result2))
+        # self.setRowCount(len(result1)+len(result2))
+        self.setRowCount(len(result2))
         row = 0
-
-        for key in l2:
-            contract = d[key]
-
+        for r in result2:
+            # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
-                content = contract.__getattribute__(header)
+
+                content = r.__getattribute__(header)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
-
+                print(cell.text())
                 if self.font:
                     cell.setFont(self.font)  # 如果设置了特殊字体，则进行单元格设置
 
@@ -81,7 +84,7 @@ class MoneyFundListView(BasicFcView):
         self.menu.close()  # 关闭菜单
         self.clearContents()
         self.setRowCount(0)
-        # self.showMoneyFundListDetail()
+        self.showMoneyFundListDetail()
 
     # ----------------------------------------------------------------------
     def addMenuAction(self):
@@ -96,3 +99,14 @@ class MoneyFundListView(BasicFcView):
         """显示"""
         super(MoneyFundListView, self).show()
         self.refresh()
+
+
+if __name__ == '__main__':
+    import sys
+
+    app = QApplication(sys.argv)
+    mainEngine = MainEngine()
+    mflv = MoneyFundListView(mainEngine)
+
+    mflv.show()
+    sys.exit(app.exec_())

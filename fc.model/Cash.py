@@ -94,8 +94,6 @@ if __name__ == '__main__':
     d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
     d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': BasicCell}
     #
-    # result = dataEngine.dbQuery(Cash)
-    #
     # row = 0
     # for r in result:
     #     print(r.uuid)
@@ -116,38 +114,6 @@ if __name__ == '__main__':
     # INSERT
     # d = datetime.today()
     # print(d.minute(1).__str__())
-    # cash = Cash(date=date(2017, 3, 27), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
-    # cash = Cash(date=date(2017, 3, 26), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
-    # cash = Cash(date=date(2017, 3, 25), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
-    # cash = Cash(date=date(2017, 3, 24), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
-    # cash = Cash(date=date(2017, 3, 23), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
-    # cash = Cash(date=date(2017, 3, 22), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
-    # cash = Cash(date=date(2017, 3, 21), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
-    # cash = Cash(date=date(2017, 3, 20), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
-    # cash = Cash(date=date(2017, 3, 19), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
-    # cash = Cash(date=date(2017, 3, 18), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
-    # cash = Cash(date=date(2017, 3, 17), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
-    # cash = Cash(date=date(2017, 3, 16), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
-    # cash = Cash(date=date(2017, 3, 15), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
-    # cash = Cash(date=date(2017, 3, 14), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
-    # cash = Cash(date=date(2017, 3, 13), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
-    # cash = Cash(date=date(2017, 3, 12), cash_to_investor=22.00, investor_to_cash=16.00)
-    # dataEngine.dbInsert(cash)
 
     # QUERY
     # session = Session(bind=engine)

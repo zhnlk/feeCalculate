@@ -1,13 +1,13 @@
 # encoding: UTF-8
-
+import json
 from collections import OrderedDict
 from datetime import datetime
 
 from Cash import Cash
+from MoneyFund import MfProjectList
 from ProtocolDeposit import ProtocolDeposit, PdProject, PdProjectList
 from fcConstant import LOG_DB_NAME
 
-from DataEngine import DataEngine
 from EventEngine import *
 
 
@@ -23,28 +23,6 @@ class MainEngine(object):
         # 创建事件引擎
         self.eventEngine = EventEngine()
         self.eventEngine.start()
-
-        # 创建数据引擎
-        self.dataEngine = DataEngine(self.eventEngine)
-
-
-        # 调用一个个初始化函数
-        # self.initGateway()
-
-        # 扩展模块
-        # self.ctaEngine = CtaEngine(self, self.eventEngine)
-        # self.drEngine = DrEngine(self, self.eventEngine)
-        # self.rmEngine = RmEngine(self, self.eventEngine)
-
-    # ----------------------------------------------------------------------
-
-    # ----------------------------------------------------------------------
-
-    # ----------------------------------------------------------------------
-
-    # ----------------------------------------------------------------------
-
-    # ----------------------------------------------------------------------
 
     # ----------------------------------------------------------------------
 
@@ -66,7 +44,6 @@ class MainEngine(object):
     def getProtocolDeposit(self):
         """查询协存汇总"""
 
-
     def getProtocolDetail(self):
         """查询协存"""
         detail = PdProject.listAll()
@@ -80,4 +57,12 @@ class MainEngine(object):
         for d in detail:
             print('getProtocolListDetail' + d.uuid)
         return detail
+
+    def getMoneyFundDetail(self):
+        """查询货基列表明细"""
+        detail = MfProjectList.listAll()
+        for m in detail:
+            print('getMoneyFundListDetail' + m.uuid)
+        return detail
+
 

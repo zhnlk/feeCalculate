@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+import datetime
 import uuid
 
-import datetime
 from sqlalchemy import Column, engine
 from sqlalchemy import Date
 from sqlalchemy import Float
@@ -126,6 +126,11 @@ class MfProjectList(BaseModel):
     mf_obj = relationship(MfProject, backref=backref('mf_pro_list_table',
                                                      cascade='all,delete-orphan'))
 
+    @classmethod
+    def listAll(self):
+        return session.query(MfProjectList).all()
+
+
     def save(self, uuid):
 
         today = self.date
@@ -180,9 +185,6 @@ if __name__ == '__main__':
     print(mfProject.save())
 
     # QUERY
-    # for i in dataEngine.dbQuery(MfProject):
-    #     print(i.uuid)
-    #     print(i.mf_project_name)
 
     # DELETE
     # 731055ac-123e-11e7-8cdf-a45e60d89519

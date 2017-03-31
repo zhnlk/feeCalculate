@@ -11,7 +11,6 @@ from PyQt5.QtWidgets import QPushButton
 
 from BasicWidget import BASIC_FONT, BasicFcView
 from Cash import Cash
-from DataEngine import DataEngine
 from MainEngine import MainEngine
 from MoneyFund import MfProject
 from ProtocolDeposit import ProtocolDeposit, PdProject
@@ -66,7 +65,7 @@ class MfCateInput(BasicFcView):
         grid = QGridLayout()
         grid.addWidget(mf_project_name_Label, 0, 0)
         grid.addWidget(self.mf_project_name_Edit, 0, 1)
-        grid.addLayout(buttonHBox, 5, 0, 1, 2)
+        grid.addLayout(buttonHBox, 2, 0, 1, 2)
 
         self.setLayout(grid)
 

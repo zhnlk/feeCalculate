@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+import datetime
 import uuid
 
-import datetime
 from sqlalchemy import Column, engine
 from sqlalchemy import Date
 from sqlalchemy import Float
@@ -203,10 +203,8 @@ if __name__ == '__main__':
     # pd_project_name = '习惯性晚睡银行协存'
     # pd_project_rate = 0.03
     # pdProject = PdProject(pd_project_name, pd_project_rate)
-    # dataEngine.dbInsert(pdProject)
 
     # QUERY
-    # for i in dataEngine.dbQuery(PdProject):
     #     print(i.uuid)
     #     print(i.pd_project_name)
     #     print(i.pd_project_rate)

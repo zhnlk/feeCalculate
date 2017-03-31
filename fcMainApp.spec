@@ -2,11 +2,15 @@
 
 block_cipher = None
 
+added_files = [
+              ('./fc.misc/data-test.db','.'),
+              ('./fc.misc/FC_setting.json','.')
+]
 
 a = Analysis(['fcMain.py'],
-             pathex=['C:\\Users\\zhnlk\\AppData\\Local\\Programs\\Python\\Python35\\Lib\\site-packages\\PyQt5\\Qt\\bin\\', 'C:\\Users\\zhnlk\\Documents\\gitcode\\feeCalculate\\fc.misc', 'C:\\Users\\zhnlk\\Documents\\gitcode\\feeCalculate\\fc.view\\', 'C:\\Users\\zhnlk\\Documents\\gitcode\\feeCalculate\\fc.model\\', 'C:\\Users\\zhnlk\\Documents\\gitcode\\feeCalculate\\fc.controller\\', 'C:\\Users\\zhnlk\\Documents\\gitcode\\feeCalculate\\fc.orm\\', 'C:\\Users\\zhnlk\\Documents\\gitcode\\feeCalculate'],
+             pathex=['./fc.controller', './fc.view', './fc.model', './fc.orm', './fc.misc', '/Users/wangjiangbin/gitlab/feeCalculate'],
              binaries=[],
-             datas=[],
+             datas=added_files,
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -25,4 +29,8 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=True,
-          console=False , icon='fc.misc\\zhnlk.ico')
+          console=False , icon='fc.misc/zhnlk.ico')
+app = BUNDLE(exe,
+             name='fcMain.app',
+             icon='./fc.misc/zhnlk.ico',
+             bundle_identifier=None)
