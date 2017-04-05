@@ -78,7 +78,7 @@ class BasicFcView(QTableWidget):
         self.saveData = False
 
         # 默认不允许根据表头进行排序，需要的组件可以开启
-        self.sorting = False
+        self.sorting = True
 
         # 初始化右键菜单
         self.initPopMenu()
@@ -276,17 +276,17 @@ class BasicCell(QTableWidgetItem):
         """Constructor"""
         super(BasicCell, self).__init__()
         self.data = None
-        if text:
-            self.setContent(text)
+        # if text:
+        self.setContent(text)
 
     # ----------------------------------------------------------------------
     def setContent(self, text):
         """设置内容"""
-        # if text == '0' or text == '0.0' or text is None:
+        if text == '0' or text == '0.0' or text is None:
         # if text is None:
-        #     self.setText('0.00')
-        # else :
-        self.setText(str(text))
+            self.setText('0.00')
+        else :
+            self.setText(str(text))
 
 
 ########################################################################
@@ -304,9 +304,6 @@ class NumCell(QTableWidgetItem):
     # ----------------------------------------------------------------------
     def setContent(self, text):
         """设置内容"""
-        # 考虑到NumCell主要用来显示OrderID和TradeID之类的整数字段，
-        # 这里的数据转化方式使用int类型。但是由于部分交易接口的委托
-        # 号和成交号可能不是纯数字的形式，因此补充了一个try...except
         try:
             num = int(text)
             self.setData(Qt.DisplayRole, num)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QHBoxLayout
 from PyQt5.QtWidgets import QLabel
@@ -70,20 +70,29 @@ class CashInput(BasicFcView):
     def addData(self):
         """增加数据"""
         cash_to_investor = str(self.cash_to_investor_Edit.text())
+        if cash_to_investor == '':
+            cash_to_investor = '0.00'
         invest_to_cash = str(self.invest_to_cash_Edit.text())
-        self.insertDB(cash_to_investor, invest_to_cash)
+        if invest_to_cash == '':
+            invest_to_cash = '0.00'
 
-    # ----------------------------------------------------------------------
-    def insertDB(self, cash_to_investor, invest_to_cash):
         """向数据库增加数据"""
         print(cash_to_investor)
         print(invest_to_cash)
         d = datetime.date.today()
         cash = Cash(datetime.date(d.year, d.month, d.day), cash_to_investor, invest_to_cash)
+        cash.total_cash = Cash.getTodayTotalCash(datetime.date(d.year, d.month, d.day))
         cash.save()
 
         # self.mainEngine.eventEngine.put(EVENT_CASH)
+        # self.connect(okButton, SIGNAL("clicked()"), self.slotInformation)
         self.signal.emit(Event(EVENT_CASH))
+
+    # 输入成功提示框
+    def slotInformation(self):
+        QMessageBox.information(self, "Information",
+                                self.tr("输入成功!"))
+        self.label.setText("Information MessageBox")
 
 
 if __name__ == "__main__":
@@ -91,6 +100,6 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    cashInput = CashInput(mainEngine, mainEngine.eventEngine)
+    cashInput = CashInput(mainEngine)
     cashInput.show()
     sys.exit(app.exec_())

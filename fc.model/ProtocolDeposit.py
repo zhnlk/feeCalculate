@@ -56,6 +56,7 @@ class ProtocolDeposit(BaseModel):
         return self
 
     def update(self):
+        """更新协存字段"""
         try:
             protocolDeposit = session.query(ProtocolDeposit).filter(ProtocolDeposit.date == self.date).one()
             protocolDepositList = session.query(PdProjectList).filter(PdProjectList.date == self.date).all()
@@ -142,6 +143,15 @@ class PdProjectList(BaseModel):
     def listAll(self):
         return session.query(PdProjectList).all()
 
+
+    def getPdProjectName(self):
+        # 获取协存项目名称
+        pd_project = session.query(PdProject).filter(PdProject.uuid == self.pd_obj_uuid).one()
+        if pd_project is not None:
+            return pd_project.pd_project_name
+        else:
+            return '名称暂无'
+
     def save(self, uuid):
         today = self.date
 
@@ -178,7 +188,7 @@ class PdProjectList(BaseModel):
                          - float(self.pd_pd_to_cash) \
                          - float(self.pd_pd_to_investor) \
                          + float(self.pd_interest)
-
+        self.pd_obj_uuid = uuid
         session.add(self)
         session.flush()
         session.commit()

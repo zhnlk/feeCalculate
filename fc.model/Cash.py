@@ -17,7 +17,7 @@ from fcConstant import SQLALCHEMY_DATABASE_URI
 
 BaseModel = declarative_base()
 
-engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
+engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=False)
 session = Session(bind=engine)
 
 
@@ -64,19 +64,29 @@ class Cash(BaseModel):
         print('SQLALCHEMY_DATABASE_URI:'+SQLALCHEMY_DATABASE_URI)
         return session.query(Cash).all()
 
-    def getTodayTotalCash(self):
+    def getTodayTotalCash(self,date):
 
         session = Session(bind=engine)
         # today = datetime.date.today()
-        today = datetime.date(2017,3,27)
+        # today = datetime.date(2017,3,27)
+        today = date
         yesterday = today - datetime.timedelta(days=1)
-        print(today.strftime('%Y-%m-%d'))
+        # print(today.strftime('%Y-%m-%d'))
         yesterday_total_cash = session.query(Cash.total_cash).filter(Cash.date == yesterday.strftime('%Y-%m-%d')).first()
+        if yesterday_total_cash == None:
+            yesterday_total_cash = (0.00,)
         today_cash = session.query(Cash).filter(Cash.date == today.strftime('%Y-%m-%d')).first()
 
-        today_total_cash = yesterday_total_cash[0] - today_cash.cash_to_assert_mgt - today_cash.cash_to_money_fund - today_cash.cash_to_protocol_deposit - today_cash.cash_to_investor \
-                           + today_cash.assert_mgt_to_cash + today_cash.money_fund_to_cash + today_cash.protocol_deposit_to_cash + today_cash.investor_to_cash
-        print('today_total_cash:............:' + str(today_total_cash))
+        today_total_cash = yesterday_total_cash[0] \
+                           - today_cash.cash_to_assert_mgt \
+                           - today_cash.cash_to_money_fund \
+                           - today_cash.cash_to_protocol_deposit \
+                           - today_cash.cash_to_investor \
+                           + today_cash.assert_mgt_to_cash \
+                           + today_cash.money_fund_to_cash \
+                           + today_cash.protocol_deposit_to_cash \
+                           + today_cash.investor_to_cash
+        # print('today_total_cash:............:' + str(today_total_cash))
         return today_total_cash
 
 

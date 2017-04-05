@@ -20,6 +20,7 @@ class ProtocolListView(BasicFcView):
         self.mainEngine = mainEngine
 
         d = OrderedDict()
+        d['pd_project_name'] = {'chinese':'协存项目名称','cellType':BasicCell}
         d['date'] = {'chinese': '计算日', 'cellType': BasicCell}
         # d['protocol_deposit_amount'] = {'chinese': '协存总额', 'cellType': NumCell}
         # d['protocol_deposit_revenue'] = {'chinese': '协存收益', 'cellType': NumCell}
@@ -27,15 +28,15 @@ class ProtocolListView(BasicFcView):
         # d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': NumCell}
 
         # 协存项目
-        d['pd_amount'] = {'chinese': '总额', 'cellType': NumCell}
-        d['pd_principal'] = {'chinese': '协存本金', 'cellType': NumCell}
-        d['pd_interest'] = {'chinese': '协存利息', 'cellType': NumCell}
+        d['pd_amount'] = {'chinese': '总额', 'cellType': BasicCell}
+        d['pd_principal'] = {'chinese': '协存本金', 'cellType': BasicCell}
+        d['pd_interest'] = {'chinese': '协存利息', 'cellType': BasicCell}
         # 协存项目 输入项
-        d['pd_interest_to_principal'] = {'chinese': '利息转结本金', 'cellType': NumCell}
-        d['pd_investor_to_pd'] = {'chinese': '投资人资金->协存', 'cellType': NumCell}
-        d['pd_cash_to_pd'] = {'chinese': '现金->协存', 'cellType': NumCell}
-        d['pd_pd_to_investor'] = {'chinese': '协存->总付投资人', 'cellType': NumCell}
-        d['pd_pd_to_cash'] = {'chinese': '协存->现金', 'cellType': NumCell}
+        d['pd_interest_to_principal'] = {'chinese': '利息转结本金', 'cellType': BasicCell}
+        d['pd_investor_to_pd'] = {'chinese': '投资人资金->协存', 'cellType': BasicCell}
+        d['pd_cash_to_pd'] = {'chinese': '现金->协存', 'cellType': BasicCell}
+        d['pd_pd_to_investor'] = {'chinese': '协存->总付投资人', 'cellType': BasicCell}
+        d['pd_pd_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
 
         self.setHeaderDict(d)
 
@@ -56,17 +57,20 @@ class ProtocolListView(BasicFcView):
     def showProtocolListDetail(self):
         """显示所有合约数据"""
         # result0 = self.mainEngine.getProtocol()
-        result1 = self.mainEngine.getProtocolDetail()
         result2 = self.mainEngine.getProtocolListDetail()
-        print(len(result1)+len(result2))
         # self.setRowCount(len(result1)+len(result2))
         self.setRowCount(len(result2))
         row = 0
         for r in result2:
             # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
+                if header == 'pd_project_name':
+                    content = r.getPdProjectName()
+                else:
+                    content = r.__getattribute__(header)
 
-                content = r.__getattribute__(header)
+                if isinstance(content,float):
+                    content = float('%.2f'% content)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
                 print(cell.text())

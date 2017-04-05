@@ -132,6 +132,16 @@ class MfProjectList(BaseModel):
     def listAll(self):
         return session.query(MfProjectList).all()
 
+    def getMfProjectName(self):
+        # 获取货基项目名称
+        print(self.mf_obj_uuid)
+        mf_project = session.query(MfProject).filter(MfProject.uuid == self.mf_obj_uuid).one()
+        print(mf_project)
+        if mf_project is not None:
+            print(mf_project.mf_project_name)
+            return mf_project.mf_project_name
+        else:
+            return '名称暂无'
 
     def save(self, uuid):
 
@@ -172,6 +182,8 @@ class MfProjectList(BaseModel):
                          + float(self.mf_subscribe_amount) \
                          - float(self.mf_redeem_amount)
 
+
+        self.mf_obj_uuid = uuid
         session.add(self)
         session.flush()
         session.commit()

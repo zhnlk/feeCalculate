@@ -19,24 +19,26 @@ class MoneyFundListView(BasicFcView):
         self.mainEngine = mainEngine
 
         d = OrderedDict()
+
+        d['mf_project_name'] = {'chinese': '货基项目名称', 'cellType': BasicCell}
         d['date'] = {'chinese': '计算日', 'cellType': BasicCell}
         # d['money_fund_amount'] = {'chinese': '货基总额', 'cellType': NumCell}
         # d['money_fund_revenue'] = {'chinese': '货基收益', 'cellType': NumCell}
         # 货基项目
-        d['mf_amount'] = {'chinese': '金额', 'cellType': NumCell}
-        d['mf_revenue'] = {'chinese': '收益', 'cellType': NumCell}
-        d['mf_subscribe_amount'] = {'chinese': '申购总额', 'cellType': NumCell}
-        d['mf_redeem_amount'] = {'chinese': '赎回总额', 'cellType': NumCell}
+        d['mf_amount'] = {'chinese': '金额', 'cellType': BasicCell}
+        d['mf_revenue'] = {'chinese': '收益', 'cellType': BasicCell}
+        d['mf_subscribe_amount'] = {'chinese': '申购总额', 'cellType': BasicCell}
+        d['mf_redeem_amount'] = {'chinese': '赎回总额', 'cellType': BasicCell}
         # 货基项目 输入项
-        d['mf_subscribe_normal'] = {'chinese': '正常申购', 'cellType': NumCell}
-        d['mf_subscribe_from_assert_mgt'] = {'chinese': '申购(资管)', 'cellType': NumCell}
-        d['mf_subscribe_from_cash'] = {'chinese': '申购(现金)', 'cellType': NumCell}
-        d['mf_redeem_normal'] = {'chinese': '正常赎回', 'cellType': NumCell}
-        d['mf_redeem_to_assert_mgt'] = {'chinese': '赎回(进资管)', 'cellType': NumCell}
-        d['mf_redeem_to_cash'] = {'chinese': '赎回(进现金)', 'cellType': NumCell}
-        d['mf_redeem_fee'] = {'chinese': '赎回(费用)', 'cellType': NumCell}
-        d['mf_not_carry_forward_amount'] = {'chinese': '未结转收益', 'cellType': NumCell}
-        d['mf_carry_forward_amount'] = {'chinese': '结转金额', 'cellType': NumCell}
+        d['mf_subscribe_normal'] = {'chinese': '正常申购', 'cellType': BasicCell}
+        d['mf_subscribe_from_assert_mgt'] = {'chinese': '申购(资管)', 'cellType': BasicCell}
+        d['mf_subscribe_from_cash'] = {'chinese': '申购(现金)', 'cellType': BasicCell}
+        d['mf_redeem_normal'] = {'chinese': '正常赎回', 'cellType': BasicCell}
+        d['mf_redeem_to_assert_mgt'] = {'chinese': '赎回(进资管)', 'cellType': BasicCell}
+        d['mf_redeem_to_cash'] = {'chinese': '赎回(进现金)', 'cellType': BasicCell}
+        d['mf_redeem_fee'] = {'chinese': '赎回(费用)', 'cellType': BasicCell}
+        d['mf_not_carry_forward_amount'] = {'chinese': '未结转收益', 'cellType': BasicCell}
+        d['mf_carry_forward_amount'] = {'chinese': '结转金额', 'cellType': BasicCell}
 
         self.setHeaderDict(d)
 
@@ -66,8 +68,10 @@ class MoneyFundListView(BasicFcView):
         for r in result2:
             # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
-
-                content = r.__getattribute__(header)
+                if header is 'mf_project_name':
+                    content = r.getMfProjectName()
+                else:
+                    content = r.__getattribute__(header)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
                 print(cell.text())

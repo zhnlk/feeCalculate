@@ -32,8 +32,10 @@ class MainEngine(object):
     def getCashDetail(self):
         """查询现金明细"""
         detail = Cash.listAll()
-        for d in detail:
-            d.total_cash = d.getTodayTotalCash()
+        # 计算每日的现金明细
+        # for d in detail:
+        #     d.total_cash = d.getTodayTotalCash(d.date)
+        #     d.save()
         print('get Cash Detail')
         return detail
 

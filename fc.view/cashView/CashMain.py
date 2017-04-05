@@ -23,19 +23,21 @@ class CashListView(BasicFcView):
 
         d = OrderedDict()
         d['date'] = {'chinese': '计算日', 'cellType': BasicCell}
-        d['total_cash'] = {'chinese': '现金总额', 'cellType': NumCell}
-        d['cash_to_assert_mgt'] = {'chinese': '现金->资管', 'cellType': NumCell}
-        d['cash_to_money_fund'] = {'chinese': '现金->货基', 'cellType': NumCell}
-        d['cash_to_protocol_deposit'] = {'chinese': '现金->协存', 'cellType': NumCell}
-        d['cash_to_investor'] = {'chinese': '现金->兑付投资人', 'cellType': NumCell}
-        d['assert_mgt_to_cash'] = {'chinese': '资管->现金', 'cellType': NumCell}
-        d['money_fund_to_cash'] = {'chinese': '货基->现金', 'cellType': NumCell}
-        d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': NumCell}
-        d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': NumCell}
+        d['total_cash'] = {'chinese': '现金总额', 'cellType': BasicCell}
+        d['cash_to_assert_mgt'] = {'chinese': '现金->资管', 'cellType': BasicCell}
+        d['cash_to_money_fund'] = {'chinese': '现金->货基', 'cellType': BasicCell}
+        d['cash_to_protocol_deposit'] = {'chinese': '现金->协存', 'cellType': BasicCell}
+        d['cash_to_investor'] = {'chinese': '现金->兑付投资人', 'cellType': BasicCell}
+        d['assert_mgt_to_cash'] = {'chinese': '资管->现金', 'cellType': BasicCell}
+        d['money_fund_to_cash'] = {'chinese': '货基->现金', 'cellType': BasicCell}
+        d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
+        d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': BasicCell}
 
         self.setEventType(EVENT_CASH)
 
         self.setHeaderDict(d)
+
+        self.eventType = 'eCash'
 
         self.initUi()
 
@@ -67,12 +69,13 @@ class CashListView(BasicFcView):
             # 按照定义的表头，进行填充数据
             for n, header in enumerate(self.headerList):
                 content = r.__getattribute__(header)
-                # print(r)
+                print(content)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
+                # print(cell)
 
-                if self.font:
-                    cell.setFont(self.font)  # 如果设置了特殊字体，则进行单元格设置
+                # if self.font:
+                #     cell.setFont(self.font)  # 如果设置了特殊字体，则进行单元格设置
 
                 self.setItem(row, n, cell)
 
