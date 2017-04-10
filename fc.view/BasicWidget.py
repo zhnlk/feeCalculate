@@ -226,15 +226,18 @@ class BasicFcView(QTableWidget):
 
         # 获取想要保存的文件名
         path = QFileDialog.getSaveFileName(self, '保存数据', '', 'CSV(*.csv)')
-
         try:
-            if not path.isEmpty():
-                with open(path, 'wb') as f:
+            if path[0]:
+                print(path[0])
+                with open(path[0], 'w') as f:
                     writer = csv.writer(f)
 
-                    # 保存标签
-                    headers = [header.encode('gbk') for header in self.headerList]
+                    # 保存中文标签
+                    headers = [d['chinese'] for d in self.headerDict.values()]
+                    # headers = [header for header in self.headerDict]
+                    print(headers)
                     writer.writerow(headers)
+
 
                     # 保存每行内容
                     for row in range(self.rowCount()):
@@ -243,11 +246,11 @@ class BasicFcView(QTableWidget):
                             item = self.item(row, column)
                             if item is not None:
                                 rowdata.append(
-                                    item.text().encode('gbk'))
+                                    item.text())
                             else:
                                 rowdata.append('')
                         writer.writerow(rowdata)
-        except IOError:
+        except IOError as e:
             pass
 
     # ----------------------------------------------------------------------
@@ -256,10 +259,10 @@ class BasicFcView(QTableWidget):
         pass
         self.menu = QMenu(self)
 
-        # saveAction = QAction('保存内容', self)
-        # saveAction.triggered.connect(self.saveToCsv)
+        saveAction = QAction('保存内容', self)
+        saveAction.triggered.connect(self.saveToCsv)
 
-        # self.menu.addAction(saveAction)
+        self.menu.addAction(saveAction)
 
     # ----------------------------------------------------------------------
     def contextMenuEvent(self, event):

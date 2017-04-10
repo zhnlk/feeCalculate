@@ -4,20 +4,23 @@ import uuid
 from collections import OrderedDict
 
 import datetime
-from sqlalchemy import Column, engine
+from sqlalchemy import Column, engine, func
 from sqlalchemy import Date
 from sqlalchemy import Float
 from sqlalchemy import String
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.exc import NoResultFound
 
 from BasicWidget import BasicCell
+from MoneyFund import MfProjectList
+from ProtocolDeposit import ProtocolDeposit
 from fcConstant import SQLALCHEMY_DATABASE_URI
 
 BaseModel = declarative_base()
 
-engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=False)
+engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
 session = Session(bind=engine)
 
 
@@ -31,12 +34,21 @@ def drop_db():
 
 class Cash(BaseModel):
     # 构造器
-    def __init__(self, date, cash_to_investor, investor_to_cash):
+    def __init__(self, date, cash_to_investor, extract_fee, investor_to_cash, cash_revenue):
         init_db()
         self.date = date
         self.cash_to_investor = cash_to_investor
         self.investor_to_cash = investor_to_cash
+        self.cash_revenue = cash_revenue
+        self.extract_fee = extract_fee
         self.uuid = uuid.uuid1().__str__()
+        self.total_cash = 0.00
+        self.cash_to_assert_mgt = 0.00
+        self.cash_to_money_fund = 0.00
+        self.cash_to_protocol_deposit = 0.00
+        self.assert_mgt_to_cash = 0.00
+        self.money_fund_to_cash = 0.00
+        self.protocol_deposit_to_cash = 0.00
 
     # 表的名字:
     __tablename__ = 'cash_table'
@@ -53,41 +65,84 @@ class Cash(BaseModel):
     money_fund_to_cash = Column(Float, default=0.00)
     protocol_deposit_to_cash = Column(Float, default=0.00)
     investor_to_cash = Column(Float, default=0.00)
+    cash_revenue = Column(Float, default=0.00)
+    extract_fee = Column(Float, default=0.00)
 
     def save(self):
-        session.add(self)
+        # session.add(self)
+        # self.total_cash = self.getTodayTotalCash(self.date)
+        session.merge(self)
         session.flush()
         session.commit()
 
     @classmethod
     def listAll(self):
-        print('SQLALCHEMY_DATABASE_URI:'+SQLALCHEMY_DATABASE_URI)
+        print('SQLALCHEMY_DATABASE_URI:' + SQLALCHEMY_DATABASE_URI)
         return session.query(Cash).all()
 
-    def getTodayTotalCash(self,date):
-
-        session = Session(bind=engine)
+    def getTodayTotalCash(self, date):
+        # session = Session(bind=engine)
         # today = datetime.date.today()
         # today = datetime.date(2017,3,27)
         today = date
         yesterday = today - datetime.timedelta(days=1)
         # print(today.strftime('%Y-%m-%d'))
-        yesterday_total_cash = session.query(Cash.total_cash).filter(Cash.date == yesterday.strftime('%Y-%m-%d')).first()
-        if yesterday_total_cash == None:
+        try:
+            yesterday_total_cash = session.query(Cash.total_cash).filter(Cash.date == yesterday.strftime('%Y-%m-%d')).one()
+        except:
             yesterday_total_cash = (0.00,)
-        today_cash = session.query(Cash).filter(Cash.date == today.strftime('%Y-%m-%d')).first()
+        # today_cash = session.query(Cash).filter(Cash.date == today.strftime('%Y-%m-%d')).one()
+        print(self.__dict__)
 
+        # 2017-04-07，增加现金收入与提取费用
         today_total_cash = yesterday_total_cash[0] \
-                           - today_cash.cash_to_assert_mgt \
-                           - today_cash.cash_to_money_fund \
-                           - today_cash.cash_to_protocol_deposit \
-                           - today_cash.cash_to_investor \
-                           + today_cash.assert_mgt_to_cash \
-                           + today_cash.money_fund_to_cash \
-                           + today_cash.protocol_deposit_to_cash \
-                           + today_cash.investor_to_cash
-        # print('today_total_cash:............:' + str(today_total_cash))
+                           - float(self.cash_to_assert_mgt) \
+                           - float(self.cash_to_money_fund) \
+                           - float(self.cash_to_protocol_deposit) \
+                           - float(self.cash_to_investor) \
+                           + float(self.assert_mgt_to_cash) \
+                           + float(self.money_fund_to_cash) \
+                           + float(self.protocol_deposit_to_cash) \
+                           + float(self.investor_to_cash) \
+                           + float(self.cash_revenue) \
+                           - float(self.extract_fee)
+
+        print('today_total_cash:............:' + str(today_total_cash))
         return today_total_cash
+
+    def getRelatedData(self):
+        today = self.date
+        print(today)
+        try:
+            pd_sum = session.query(ProtocolDeposit).filter(ProtocolDeposit.date == today).one()
+        except NoResultFound:
+            pd_sum = None
+        if pd_sum is not None:
+            # 现金到协存
+            self.cash_to_protocol_deposit = pd_sum.cash_to_protocol_deposit
+            # 协存到现金
+            self.protocol_deposit_to_cash = pd_sum.protocol_deposit_to_cash
+        else:
+            self.cash_to_protocol_deposit = 0.00
+            self.protocol_deposit_to_cash = 0.00
+        # 现金到货基
+        try:
+            cash_to_mf = session.query(func.sum(MfProjectList.mf_subscribe_from_cash)).filter(MfProjectList.date == today).scalar()
+        except NoResultFound:
+            cash_to_mf = None
+        if cash_to_mf is not None:
+            self.cash_to_money_fund = cash_to_mf
+        else:
+            self.cash_to_money_fund = 0.00
+        # 货基到现金
+        try:
+            mf_to_cash = session.query(func.sum(MfProjectList.mf_redeem_to_cash)).filter(MfProjectList.date == today).scalar()
+        except NoResultFound:
+            mf_to_cash = NoResultFound
+        if mf_to_cash is not None:
+            self.money_fund_to_cash = mf_to_cash
+        else:
+            self.money_fund_to_cash = 0.00
 
 
 if __name__ == '__main__':

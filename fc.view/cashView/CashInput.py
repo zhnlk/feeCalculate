@@ -43,9 +43,14 @@ class CashInput(BasicFcView):
 
         # 设置组件
         cash_to_investor_Label = QLabel("现金->兑付投资人")
+        extract_fee_Label = QLabel("提取费用")
         investor_to_cash_Label = QLabel("投资人->现金")
+        cash_revenue_Label = QLabel("现金收入")
+
         self.cash_to_investor_Edit = QLineEdit("0.00")
+        self.extract_fee_Edit = QLineEdit("0.00")
         self.invest_to_cash_Edit = QLineEdit("0.00")
+        self.cash_revenue_Edit = QLineEdit("0.00")
         okButton = QPushButton("确定")
         cancelButton = QPushButton("取消")
         okButton.clicked.connect(self.addData)
@@ -59,10 +64,15 @@ class CashInput(BasicFcView):
 
         grid = QGridLayout()
         grid.addWidget(cash_to_investor_Label, 0, 0)
-        grid.addWidget(investor_to_cash_Label, 1, 0)
+        grid.addWidget(extract_fee_Label, 1, 0)
+        grid.addWidget(investor_to_cash_Label, 2, 0)
+        grid.addWidget(cash_revenue_Label, 3, 0)
+
         grid.addWidget(self.cash_to_investor_Edit, 0, 1)
-        grid.addWidget(self.invest_to_cash_Edit, 1, 1)
-        grid.addLayout(buttonHBox, 3, 0, 1, 2)
+        grid.addWidget(self.extract_fee_Edit, 1, 1)
+        grid.addWidget(self.invest_to_cash_Edit, 2, 1)
+        grid.addWidget(self.cash_revenue_Edit, 3, 1)
+        grid.addLayout(buttonHBox, 5, 0, 1, 2)
 
         self.setLayout(grid)
 
@@ -72,17 +82,31 @@ class CashInput(BasicFcView):
         cash_to_investor = str(self.cash_to_investor_Edit.text())
         if cash_to_investor == '':
             cash_to_investor = '0.00'
+
+        extract_fee = str(self.extract_fee_Edit.text())
+        if extract_fee == '':
+            extract_fee = '0.00'
+
         invest_to_cash = str(self.invest_to_cash_Edit.text())
         if invest_to_cash == '':
             invest_to_cash = '0.00'
 
+        cash_revenue = str(self.cash_revenue_Edit.text())
+        if cash_revenue == '':
+            cash_revenue = '0.00'
+
         """向数据库增加数据"""
         print(cash_to_investor)
+        print(extract_fee)
         print(invest_to_cash)
+        print(cash_revenue)
+
         d = datetime.date.today()
-        cash = Cash(datetime.date(d.year, d.month, d.day), cash_to_investor, invest_to_cash)
-        cash.total_cash = Cash.getTodayTotalCash(datetime.date(d.year, d.month, d.day))
+        cash = Cash(datetime.date(d.year, d.month, d.day), cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
+        print(cash.__dict__)
         cash.save()
+        # cash.total_cash = cash.getTodayTotalCash(d)
+        # cash.save()
 
         # self.mainEngine.eventEngine.put(EVENT_CASH)
         # self.connect(okButton, SIGNAL("clicked()"), self.slotInformation)

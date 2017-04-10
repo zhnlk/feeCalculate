@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
+import EventType
 from BasicWidget import BasicCell, BasicFcView, BASIC_FONT
 from assertmgtView.AssertMgtMain import AssertMgtListView
 from cashView.CashInput import CashInput
@@ -60,6 +61,7 @@ class MainWindow(QMainWindow, BasicFcView):
         widgetMainView, dockMainView = self.createDock(DateMainView, '今日资金成本', QtCore.Qt.LeftDockWidgetArea)
         widgetMainView, dockMainView = self.createDock(FeeTotalView, '费用详情统计', QtCore.Qt.RightDockWidgetArea)
         widgetMainView, dockMainView = self.createDock(AssertTotalView, '存量资产详情', QtCore.Qt.BottomDockWidgetArea)
+        widgetMainView, dockMainView = self.createDock(TotalValuationView, '总估值表', QtCore.Qt.BottomDockWidgetArea)
         # self.tabifyDockWidget(widgetMainView,dockMainView)
 
         dockMainView.raise_()
@@ -327,8 +329,10 @@ class DateMainView(BasicFcView):
         # 设置数据键
         self.setDataKey('fcSymbol')
 
+        self.setEventType(EventType.EVENT_MAIN_COST)
+
         # 设置字体
-        self.setFont(BASIC_FONT)
+        # self.setFont(BASIC_FONT)
 
         # 设置允许排序
         self.setSorting(True)
@@ -358,8 +362,10 @@ class FeeTotalView(BasicFcView):
         # 设置数据键
         self.setDataKey('fcSymbol')
 
+        self.setEventType(EventType.EVENT_MAIN_FEE)
+
         # 设置字体
-        self.setFont(BASIC_FONT)
+        # self.setFont(BASIC_FONT)
 
         # 设置允许排序
         self.setSorting(True)
@@ -397,10 +403,10 @@ class AssertTotalView(BasicFcView):
         self.setDataKey('fcSymbol')
 
         # 设置监控事件类型
-        # self.setEventType(EVENT_TICK)
+        self.setEventType(EventType.EVENT_MAIN_ASSERT_DETAIL)
 
         # 设置字体
-        self.setFont(BASIC_FONT)
+        # self.setFont(BASIC_FONT)
 
         # 设置允许排序
         self.setSorting(True)
@@ -410,3 +416,35 @@ class AssertTotalView(BasicFcView):
 
         # 注册事件监听
         self.registerEvent()
+
+
+class TotalValuationView(BasicFcView):
+    """总估值表"""
+
+    def __init__(self, mainEngine, eventEngine, parent=None):
+        super(TotalValuationView, self).__init__(mainEngine, eventEngine, parent)
+
+        # 设置表头有序字典
+        d = OrderedDict()
+        d['date'] = {'chinese': '计算日', 'cellType': BasicCell}
+        d['total_assert_net_value'] = {'chinese': '总资产净值', 'cellType': BasicCell}
+        d['cash'] = {'chinese': '现金', 'cellType': BasicCell}
+        d['protocol_deposit'] = {'chinese': '协存', 'cellType': BasicCell}
+        d['money_fund'] = {'chinese': '货币基金', 'cellType': BasicCell}
+        d['assert_mgt'] = {'chinese': '资管', 'cellType': BasicCell}
+        d['liquid_assert_ratio'] = {'chinese': '流动资产比例', 'cellType': BasicCell}
+        d['today_total_revenue'] = {'chinese': '当日总收益', 'cellType': BasicCell}
+
+        self.setHeaderDict(d)
+        self.setDataKey('fcSymbol')
+
+        self.setEventType(EventType.EVENT_MAIN_VALUATION)
+
+        # self.setFont(BASIC_FONT)
+
+        self.setSorting(True)
+
+        self.initTable()
+
+        self.registerEvent()
+

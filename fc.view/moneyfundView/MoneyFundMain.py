@@ -27,16 +27,16 @@ class MoneyFundListView(BasicFcView):
         # 货基项目
         d['mf_amount'] = {'chinese': '金额', 'cellType': BasicCell}
         d['mf_revenue'] = {'chinese': '收益', 'cellType': BasicCell}
-        d['mf_subscribe_amount'] = {'chinese': '申购总额', 'cellType': BasicCell}
-        d['mf_redeem_amount'] = {'chinese': '赎回总额', 'cellType': BasicCell}
+        # d['mf_subscribe_amount'] = {'chinese': '申购总额', 'cellType': BasicCell}
+        # d['mf_redeem_amount'] = {'chinese': '赎回总额', 'cellType': BasicCell}
         # 货基项目 输入项
-        d['mf_subscribe_normal'] = {'chinese': '正常申购', 'cellType': BasicCell}
-        d['mf_subscribe_from_assert_mgt'] = {'chinese': '申购(资管)', 'cellType': BasicCell}
+        # d['mf_subscribe_normal'] = {'chinese': '正常申购', 'cellType': BasicCell}
+        # d['mf_subscribe_from_assert_mgt'] = {'chinese': '申购(资管)', 'cellType': BasicCell}
         d['mf_subscribe_from_cash'] = {'chinese': '申购(现金)', 'cellType': BasicCell}
-        d['mf_redeem_normal'] = {'chinese': '正常赎回', 'cellType': BasicCell}
-        d['mf_redeem_to_assert_mgt'] = {'chinese': '赎回(进资管)', 'cellType': BasicCell}
+        # d['mf_redeem_normal'] = {'chinese': '正常赎回', 'cellType': BasicCell}
+        # d['mf_redeem_to_assert_mgt'] = {'chinese': '赎回(进资管)', 'cellType': BasicCell}
         d['mf_redeem_to_cash'] = {'chinese': '赎回(进现金)', 'cellType': BasicCell}
-        d['mf_redeem_fee'] = {'chinese': '赎回(费用)', 'cellType': BasicCell}
+        # d['mf_redeem_fee'] = {'chinese': '赎回(费用)', 'cellType': BasicCell}
         d['mf_not_carry_forward_amount'] = {'chinese': '未结转收益', 'cellType': BasicCell}
         d['mf_carry_forward_amount'] = {'chinese': '结转金额', 'cellType': BasicCell}
 
@@ -50,7 +50,7 @@ class MoneyFundListView(BasicFcView):
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('货基明细')
-        self.setMinimumSize(800, 800)
+        self.setMinimumSize(1200, 600)
         self.setFont(BASIC_FONT)
         self.initTable()
         self.addMenuAction()

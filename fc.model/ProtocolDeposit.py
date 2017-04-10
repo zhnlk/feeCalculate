@@ -2,7 +2,7 @@
 import datetime
 import uuid
 
-from sqlalchemy import Column, engine
+from sqlalchemy import Column, engine, Boolean
 from sqlalchemy import Date
 from sqlalchemy import Float
 from sqlalchemy import ForeignKey
@@ -34,6 +34,10 @@ class ProtocolDeposit(BaseModel):
         init_db()
         self.uuid = uuid.uuid1().__str__()
         self.date = date
+        self.protocol_deposit_amount = 0.00
+        self.protocol_deposit_revenue = 0.00
+        self.cash_to_protocol_deposit = 0.00
+        self.protocol_deposit_to_cash = 0.00
         session.commit()
 
     # 表的名字:
@@ -49,37 +53,35 @@ class ProtocolDeposit(BaseModel):
 
     def save(self):
         """计算某日的协存汇总"""
+        # protocolDeposit = session.query(ProtocolDeposit).filter(ProtocolDeposit.date == self.date).one()
+        protocolDepositList = session.query(PdProjectList).filter(PdProjectList.date == self.date).all()
+        for p in protocolDepositList:
+            self.protocol_deposit_amount = self.protocol_deposit_amount + p.pd_amount
+            self.protocol_deposit_revenue = self.protocol_deposit_revenue + p.pd_interest
+            self.cash_to_protocol_deposit = self.cash_to_protocol_deposit + p.pd_cash_to_pd
+            self.protocol_deposit_to_cash = self.protocol_deposit_to_cash + p.pd_pd_to_cash
 
-        session.add(self)
+        # session.update(self)
         session.flush()
         session.commit()
         return self
 
-    def update(self):
-        """更新协存字段"""
-        try:
-            protocolDeposit = session.query(ProtocolDeposit).filter(ProtocolDeposit.date == self.date).one()
-            protocolDepositList = session.query(PdProjectList).filter(PdProjectList.date == self.date).all()
-            for p in protocolDepositList:
-                protocolDeposit.protocol_deposit_amount += p.pd_amount
-                protocolDeposit.protocol_deposit_revenue += p.pd_interest
-                protocolDeposit.cash_to_protocol_deposit += p.pd_cash_to_pd
-                protocolDeposit.protocol_deposit_to_cash += p.pd_pd_to_cash
-
-            session.flush()
-            session.commit()
-        except:
-            pass
+    @classmethod
+    def findByDate(self, date):
+        return session.query(ProtocolDeposit).filter(ProtocolDeposit.date == date).one()
 
 
 class PdProject(BaseModel):
     """构造器"""
 
-    def __init__(self, pd_project_name, pd_project_rate):
+    def __init__(self, pd_project_name, pd_project_rate, stage_rate, pd_stage_amount, pd_stage_rate):
         init_db()
         self.uuid = uuid.uuid1().__str__()
         self.pd_project_name = pd_project_name
         self.pd_project_rate = pd_project_rate
+        self.stage_rate = stage_rate
+        self.pd_stage_amount = pd_stage_amount
+        self.pd_stage_rate = pd_stage_rate
 
     __tablename__ = 'pd_pro_table'
 
@@ -87,6 +89,9 @@ class PdProject(BaseModel):
     """协存项目"""
     pd_project_name = Column(String)
     pd_project_rate = Column(Float)
+    stage_rate = Column(Boolean)
+    pd_stage_amount = Column(Float)
+    pd_stage_rate = Column(Float)
 
     @classmethod
     def findByUUID(self, uuid):
@@ -143,14 +148,17 @@ class PdProjectList(BaseModel):
     def listAll(self):
         return session.query(PdProjectList).all()
 
+    @classmethod
+    def listByDate(self, date):
+        return session.query(PdProjectList).filter(PdProjectList.date == date).all()
 
-    def getPdProjectName(self):
+    def getPdProjectInfo(self):
         # 获取协存项目名称
         pd_project = session.query(PdProject).filter(PdProject.uuid == self.pd_obj_uuid).one()
         if pd_project is not None:
-            return pd_project.pd_project_name
+            return pd_project.pd_project_name, pd_project.pd_project_rate
         else:
-            return '名称暂无'
+            return '名称暂无', '0.00'
 
     def save(self, uuid):
         today = self.date
@@ -171,7 +179,17 @@ class PdProjectList(BaseModel):
         finally:
             session.close()
 
-        rate = session.query(PdProject.pd_project_rate).filter(PdProject.uuid == uuid).one()
+        # rate = session.query(PdProject.pd_project_rate).filter(PdProject.uuid == uuid).one()
+        pd_proj = session.query(PdProject).filter(PdProject.uuid == uuid).one()
+        rate = pd_proj.pd_project_rate
+        stage_rate = pd_proj.stage_rate
+        pd_stage_amount = pd_proj.pd_stage_amount
+        pd_stage_rate = pd_proj.pd_stage_rate
+
+        if stage_rate:
+            if self.pd_amount > pd_stage_amount:
+                # 使用二级利率
+                rate = pd_stage_rate
 
         self.pd_principal = float(yesterday_pd_principal[0]) \
                             + float(self.pd_cash_to_pd) \
@@ -180,7 +198,7 @@ class PdProjectList(BaseModel):
                             - float(self.pd_pd_to_investor) \
                             + float(self.pd_interest_to_principal)
         self.pd_interest = float(self.pd_principal) \
-                           * float(rate[0]) \
+                           * float(rate) \
                            / 360
         self.pd_amount = float(yesterday_pd_amount[0]) \
                          + float(self.pd_cash_to_pd) \
@@ -205,10 +223,10 @@ class PdProjectList(BaseModel):
 
 if __name__ == '__main__':
     d = datetime.date.today()
-    protocolDeposit = ProtocolDeposit(datetime.date(d.year, d.month, d.day-1))
+    protocolDeposit = ProtocolDeposit(datetime.date(d.year, d.month, d.day - 1))
     # print(protocolDeposit)
     # protocolDeposit.save()
-    protocolDeposit.update(datetime.date(d.year, d.month, d.day-1))
+    protocolDeposit.update(datetime.date(d.year, d.month, d.day - 1))
 
     # INSERT
     # pd = ProtocolDeposit()

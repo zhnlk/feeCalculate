@@ -32,6 +32,8 @@ class CashListView(BasicFcView):
         d['money_fund_to_cash'] = {'chinese': '货基->现金', 'cellType': BasicCell}
         d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
         d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': BasicCell}
+        d['cash_revenue'] = {'chinese': '现金收入', 'cellType': BasicCell}
+        d['extract_fee'] = {'chinese': '提取费用', 'cellType': BasicCell}
 
         self.setEventType(EVENT_CASH)
 

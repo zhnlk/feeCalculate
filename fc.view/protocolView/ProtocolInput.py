@@ -119,7 +119,7 @@ class ProtocolInput(BasicFcView):
         pdProjectList.pd_obj = pdProject
         ret = pdProjectList.save(pd_uuid)
         protocolDeposit = ProtocolDeposit(datetime.date(d.year, d.month, d.day))
-        protocolDeposit.update()
+        protocolDeposit.save()
         if ret:
             print('insert success')
         else:

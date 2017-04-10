@@ -20,7 +20,9 @@ class ProtocolListView(BasicFcView):
         self.mainEngine = mainEngine
 
         d = OrderedDict()
-        d['pd_project_name'] = {'chinese':'协存项目名称','cellType':BasicCell}
+        d['pd_project_name'] = {'chinese': '协存项目名称', 'cellType': BasicCell}
+        d['pd_project_rate'] = {'chinese': '协存项目利率', 'cellType': BasicCell}
+
         d['date'] = {'chinese': '计算日', 'cellType': BasicCell}
         # d['protocol_deposit_amount'] = {'chinese': '协存总额', 'cellType': NumCell}
         # d['protocol_deposit_revenue'] = {'chinese': '协存收益', 'cellType': NumCell}
@@ -33,9 +35,9 @@ class ProtocolListView(BasicFcView):
         d['pd_interest'] = {'chinese': '协存利息', 'cellType': BasicCell}
         # 协存项目 输入项
         d['pd_interest_to_principal'] = {'chinese': '利息转结本金', 'cellType': BasicCell}
-        d['pd_investor_to_pd'] = {'chinese': '投资人资金->协存', 'cellType': BasicCell}
+        # d['pd_investor_to_pd'] = {'chinese': '投资人资金->协存', 'cellType': BasicCell}
         d['pd_cash_to_pd'] = {'chinese': '现金->协存', 'cellType': BasicCell}
-        d['pd_pd_to_investor'] = {'chinese': '协存->总付投资人', 'cellType': BasicCell}
+        # d['pd_pd_to_investor'] = {'chinese': '协存->总付投资人', 'cellType': BasicCell}
         d['pd_pd_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
 
         self.setHeaderDict(d)
@@ -48,7 +50,7 @@ class ProtocolListView(BasicFcView):
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('协存明细')
-        self.setMinimumSize(800, 800)
+        self.setMinimumSize(1200, 600)
         self.setFont(BASIC_FONT)
         self.initTable()
         self.addMenuAction()
@@ -64,18 +66,21 @@ class ProtocolListView(BasicFcView):
         for r in result2:
             # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
-                if header == 'pd_project_name':
-                    content = r.getPdProjectName()
+                name, rate = r.getPdProjectInfo()
+                if header is 'pd_project_name':
+                    content = name
+                elif header is 'pd_project_rate':
+                    content = rate
                 else:
                     content = r.__getattribute__(header)
 
-                if isinstance(content,float):
-                    content = float('%.2f'% content)
+                if isinstance(content, float):
+                    content = float('%.2f' % content)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
                 print(cell.text())
-                if self.font:
-                    cell.setFont(self.font)  # 如果设置了特殊字体，则进行单元格设置
+                # if self.font:
+                #     cell.setFont(self.font)  # 如果设置了特殊字体，则进行单元格设置
 
                 self.setItem(row, n, cell)
 
@@ -102,6 +107,7 @@ class ProtocolListView(BasicFcView):
         """显示"""
         super(ProtocolListView, self).show()
         self.refresh()
+
 
 if __name__ == '__main__':
     import sys

@@ -4,7 +4,7 @@ from datetime import datetime
 from Cash import Cash
 from EventEngine import *
 from MoneyFund import MfProjectList
-from ProtocolDeposit import PdProject, PdProjectList
+from ProtocolDeposit import PdProject, PdProjectList, ProtocolDeposit
 
 
 class MainEngine(object):
@@ -33,14 +33,27 @@ class MainEngine(object):
         """查询现金明细"""
         detail = Cash.listAll()
         # 计算每日的现金明细
-        # for d in detail:
-        #     d.total_cash = d.getTodayTotalCash(d.date)
-        #     d.save()
+        for d in detail:
+            d.total_cash = d.getTodayTotalCash(d.date)
+            # 计算协存与货基的相关数据
+            d.getRelatedData()
+            d.save()
         print('get Cash Detail')
         return detail
 
-    def getProtocolDeposit(self):
+    def getProtocolDeposit(self, date):
         """查询协存汇总"""
+        pd = ProtocolDeposit(date)
+
+        # protocolDepositList = PdProjectList.listByDate(date)
+        # for p in protocolDepositList:
+        #     pd.protocol_deposit_amount += p.pd_amount
+        #     pd.protocol_deposit_revenue += p.pd_interest
+        #     pd.cash_to_protocol_deposit += p.pd_cash_to_pd
+        #     pd.protocol_deposit_to_cash += p.pd_pd_to_cash
+        pd.save()
+
+        return pd
 
     def getProtocolDetail(self):
         """查询协存"""
@@ -53,7 +66,8 @@ class MainEngine(object):
         """查询协存列表明细"""
         detail = PdProjectList.listAll()
         for d in detail:
-            print('getProtocolListDetail' + d.uuid)
+            self.getProtocolDeposit(d.date)
+            print('getProtocolListDetail.........' + d.uuid)
         return detail
 
     def getMoneyFundDetail(self):
