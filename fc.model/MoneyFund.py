@@ -2,7 +2,7 @@
 import datetime
 import uuid
 
-from sqlalchemy import Column, engine
+from sqlalchemy import Column, engine, func
 from sqlalchemy import Date
 from sqlalchemy import Float
 from sqlalchemy import ForeignKey
@@ -18,6 +18,7 @@ BaseModel = declarative_base()
 
 engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
 session = Session(bind=engine)
+
 
 def init_db():
     BaseModel.metadata.create_all(engine)
@@ -59,6 +60,12 @@ class MoneyFund(BaseModel):
         except:
             pass
 
+    @classmethod
+    def findByDate(self, date):
+        try:
+            return session.query(MoneyFund).filter(MoneyFund.date == date).one()
+        except:
+            return None
 
 
 class MfProject(BaseModel):
@@ -86,22 +93,20 @@ class MfProject(BaseModel):
 class MfProjectList(BaseModel):
     """每日的记录"""
 
-    def __init__(self, date, mf_subscribe_normal, mf_subscribe_from_assert_mgt, mf_subscribe_from_cash,
-                 mf_redeem_normal, mf_redeem_to_assert_mgt, mf_redeem_to_cash,
-                 mf_carry_forward_amount, mf_not_carry_forward_amount, mf_redeem_fee):
+    def __init__(self, date, mf_subscribe_from_cash, mf_redeem_to_cash, mf_carry_forward_amount, mf_not_carry_forward_amount):
         init_db()
         self.uuid = uuid.uuid1().__str__()
 
         self.date = date
-        self.mf_subscribe_normal = mf_subscribe_normal
-        self.mf_subscribe_from_assert_mgt = mf_subscribe_from_assert_mgt
+        # self.mf_subscribe_normal = mf_subscribe_normal
+        # self.mf_subscribe_from_assert_mgt = mf_subscribe_from_assert_mgt
         self.mf_subscribe_from_cash = mf_subscribe_from_cash
-        self.mf_redeem_normal = mf_redeem_normal
-        self.mf_redeem_to_assert_mgt = mf_redeem_to_assert_mgt
+        # self.mf_redeem_normal = mf_redeem_normal
+        # self.mf_redeem_to_assert_mgt = mf_redeem_to_assert_mgt
         self.mf_redeem_to_cash = mf_redeem_to_cash
         self.mf_carry_forward_amount = mf_carry_forward_amount
         self.mf_not_carry_forward_amount = mf_not_carry_forward_amount
-        self.mf_redeem_fee = mf_redeem_fee
+        # self.mf_redeem_fee = mf_redeem_fee
 
     __tablename__ = 'mf_pro_list_table'
 
@@ -114,15 +119,15 @@ class MfProjectList(BaseModel):
     mf_subscribe_amount = Column(Float, nullable=True)
 
     mf_redeem_amount = Column(Float, nullable=True)
-    mf_subscribe_normal = Column(Float, nullable=True)
-    mf_subscribe_from_assert_mgt = Column(Float, nullable=True)
+    # mf_subscribe_normal = Column(Float, nullable=True)
+    # mf_subscribe_from_assert_mgt = Column(Float, nullable=True)
     mf_subscribe_from_cash = Column(Float, nullable=True)
-    mf_redeem_normal = Column(Float, nullable=True)
-    mf_redeem_to_assert_mgt = Column(Float, nullable=True)
+    # mf_redeem_normal = Column(Float, nullable=True)
+    # mf_redeem_to_assert_mgt = Column(Float, nullable=True)
     mf_redeem_to_cash = Column(Float, nullable=True)
     mf_carry_forward_amount = Column(Float, nullable=True)
     mf_not_carry_forward_amount = Column(Float, nullable=True)
-    mf_redeem_fee = Column(Float, nullable=True)
+    # mf_redeem_fee = Column(Float, nullable=True)
 
     mf_obj_uuid = Column(ForeignKey('mf_pro_table.uuid'))
     mf_obj = relationship(MfProject, backref=backref('mf_pro_list_table',
@@ -132,13 +137,26 @@ class MfProjectList(BaseModel):
     def listAll(self):
         return session.query(MfProjectList).all()
 
-    def getMfProjectName(self):
+    @classmethod
+    def listAllForSummary(self, date):
+
+        res = session.query(MfProjectList.mf_obj_uuid,
+                            func.sum(MfProjectList.mf_amount),
+                            func.sum(MfProjectList.mf_revenue),
+                            func.sum(MfProjectList.mf_subscribe_from_cash),
+                            func.sum(MfProjectList.mf_redeem_to_cash)) \
+            .filter(MfProjectList.date == date) \
+            .group_by(MfProjectList.mf_obj_uuid).all()
+
+        return res
+
+    @classmethod
+    def getMfProjectName(self, mf_obj_uuid):
         # 获取货基项目名称
-        print(self.mf_obj_uuid)
-        mf_project = session.query(MfProject).filter(MfProject.uuid == self.mf_obj_uuid).one()
-        print(mf_project)
+        mf_project = session.query(MfProject).filter(MfProject.uuid == mf_obj_uuid).one()
+        # print(mf_project)
         if mf_project is not None:
-            print(mf_project.mf_project_name)
+            # print(mf_project.mf_project_name)
             return mf_project.mf_project_name
         else:
             return '名称暂无'
@@ -168,20 +186,14 @@ class MfProjectList(BaseModel):
                           - float(yesterday_ncfa[0]) \
                           + float(self.mf_carry_forward_amount)
         # 申购总额
-        self.mf_subscribe_amount = float(self.mf_subscribe_normal) \
-                                   + float(self.mf_subscribe_from_assert_mgt) \
-                                   + float(self.mf_subscribe_from_cash)
+        self.mf_subscribe_amount = float(self.mf_subscribe_from_cash)
         # 赎回总额
-        self.mf_redeem_amount = float(self.mf_redeem_normal) \
-                                + float(self.mf_redeem_to_assert_mgt) \
-                                + float(self.mf_redeem_to_cash) \
-                                + float(self.mf_redeem_fee)
+        self.mf_redeem_amount = float(self.mf_redeem_to_cash) \
         # 金额
         self.mf_amount = float(yesterday_mf_amount[0]) \
                          + float(self.mf_revenue) \
                          + float(self.mf_subscribe_amount) \
                          - float(self.mf_redeem_amount)
-
 
         self.mf_obj_uuid = uuid
         session.add(self)
@@ -191,14 +203,18 @@ class MfProjectList(BaseModel):
 
 
 if __name__ == '__main__':
-
-
+    init_db()
     # INSERT
-    mf_project_name = '广发基金'
-    mfProject = MfProject(mf_project_name)
-    print(mfProject.save())
+    # mf_project_name = '广发基金'
+    # mfProject = MfProject(mf_project_name)
+    # print(mfProject.save())
 
     # QUERY
+    # date = datetime.date(2017,3,28)
+    # res = MfProjectList.listAllForSummary(date)
+    # for r in res:
+    #     print(r[0], r[1], r[2], r[3], r[4])
+
 
     # DELETE
     # 731055ac-123e-11e7-8cdf-a45e60d89519

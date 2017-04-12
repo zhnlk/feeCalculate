@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import re
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QComboBox
@@ -14,6 +15,7 @@ from Cash import Cash
 from MainEngine import MainEngine
 from MoneyFund import MoneyFund, MfProjectList, MfProject
 from ProtocolDeposit import ProtocolDeposit
+from Valuation import Valuation
 
 
 class MoneyFundInput(BasicFcView):
@@ -51,25 +53,19 @@ class MoneyFundInput(BasicFcView):
         self.mf_ComboBox = QComboBox()
 
         # 设置组件
-        mf_subscribe_normal_Label = QLabel("正常申购")
-        mf_subscribe_from_assert_mgt_Label = QLabel("申购(现金)")
         mf_subscribe_from_cash_Label = QLabel("申购(现金)")
-        mf_redeem_normal_Label = QLabel("正常赎回")
-        mf_redeem_to_assert_mgt_Label = QLabel("赎回(资管)")
         mf_redeem_to_cash_Label = QLabel("赎回(现金)")
-        mf_redeem_fee_Label = QLabel("赎回(费用)")
         mf_not_carry_forward_revenue_Label = QLabel("未结转收益")
         mf_carry_forward_revenue_Label = QLabel("结转金额")
 
-        self.mf_subscribe_normal_Edit = QLineEdit("0.00")
-        self.mf_subscribe_from_assert_mgt_Edit = QLineEdit("0.00")
+        date_Label = QLabel("时间")
+
         self.mf_subscribe_from_cash_Edit = QLineEdit("0.00")
-        self.mf_redeem_normal_Edit = QLineEdit("0.00")
-        self.mf_redeem_to_assert_mgt_Edit = QLineEdit("0.00")
         self.mf_redeem_to_cash_Edit = QLineEdit("0.00")
-        self.mf_redeem_fee_Edit = QLineEdit("0.00")
         self.mf_not_carry_forward_revenue_Edit = QLineEdit("0.00")
         self.mf_carry_forward_revenue_Edit = QLineEdit("0.00")
+
+        self.date_Edit = QLineEdit("2017-01-01")
 
         okButton = QPushButton("确定")
         cancelButton = QPushButton("取消")
@@ -84,27 +80,20 @@ class MoneyFundInput(BasicFcView):
 
         grid = QGridLayout()
         grid.addWidget(mf_ComboBox_Label,0,0)
-        grid.addWidget(mf_subscribe_normal_Label, 1, 0)
-        grid.addWidget(mf_subscribe_from_assert_mgt_Label, 2, 0)
-        grid.addWidget(mf_subscribe_from_cash_Label, 3, 0)
-        grid.addWidget(mf_redeem_normal_Label, 4, 0)
-        grid.addWidget(mf_redeem_to_assert_mgt_Label, 5, 0)
-        grid.addWidget(mf_redeem_to_cash_Label, 6, 0)
-        grid.addWidget(mf_redeem_fee_Label, 7, 0)
-        grid.addWidget(mf_not_carry_forward_revenue_Label, 8, 0)
-        grid.addWidget(mf_carry_forward_revenue_Label, 9, 0)
+        grid.addWidget(mf_subscribe_from_cash_Label, 1, 0)
+        grid.addWidget(mf_redeem_to_cash_Label, 2, 0)
+        grid.addWidget(mf_not_carry_forward_revenue_Label, 3, 0)
+        grid.addWidget(mf_carry_forward_revenue_Label, 4, 0)
+        grid.addWidget(date_Label,5,0)
 
         grid.addWidget(self.mf_ComboBox,0,1)
-        grid.addWidget(self.mf_subscribe_normal_Edit, 1, 1)
-        grid.addWidget(self.mf_subscribe_from_assert_mgt_Edit, 2, 1)
-        grid.addWidget(self.mf_subscribe_from_cash_Edit, 3, 1)
-        grid.addWidget(self.mf_redeem_normal_Edit, 4, 1)
-        grid.addWidget(self.mf_redeem_to_assert_mgt_Edit, 5, 1)
-        grid.addWidget(self.mf_redeem_to_cash_Edit, 6, 1)
-        grid.addWidget(self.mf_redeem_fee_Edit, 7, 1)
-        grid.addWidget(self.mf_not_carry_forward_revenue_Edit, 8, 1)
-        grid.addWidget(self.mf_carry_forward_revenue_Edit, 9, 1)
-        grid.addLayout(buttonHBox, 10, 0, 1, 2)
+        grid.addWidget(self.mf_subscribe_from_cash_Edit, 1, 1)
+        grid.addWidget(self.mf_redeem_to_cash_Edit, 2, 1)
+        grid.addWidget(self.mf_not_carry_forward_revenue_Edit, 3, 1)
+        grid.addWidget(self.mf_carry_forward_revenue_Edit, 4, 1)
+        grid.addWidget(self.date_Edit,5,1)
+
+        grid.addLayout(buttonHBox, 6, 0, 1, 2)
 
         self.setLayout(grid)
 
@@ -113,36 +102,33 @@ class MoneyFundInput(BasicFcView):
         """增加数据"""
         mf_project_name_index = str(self.mf_ComboBox.currentIndex())
 
-        mf_subscribe_normal = str(self.mf_subscribe_normal_Edit.text())
-        mf_subscribe_from_assert_mgt = str(self.mf_subscribe_from_assert_mgt_Edit.text())
         mf_subscribe_from_cash = str(self.mf_subscribe_from_cash_Edit.text())
-        mf_redeem_normal = str(self.mf_redeem_normal_Edit.text())
-        mf_redeem_to_assert_mgt = str(self.mf_redeem_to_assert_mgt_Edit.text())
         mf_redeem_to_cash = str(self.mf_redeem_to_cash_Edit.text())
-        mf_redeem_fee = str(self.mf_redeem_fee_Edit.text())
         mf_not_carry_forward_revenue = str(self.mf_not_carry_forward_revenue_Edit.text())
         mf_carry_forward_revenue = str(self.mf_carry_forward_revenue_Edit.text())
 
         mf_uuid = self.mf_ComboBox_list[int(mf_project_name_index)]
         """向数据库增加数据"""
-        print(mf_subscribe_normal)
-        print(mf_subscribe_from_assert_mgt)
-        print(mf_subscribe_from_cash)
-        print(mf_redeem_normal)
-        print(mf_redeem_to_assert_mgt)
-        print(mf_redeem_to_cash)
-        print(mf_redeem_fee)
-        print(mf_not_carry_forward_revenue)
-        print(mf_carry_forward_revenue)
+
+        date_str = str(self.date_Edit.text()).split('-')
         d = datetime.date.today()
-        mfProjectList = MfProjectList(d, mf_subscribe_normal, mf_subscribe_from_assert_mgt,mf_subscribe_from_cash,
-                      mf_redeem_normal,mf_redeem_to_assert_mgt,mf_redeem_to_cash,
-                      mf_redeem_fee,mf_not_carry_forward_revenue,mf_carry_forward_revenue)
+        if date_str is None:
+            date = datetime.date(d.year, d.month, d.day)
+        else:
+            date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[0])),
+                                 int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
+                                 int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
+
+        mfProjectList = MfProjectList(date,mf_subscribe_from_cash,mf_redeem_to_cash,mf_not_carry_forward_revenue,mf_carry_forward_revenue)
 
         mfProjectList.save(mf_uuid)
 
-        moneyFund = MoneyFund(datetime.date(d.year, d.month, d.day))
+        moneyFund = MoneyFund(date)
         moneyFund.update()
+
+        v = Valuation(date)
+        v.save()
+
 
     def prepareData(self):
 

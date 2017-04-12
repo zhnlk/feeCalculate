@@ -47,7 +47,7 @@ class CashListView(BasicFcView):
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('现金明细')
-        self.setMinimumSize(800, 600)
+        self.setMinimumSize(1300, 600)
 
         # 将信号连接到refresh函数
         self.signal.connect(self.refresh)
@@ -76,8 +76,8 @@ class CashListView(BasicFcView):
                 cell = cellType(content)
                 # print(cell)
 
-                # if self.font:
-                #     cell.setFont(self.font)  # 如果设置了特殊字体，则进行单元格设置
+                if self.font:
+                    cell.setFont(self.font)  # 如果设置了特殊字体，则进行单元格设置
 
                 self.setItem(row, n, cell)
 

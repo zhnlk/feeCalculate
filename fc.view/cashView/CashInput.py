@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import re
 
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtWidgets import QGridLayout
@@ -13,6 +14,7 @@ from Cash import Cash
 from EventEngine import Event
 from EventType import EVENT_CASH
 from MainEngine import MainEngine
+from Valuation import Valuation
 
 
 class CashInput(BasicFcView):
@@ -47,10 +49,14 @@ class CashInput(BasicFcView):
         investor_to_cash_Label = QLabel("投资人->现金")
         cash_revenue_Label = QLabel("现金收入")
 
+        date_Label = QLabel("日期")
+
         self.cash_to_investor_Edit = QLineEdit("0.00")
         self.extract_fee_Edit = QLineEdit("0.00")
         self.invest_to_cash_Edit = QLineEdit("0.00")
         self.cash_revenue_Edit = QLineEdit("0.00")
+        self.date_Edit = QLineEdit("2017-01-01")
+
         okButton = QPushButton("确定")
         cancelButton = QPushButton("取消")
         okButton.clicked.connect(self.addData)
@@ -67,12 +73,14 @@ class CashInput(BasicFcView):
         grid.addWidget(extract_fee_Label, 1, 0)
         grid.addWidget(investor_to_cash_Label, 2, 0)
         grid.addWidget(cash_revenue_Label, 3, 0)
+        grid.addWidget(date_Label, 4, 0)
 
         grid.addWidget(self.cash_to_investor_Edit, 0, 1)
         grid.addWidget(self.extract_fee_Edit, 1, 1)
         grid.addWidget(self.invest_to_cash_Edit, 2, 1)
         grid.addWidget(self.cash_revenue_Edit, 3, 1)
-        grid.addLayout(buttonHBox, 5, 0, 1, 2)
+        grid.addWidget(self.date_Edit, 4, 1)
+        grid.addLayout(buttonHBox, 6, 0, 1, 2)
 
         self.setLayout(grid)
 
@@ -95,16 +103,28 @@ class CashInput(BasicFcView):
         if cash_revenue == '':
             cash_revenue = '0.00'
 
+        date_str = str(self.date_Edit.text()).split('-')
+        d = datetime.date.today()
+        if date_str is None:
+            date = datetime.date(d.year, d.month, d.day)
+        else:
+            date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[0])),
+                                 int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
+                                 int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
+
         """向数据库增加数据"""
         print(cash_to_investor)
         print(extract_fee)
         print(invest_to_cash)
         print(cash_revenue)
 
-        d = datetime.date.today()
-        cash = Cash(datetime.date(d.year, d.month, d.day), cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
+        cash = Cash(date, cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
+
         print(cash.__dict__)
         cash.save()
+
+        v = Valuation(date)
+        v.save()
         # cash.total_cash = cash.getTodayTotalCash(d)
         # cash.save()
 

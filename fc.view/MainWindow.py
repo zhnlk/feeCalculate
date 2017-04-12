@@ -7,7 +7,7 @@ from asyncio import Event
 import psutil as psutil
 from PyQt5.QtCore import QSettings
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QAction
+from PyQt5.QtWidgets import QAction, QApplication
 from PyQt5.QtWidgets import QDockWidget
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QMainWindow
@@ -15,14 +15,14 @@ from PyQt5.QtWidgets import QMessageBox
 
 import EventType
 from BasicWidget import BasicCell, BasicFcView, BASIC_FONT
-from assertmgtView.AssertMgtMain import AssertMgtListView
+from MainEngine import MainEngine
 from cashView.CashInput import CashInput
 from cashView.CashMain import CashListView
 from miscView.AboutMain import AboutWidget
 from miscView.ErrorMain import ErrorWidget
 from moneyfundView.MfCateInput import MfCateInput
 from moneyfundView.MoneyFundInput import MoneyFundInput
-from moneyfundView.MoneyFundMain import MoneyFundListView
+from moneyfundView.MoneyFundMain import MoneyFundMain
 from protocolView.PdCateInput import PdCateInput
 from protocolView.ProtocolInput import ProtocolInput
 from protocolView.ProtocolMain import ProtocolListView
@@ -58,13 +58,13 @@ class MainWindow(QMainWindow, BasicFcView):
         """总估值与费用"""
 
         # 增加主界面显示
-        widgetMainView, dockMainView = self.createDock(DateMainView, '今日资金成本', QtCore.Qt.LeftDockWidgetArea)
-        widgetMainView, dockMainView = self.createDock(FeeTotalView, '费用详情统计', QtCore.Qt.RightDockWidgetArea)
-        widgetMainView, dockMainView = self.createDock(AssertTotalView, '存量资产详情', QtCore.Qt.BottomDockWidgetArea)
-        widgetMainView, dockMainView = self.createDock(TotalValuationView, '总估值表', QtCore.Qt.BottomDockWidgetArea)
-        # self.tabifyDockWidget(widgetMainView,dockMainView)
+        widgetMainView1, dockMainView1 = self.createDock(DateMainView, '今日资金成本', QtCore.Qt.LeftDockWidgetArea)
+        widgetMainView2, dockMainView2 = self.createDock(FeeTotalView, '费用详情统计', QtCore.Qt.RightDockWidgetArea)
+        widgetMainView3, dockMainView3 = self.createDock(AssertTotalView, '存量资产详情', QtCore.Qt.BottomDockWidgetArea)
+        widgetMainView4, dockMainView4 = self.createDock(TotalValuationView, '总估值表', QtCore.Qt.BottomDockWidgetArea)
+        self.tabifyDockWidget(dockMainView3, dockMainView4)
 
-        dockMainView.raise_()
+        # dockMainView.raise_()
 
     # ----------------------------------------------------------------------
     def initTopMenu(self):
@@ -168,7 +168,7 @@ class MainWindow(QMainWindow, BasicFcView):
         try:
             self.widgetDict['openMoneyFundListDetail'].show()
         except KeyError:
-            self.widgetDict['openMoneyFundListDetail'] = MoneyFundListView(self.mainEngine)
+            self.widgetDict['openMoneyFundListDetail'] = MoneyFundMain(self.mainEngine)
             self.widgetDict['openMoneyFundListDetail'].show()
 
     def openAssertMgtListDetail(self):
@@ -293,12 +293,6 @@ class MainWindow(QMainWindow, BasicFcView):
     def loadWindowSettings(self, settingName):
         """载入窗口设置"""
         settings = QSettings('vn.trader', settingName)
-        # 这里由于PyQt4的版本不同，settings.value('state')调用返回的结果可能是：
-        # 1. None（初次调用，注册表里无相应记录，因此为空）
-        # 2. QByteArray（比较新的PyQt4）
-        # 3. QVariant（以下代码正确执行所需的返回结果）
-        # 所以为了兼容考虑，这里加了一个try...except，如果是1、2的情况就pass
-        # 可能导致主界面的设置无法载入（每次退出时的保存其实是成功了）
         try:
             self.restoreState(settings.value('state').toByteArray())
             self.restoreGeometry(settings.value('geometry').toByteArray())
@@ -337,11 +331,37 @@ class DateMainView(BasicFcView):
         # 设置允许排序
         self.setSorting(True)
 
-        # 初始化表格
-        self.initTable()
+        # 界面初始化
+        self.initUI()
 
         # 注册事件监听
         self.registerEvent()
+
+    def initUI(self):
+        # 初始化表格
+        self.initTable()
+        self.refresh()
+
+    def refresh(self):
+        self.initData()
+
+    def initData(self):
+        """初始化数据"""
+        result = self.mainEngine.getMainCostData()
+        self.setRowCount(1)
+        row = 0
+        self.setItem(0,0,BasicCell(result[0]))
+        self.setItem(0,1,BasicCell(result[1]))
+        self.setItem(0,2,BasicCell(result[2]))
+        # for r in result:
+        #     # 按照定义的表头，进行数据填充
+        #     for n, header in enumerate(self.headerList):
+        #         content = r[n]
+        #         cellType = self.headerDict[header]['cellType']
+        #         cell = cellType(content)
+        #         print(cell.text())
+        #         self.setItem(row, n, cell)
+        #     row = row + 1
 
 
 class FeeTotalView(BasicFcView):
@@ -371,10 +391,36 @@ class FeeTotalView(BasicFcView):
         self.setSorting(True)
 
         # 初始化表格
-        self.initTable()
+        self.initUI()
 
         # 注册事件监听
         self.registerEvent()
+
+    def initUI(self):
+        # 初始化表格
+        self.initTable()
+        self.refresh()
+
+    def refresh(self):
+        self.initData()
+        # pass
+
+    def initData(self):
+        """初始化数据"""
+        rate, duration = self.mainEngine.getFeeConstrant()
+        self.setRowCount(3)
+
+        self.setItem(0, 0, BasicCell('费率'))
+        self.setItem(1, 0, BasicCell('计算天数'))
+        self.setItem(2, 0, BasicCell('今日费用'))
+        c = 1
+        for r in rate:
+            self.setItem(0, c, BasicCell(r))
+            c = c + 1
+        c = 1
+        for d in duration:
+            self.setItem(1, c, BasicCell(d))
+            c = c + 1
 
 
 class AssertTotalView(BasicFcView):
@@ -434,6 +480,12 @@ class TotalValuationView(BasicFcView):
         d['assert_mgt'] = {'chinese': '资管', 'cellType': BasicCell}
         d['liquid_assert_ratio'] = {'chinese': '流动资产比例', 'cellType': BasicCell}
         d['today_total_revenue'] = {'chinese': '当日总收益', 'cellType': BasicCell}
+        d['fee_1'] = {'chinese': '费用1', 'cellType': BasicCell}
+        d['fee_2'] = {'chinese': '费用2', 'cellType': BasicCell}
+        d['fee_3'] = {'chinese': '费用3', 'cellType': BasicCell}
+        d['fee_4'] = {'chinese': '费用4', 'cellType': BasicCell}
+        d['today_product_revenue'] = {'chinese': '当日产品收益', 'cellType': BasicCell}
+        d['fee_accual'] = {'chinese': '费用计提', 'cellType': BasicCell}
 
         self.setHeaderDict(d)
         self.setDataKey('fcSymbol')
@@ -444,7 +496,49 @@ class TotalValuationView(BasicFcView):
 
         self.setSorting(True)
 
-        self.initTable()
+        self.initUI()
 
         self.registerEvent()
 
+    def initUI(self):
+        # 初始化表格
+        self.initTable()
+        self.refresh()
+        self.addPopAction()
+
+    def refresh(self):
+        self.initData()
+        # pass
+    def addPopAction(self):
+        """增加右键菜单内容"""
+        refreshAction = QAction('刷新', self)
+        refreshAction.triggered.connect(self.refresh)
+
+        self.menu.addAction(refreshAction)
+
+    def initData(self):
+        """初始化数据"""
+        result = self.mainEngine.getMainTotalValuationData()
+        self.setRowCount(len(result))
+        row = 0
+        for r in result:
+            # 按照定义的表头，进行数据填充
+            for n, header in enumerate(self.headerList):
+
+                content = r.__getattribute__(header)
+                cellType = self.headerDict[header]['cellType']
+                cell = cellType(content)
+                self.setItem(row, n, cell)
+            row = row + 1
+
+
+if __name__ == '__main__':
+    import sys
+
+    app = QApplication(sys.argv)
+    mainEngine = MainEngine()
+    mflv = TotalValuationView(mainEngine, mainEngine.eventEngine)
+    # mainfdv = MoneyFundSummaryView(mainEngine)
+    mflv.showMaximized()
+    # mainfdv.showMaximized()
+    sys.exit(app.exec_())

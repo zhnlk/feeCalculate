@@ -11,6 +11,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm.exc import NoResultFound
 
 from fcConstant import SQLALCHEMY_DATABASE_URI
 
@@ -68,7 +69,10 @@ class ProtocolDeposit(BaseModel):
 
     @classmethod
     def findByDate(self, date):
-        return session.query(ProtocolDeposit).filter(ProtocolDeposit.date == date).one()
+        try:
+            return session.query(ProtocolDeposit).filter(ProtocolDeposit.date == date).one()
+        except NoResultFound:
+            return None
 
 
 class PdProject(BaseModel):
@@ -88,10 +92,10 @@ class PdProject(BaseModel):
     uuid = Column(String(32), primary_key=True)
     """协存项目"""
     pd_project_name = Column(String)
-    pd_project_rate = Column(Float)
-    stage_rate = Column(Boolean)
-    pd_stage_amount = Column(Float)
-    pd_stage_rate = Column(Float)
+    pd_project_rate = Column(Float, default=0.00)
+    stage_rate = Column(Boolean, default=False)
+    pd_stage_amount = Column(Float, default=0.00)
+    pd_stage_rate = Column(Float, default=0.00)
 
     @classmethod
     def findByUUID(self, uuid):
@@ -115,14 +119,13 @@ class PdProject(BaseModel):
 class PdProjectList(BaseModel):
     """构造器"""
 
-    def __init__(self, date, interest_to_principal, investor_to_pd, cash_to_pd, pd_to_investor, pd_to_cash):
+    def __init__(self, date, interest_to_principal, cash_to_pd, pd_to_cash):
         init_db()
         self.date = date
         self.uuid = uuid.uuid1().__str__()
+        self.pd_amount = 0.00
         self.pd_interest_to_principal = interest_to_principal
-        self.pd_investor_to_pd = investor_to_pd
         self.pd_cash_to_pd = cash_to_pd
-        self.pd_pd_to_investor = pd_to_investor
         self.pd_pd_to_cash = pd_to_cash
         print('set_params success')
 
@@ -168,48 +171,37 @@ class PdProjectList(BaseModel):
 
         try:
             yesterday_pd_amount = session.query(PdProjectList.pd_amount).filter(PdProjectList.date == yesterday.strftime('%Y-%m-%d')).one()
-            # session.commit()
             yesterday_pd_principal = session.query(PdProjectList.pd_principal).filter(PdProjectList.date == yesterday.strftime('%Y-%m-%d')).one()
-            # session.commit()
         except:
-            # print('++++++++++'+e)
             session.rollback()
             yesterday_pd_amount = (0.00,)
             yesterday_pd_principal = (0.00,)
         finally:
             session.close()
+        pd_obj = session.query(PdProject).filter(PdProject.uuid == uuid).one()
+        rate = pd_obj.pd_project_rate
 
-        # rate = session.query(PdProject.pd_project_rate).filter(PdProject.uuid == uuid).one()
-        pd_proj = session.query(PdProject).filter(PdProject.uuid == uuid).one()
-        rate = pd_proj.pd_project_rate
-        stage_rate = pd_proj.stage_rate
-        pd_stage_amount = pd_proj.pd_stage_amount
-        pd_stage_rate = pd_proj.pd_stage_rate
-
-        if stage_rate:
-            if self.pd_amount > pd_stage_amount:
-                # 使用二级利率
-                rate = pd_stage_rate
+        if pd_obj.stage_rate:
+            if self.pd_amount > pd_obj.pd_stage_amount:
+                rate = pd_obj.pd_stage_rate
 
         self.pd_principal = float(yesterday_pd_principal[0]) \
                             + float(self.pd_cash_to_pd) \
-                            + float(self.pd_investor_to_pd) \
                             - float(self.pd_pd_to_cash) \
-                            - float(self.pd_pd_to_investor) \
                             + float(self.pd_interest_to_principal)
         self.pd_interest = float(self.pd_principal) \
                            * float(rate) \
                            / 360
         self.pd_amount = float(yesterday_pd_amount[0]) \
                          + float(self.pd_cash_to_pd) \
-                         + float(self.pd_investor_to_pd) \
                          - float(self.pd_pd_to_cash) \
-                         - float(self.pd_pd_to_investor) \
                          + float(self.pd_interest)
         self.pd_obj_uuid = uuid
+        print(session.__dict__)
         session.add(self)
         session.flush()
         session.commit()
+
         return self
 
 
@@ -222,11 +214,12 @@ class PdProjectList(BaseModel):
 # PdProject.artist = relationship(ProtocolDeposit, backref=backref('pd_pro_table', cascade='all'))
 
 if __name__ == '__main__':
-    d = datetime.date.today()
-    protocolDeposit = ProtocolDeposit(datetime.date(d.year, d.month, d.day - 1))
+    init_db()
+    # d = datetime.date.today()
+    # protocolDeposit = ProtocolDeposit(datetime.date(d.year, d.month, d.day - 1))
     # print(protocolDeposit)
     # protocolDeposit.save()
-    protocolDeposit.update(datetime.date(d.year, d.month, d.day - 1))
+    # protocolDeposit.update(datetime.date(d.year, d.month, d.day - 1))
 
     # INSERT
     # pd = ProtocolDeposit()

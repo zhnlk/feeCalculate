@@ -53,8 +53,8 @@ class PdCateInput(BasicFcView):
 
         self.pd_project_name_Edit = QLineEdit('盛京银行协存')
         self.pd_project_rate_Edit = QLineEdit("0.03")
-        self.pd_stage_amount_Edit = QLineEdit("")
-        self.pd_stage_rate_Edit = QLineEdit("")
+        self.pd_stage_amount_Edit = QLineEdit("0")
+        self.pd_stage_rate_Edit = QLineEdit("0")
 
         self.pd_stage_Edit = QCheckBox("")
 
@@ -94,7 +94,11 @@ class PdCateInput(BasicFcView):
         pd_stage_rate = str(self.pd_stage_rate_Edit.text())
 
         """向数据库增加数据"""
-        pdProject = PdProject(pd_project_name, pd_project_rate, stage_rate, pd_stage_amount, pd_stage_rate)
+        pdProject = PdProject(pd_project_name,
+                              float(pd_project_rate),
+                              stage_rate,
+                              float(pd_stage_amount),
+                              float(pd_stage_rate))
         pdProject.save()
 
 

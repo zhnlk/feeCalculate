@@ -24,7 +24,8 @@ def resource_path(relative):
 path = os.path.dirname(__file__)
 print('path:..' + path)
 ICON_FILENAME = resource_path(os.path.join(path, ICON_FILENAME))
-SQLALCHEMY_DATABASE_URI = "sqlite:///" + resource_path(os.path.join(path, 'data-test.db'))
+# SQLALCHEMY_DATABASE_URI = "sqlite:///" + resource_path(os.path.join(path, 'data-test.db'))
+SQLALCHEMY_DATABASE_URI = "sqlite:///" + resource_path(os.path.join(path, 'data-excel.db'))
 
 
 def disp():

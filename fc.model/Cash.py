@@ -4,7 +4,7 @@ import uuid
 from collections import OrderedDict
 
 import datetime
-from sqlalchemy import Column, engine, func
+from sqlalchemy import Column, engine, func, update
 from sqlalchemy import Date
 from sqlalchemy import Float
 from sqlalchemy import String
@@ -69,16 +69,32 @@ class Cash(BaseModel):
     extract_fee = Column(Float, default=0.00)
 
     def save(self):
-        # session.add(self)
-        # self.total_cash = self.getTodayTotalCash(self.date)
-        session.merge(self)
+        row = session.query(func.count(Cash.uuid)).filter(Cash.date == self.date).scalar()
+        print(row)
+        if row >= 1:
+            # session.query(Cash).filter(Cash.date == self.date).update()
+            self.update()
+            session.commit()
+        else:
+            session.add(self)
         session.flush()
         session.commit()
+
+    def update(self):
+        session.commit()
+        return self
 
     @classmethod
     def listAll(self):
         print('SQLALCHEMY_DATABASE_URI:' + SQLALCHEMY_DATABASE_URI)
         return session.query(Cash).all()
+
+    @classmethod
+    def findByDate(self, date):
+        try:
+            return session.query(Cash).filter(Cash.date == date).one()
+        except NoResultFound:
+            return None
 
     def getTodayTotalCash(self, date):
         # session = Session(bind=engine)
@@ -146,19 +162,8 @@ class Cash(BaseModel):
 
 
 if __name__ == '__main__':
+    init_db()
     # TEST
-    d = OrderedDict()
-    d['date'] = {'chinese': '计算日', 'cellType': BasicCell}
-    d['total_cash'] = {'chinese': '现金总额', 'cellType': BasicCell}
-    d['cash_to_assert_mgt'] = {'chinese': '现金->资管', 'cellType': BasicCell}
-    d['cash_to_money_fund'] = {'chinese': '现金->货基', 'cellType': BasicCell}
-    d['cash_to_protocol_deposit'] = {'chinese': '现金->协存', 'cellType': BasicCell}
-    d['cash_to_investor'] = {'chinese': '现金->兑付投资人', 'cellType': BasicCell}
-    d['assert_mgt_to_cash'] = {'chinese': '资管->现金', 'cellType': BasicCell}
-    d['money_fund_to_cash'] = {'chinese': '货基->现金', 'cellType': BasicCell}
-    d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
-    d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': BasicCell}
-    #
     # row = 0
     # for r in result:
     #     print(r.uuid)
@@ -179,6 +184,8 @@ if __name__ == '__main__':
     # INSERT
     # d = datetime.today()
     # print(d.minute(1).__str__())
+    c = Cash(datetime.date(2017, 2, 20), 12, 23, 34, 45)
+    c.save()
 
     # QUERY
     # session = Session(bind=engine)
