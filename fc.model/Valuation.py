@@ -173,5 +173,10 @@ class Valuation(BaseModel):
 
 if __name__ == '__main__':
     d = datetime.date.today()
-    v = Valuation(datetime.date(d.year, 3, 27))
+
+    date = datetime.date(2017,3,10)
+    v = Valuation(date)
     v.save()
+    # v = Valuation(datetime.date(d.year, 3, 27))
+    # v.save()
+

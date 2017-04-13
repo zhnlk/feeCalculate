@@ -198,7 +198,7 @@ class MoneyFundSummaryView(BasicFcView):
     def showMoneyFundSummary(self):
         """显示所有合约数据"""
 
-        date = datetime.date(2017, 3, 28)
+        date = datetime.date(2017, 3, 10)
 
         result = self.mainEngine.getMoneyFundSummary(date)
         self.setRowCount(len(result))

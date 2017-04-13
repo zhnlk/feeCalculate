@@ -57,12 +57,13 @@ class ProtocolDeposit(BaseModel):
         # protocolDeposit = session.query(ProtocolDeposit).filter(ProtocolDeposit.date == self.date).one()
         protocolDepositList = session.query(PdProjectList).filter(PdProjectList.date == self.date).all()
         for p in protocolDepositList:
-            self.protocol_deposit_amount = self.protocol_deposit_amount + p.pd_amount
-            self.protocol_deposit_revenue = self.protocol_deposit_revenue + p.pd_interest
-            self.cash_to_protocol_deposit = self.cash_to_protocol_deposit + p.pd_cash_to_pd
-            self.protocol_deposit_to_cash = self.protocol_deposit_to_cash + p.pd_pd_to_cash
+            self.protocol_deposit_amount +=  p.pd_amount
+            self.protocol_deposit_revenue += p.pd_interest
+            self.cash_to_protocol_deposit += p.pd_cash_to_pd
+            self.protocol_deposit_to_cash += p.pd_pd_to_cash
 
         # session.update(self)
+        session.add(self)
         session.flush()
         session.commit()
         return self
@@ -215,6 +216,28 @@ class PdProjectList(BaseModel):
 
 if __name__ == '__main__':
     init_db()
+
+    date = datetime.date(2017,3,10)
+
+    protocolDepositList = session.query(PdProjectList).filter(PdProjectList.date == date).all()
+    try:
+        pd = session.query(ProtocolDeposit).filter(ProtocolDeposit.date == date).one()
+    except:
+        pd = ProtocolDeposit(date)
+    print(pd.__dict__)
+    # for pd in protocolDepositList:
+    #     print(pd.__dict__)
+    for p in protocolDepositList:
+        pd.protocol_deposit_amount += p.pd_amount
+        pd.protocol_deposit_revenue += p.pd_interest
+        pd.cash_to_protocol_deposit += p.pd_cash_to_pd
+        pd.protocol_deposit_to_cash += p.pd_pd_to_cash
+
+    # # session.update(self)
+    session.add(pd)
+    session.flush()
+    session.commit()
+
     # d = datetime.date.today()
     # protocolDeposit = ProtocolDeposit(datetime.date(d.year, d.month, d.day - 1))
     # print(protocolDeposit)

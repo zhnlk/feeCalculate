@@ -184,9 +184,19 @@ if __name__ == '__main__':
     # INSERT
     # d = datetime.today()
     # print(d.minute(1).__str__())
-    c = Cash(datetime.date(2017, 2, 20), 12, 23, 34, 45)
-    c.save()
+    # c = Cash(datetime.date(2017, 2, 20), 12, 23, 34, 45)
+    # c.save()
+    date = datetime.date(2017, 3, 10)
+    # cs = session.query(Cash).filter(Cash.date == date).one()
 
+    css = session.query(func.count(MfProjectList.date)).filter(MfProjectList.date == date).scalar()
+    # if css > 0:
+    #     c = Cash(date, 1, 2, 4, 7)
+    #     c.total_cash = c.getTodayTotalCash(date)
+    #     c.getRelatedData()
+    #     c.save()
+
+    print(css)
     # QUERY
     # session = Session(bind=engine)
     # Cash.getTodayTotalCash()

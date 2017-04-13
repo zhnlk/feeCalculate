@@ -54,7 +54,7 @@ class MoneyFund(BaseModel):
                 moneyFund.protocol_deposit_revenue += p.pd_interest
                 moneyFund.cash_to_protocol_deposit += p.pd_cash_to_pd
                 moneyFund.protocol_deposit_to_cash += p.pd_pd_to_cash
-
+            self.update()
             session.flush()
             session.commit()
         except:
@@ -206,7 +206,11 @@ if __name__ == '__main__':
     init_db()
     # INSERT
     # mf_project_name = '广发基金'
+    date = datetime.date(2017,3,10)
     # mfProject = MfProject(mf_project_name)
+    mf = session.query(MfProjectList).filter(MfProjectList.date == date).all()
+    for m in mf:
+        print(m.listAllForSummary(date))
     # print(mfProject.save())
 
     # QUERY
