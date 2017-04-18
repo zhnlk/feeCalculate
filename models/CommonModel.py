@@ -3,18 +3,33 @@ from __future__ import unicode_literals
 
 import calendar
 from datetime import date, datetime
+from functools import wraps
 from uuid import uuid4
 
 from sqlalchemy import create_engine, Date, String, Boolean, Column, Float
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
 
 from fcConstant import SQLALCHEMY_DATABASE_URI
+from utils import StaticValue as SV
 
 engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
-Session = sessionmaker(autoflush=False, autocommit=False, bind=engine)
-session = Session()
 Base = declarative_base()
+
+
+def session_deco(func):
+    @wraps(func)
+    def __deco__(*args, **kwargs):
+        Session = sessionmaker(bind=engine, autoflush=True, autocommit=False)
+        session = Session()
+        if SV.SESSION_KEY not in kwargs.keys():
+            kwargs.update({SV.SESSION_KEY: session})
+        ret = func(*args, **kwargs)
+        session.flush()
+        session.commit()
+        return ret
+
+    return __deco__
 
 
 class MixinBase(Base):
