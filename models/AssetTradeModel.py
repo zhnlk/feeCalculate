@@ -17,6 +17,7 @@ class AssetTrade(MixinBase):
     asset_class_obj = relationship('AssetClass', lazy='joined', cascade='all')
 
     trade_fee_list = relationship('TradeFee', lazy='subquery', cascade='all')
+    trade_ret_list = relationship('TradeRet', lazy='subquery', cascade='all')
 
     def __init__(self, asset_class='', amount=0.0, type=1):
         MixinBase.__init__(self)

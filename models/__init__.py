@@ -2,13 +2,13 @@
 
 from __future__ import unicode_literals
 
-from models import CashModel, AssetClassModel, TradeFeeModel, AssetTradeModel, AssetFeeRateModel
+from models import CashModel, AssetClassModel, TradeFeeModel, AssetTradeModel, AssetFeeRateModel, TradeRetModel
 from models.CommonModel import init_db
 
 
 def models_all():
     result = []
-    models = [AssetClassModel, CashModel, AssetTradeModel, TradeFeeModel, AssetFeeRateModel]
+    models = [AssetClassModel, CashModel, AssetTradeModel, TradeFeeModel, AssetFeeRateModel, TradeRetModel]
     map(lambda m: result.append(m.__all__), models)
     return result
 

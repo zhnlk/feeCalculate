@@ -5,23 +5,26 @@ from __future__ import unicode_literals
 import logging
 import sys
 import unittest
+from datetime import date
 
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 from models.AssetClassModel import AssetClass
 from models.AssetFeeRateModel import AssetFeeRate
 from models.CashModel import Cash
 from models.CommonModel import tear_db, init_db
 from services.CommonService import save, get_asset_by_name, get_obj_by_id, purchase, get_cash_by_asset_and_type, \
-    get_trade_by_asset_and_type, get_trade_fee_by_asset_and_type, redeem
+    get_trade_by_asset_and_type, get_trade_fee_by_asset_and_type, redeem, get_asset_trade_change, get_cash_trade_change
 from utils import StaticValue as SV
 
 
 class TestService(unittest.TestCase):
     def setUp(self):
+        global engine, Base, Session
         engine = create_engine('sqlite:///test.db', echo=True)
-        Base = declarative_base()
+        Session = sessionmaker(bind=engine, autocommit=False, autoflush=True)
+        # Session.configure()
         init_db()
         save(Cash(amount=10000, type=SV.CASH_TYPE_DEPOSIT))
         save(AssetClass(name='余额宝', code='10001', type=SV.ASSET_CLASS_FUND, ret_rate=0.04))
@@ -125,7 +128,65 @@ class TestService(unittest.TestCase):
         self.assertEqual(fees[0].type, SV.FEE_TYPE_REDEEM)
 
     def test_get_asset_trade_change(self):
-        pass
+        asset = get_asset_by_name(name='余额宝')
+        redeem(asset=asset, amount=10000)
+        purchase(asset=asset, amount=20000)
+        redeem(asset=asset, amount=10000)
+        purchase(asset=asset, amount=20000)
+        trade_records = get_asset_trade_change(cal_date=date.today(), asset_type=SV.ASSET_CLASS_FUND,
+                                               trade_type=SV.ASSET_TYPE_PURCHASE)
+        self.assertTrue(trade_records)
+        self.assertEqual(len(trade_records), 2)
+        self.assertListEqual(list1=list(map(lambda x: x.amount, trade_records)), list2=[20000, 20000])
+
+        trade_records = get_asset_trade_change(cal_date=date.today(), asset_type=SV.ASSET_CLASS_FUND,
+                                               trade_type=SV.ASSET_TYPE_REDEEM)
+        self.assertTrue(trade_records)
+        self.assertEqual(len(trade_records), 2)
+        self.assertListEqual(list1=list(map(lambda x: x.amount, trade_records)), list2=[10000, 10000])
+
+    def test_get_cash_trade_change(self):
+        asset = get_asset_by_name(name='余额宝')
+        redeem(asset=asset, amount=10000)
+        purchase(asset=asset, amount=21000)
+        redeem(asset=asset, amount=10000)
+        purchase(asset=asset, amount=26000)
+        cashes = get_cash_trade_change(cal_date=date.today(), asset_type=SV.ASSET_CLASS_FUND,
+                                       trade_type=SV.CASH_TYPE_PURCHASE)
+        self.assertTrue(cashes)
+        self.assertEqual(len(cashes), 2)
+        self.assertListEqual(list1=list(map(lambda x: x.amount, cashes)), list2=[21000, 26000])
+        cashes = get_cash_trade_change(cal_date=date.today(), asset_type=SV.ASSET_CLASS_FUND,
+                                       trade_type=SV.CASH_TYPE_REDEEM)
+        self.assertTrue(cashes)
+        self.assertEqual(len(cashes), 2)
+        self.assertListEqual(list1=list(map(lambda x: x.amount, cashes)), list2=[10000, 10000])
+
+    def test_check_reconciliation(self):
+        asset = get_asset_by_name(name='余额宝')
+        purchase(asset=asset, amount=21000)
+        trade_records = get_asset_trade_change(cal_date=date.today(), asset_type=SV.ASSET_CLASS_FUND,
+                                               trade_type=SV.ASSET_TYPE_PURCHASE)
+        cashes = get_cash_trade_change(cal_date=date.today(), asset_type=SV.ASSET_CLASS_FUND,
+                                       trade_type=SV.CASH_TYPE_PURCHASE)
+        self.assertTrue(trade_records)
+        self.assertTrue(cashes)
+        self.assertEqual(len(trade_records), 1)
+        self.assertEqual(len(cashes), 1)
+        self.assertEqual(trade_records[0].amount, cashes[0].amount)
+        self.assertAlmostEqual(trade_records[0].time, cashes[0].time, places=4)
+
+        redeem(asset=asset, amount=10000)
+        trade_records = get_asset_trade_change(cal_date=date.today(), asset_type=SV.ASSET_CLASS_FUND,
+                                               trade_type=SV.ASSET_TYPE_REDEEM)
+        cashes = get_cash_trade_change(cal_date=date.today(), asset_type=SV.ASSET_CLASS_FUND,
+                                       trade_type=SV.CASH_TYPE_REDEEM)
+        self.assertTrue(trade_records)
+        self.assertTrue(cashes)
+        self.assertEqual(len(trade_records), 1)
+        self.assertEqual(len(cashes), 1)
+        self.assertEqual(trade_records[0].amount, cashes[0].amount)
+        self.assertAlmostEqual(trade_records[0].time, cashes[0].time, places=4)
 
 
 if __name__ == '__main__':

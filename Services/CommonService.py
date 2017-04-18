@@ -37,6 +37,19 @@ def save(obj=None, **kwargs):
 
 
 @session_deco
+def delete(obj=None, key='', **kwargs):
+    session = kwargs[SV.SESSION_KEY]
+    del_obj = session.query(obj).filter(obj.id == key)
+    del_obj.update({obj.is_active: False})
+
+
+@session_deco
+def update(obj=None, query_key='', update_data={}, **kwargs):
+    session = kwargs[SV.SESSION_KEY]
+    session.query(obj).filter(obj.id == query_key).update(update_data)
+
+
+@session_deco
 def add_asset_class(asset=AssetClass(), asset_fees=[], **kwargs):
     session = kwargs[SV.SESSION_KEY]
     session.add(asset)
@@ -140,6 +153,8 @@ if __name__ == '__main__':
     # save(AssetFeeRate(asset_class=agree.id, rate=20, type=SV.FEE_TYPE_PURCHASE, method=SV.FEE_METHOD_TIMES))
     # save(AssetFeeRate(asset_class=agree.id, rate=0.015, type=SV.FEE_TYPE_REDEEM, method=SV.FEE_METHOD_RATIO))
     # save(agree)
+
+    update(AssetClass, query_key='80f6f6baa8a343788c75abf10cf1bae9', update_data={AssetClass.is_active: True})
 
     # asset = get_asset_by_name(name='余额宝')
     # purchase(asset=asset, amount=10000)

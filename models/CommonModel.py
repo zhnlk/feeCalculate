@@ -15,12 +15,12 @@ from utils import StaticValue as SV
 
 engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
 Base = declarative_base()
+Session = sessionmaker(bind=engine, autoflush=True, autocommit=False)
 
 
 def session_deco(func):
     @wraps(func)
     def __deco__(*args, **kwargs):
-        Session = sessionmaker(bind=engine, autoflush=True, autocommit=False)
         session = Session()
         if SV.SESSION_KEY not in kwargs.keys():
             kwargs.update({SV.SESSION_KEY: session})
