@@ -15,11 +15,12 @@ class Cash(MixinBase):
     asset_class = Column(String(50), ForeignKey('TB_ASSETCLASS.id'), index=True, nullable=True)
     asset_class_obj = relationship('AssetClass', lazy='joined', cascade='all')
 
-    def __init__(self, asset_class='', type=1, amount=0.0):
+    def __init__(self, asset_class='', type=1, amount=0.0,cal_date=date.today()):
         MixinBase.__init__(self)
         self.type = type
         self.amount = amount
         self.asset_class = asset_class
+        self.date = cal_date
 
     def __repr__(self):
         return '<Cash id=%s, amount=%s, type=%s>' % (self.id, self.amount, self.type)
