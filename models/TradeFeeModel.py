@@ -15,11 +15,12 @@ class TradeFee(MixinBase):
     type = Column(Integer, default=0)
     asset_trade_obj = relationship('AssetTrade', lazy='joined', cascade='all')
 
-    def __init__(self, amount=0, asset_trade='', type=1):
+    def __init__(self, amount=0, asset_trade='', type=1, cal_date=date.today()):
         MixinBase.__init__(self)
         self.amount = amount
         self.asset_trade = asset_trade
         self.type = type
+        self.date = cal_date
 
     def __repr__(self):
         return '<TradeFee id=%s, amount=%s, asset_trade=%s, type=%s>' % (

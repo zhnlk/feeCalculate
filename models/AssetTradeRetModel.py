@@ -6,24 +6,22 @@ from sqlalchemy import ForeignKey, Integer
 
 from models.CommonModel import *
 
-__all__ = ['AssetFeeRate']
+__all__ = ['TradeRet']
 
 
-class AssetFeeRate(MixinBase):
+class AssetTradeRet(MixinBase):
     asset_class = Column(String(50), ForeignKey('TB_ASSETCLASS.id'), index=True, nullable=True)
-    rate = Column(Float, default='0.0')
-    type = Column(Integer, default=-1)
-    method = Column(Integer, default=0)
+    amount = Column(Float, default=0.0)
+    type = Column(Integer, default=0)
 
     asset_class_obj = relationship('AssetClass', lazy='joined', cascade='all')
 
-    def __init__(self, asset_class='', rate=0.0, type=1, method=1, cal_date=date.today()):
+    def __init__(self, asset_class='', amount=0, type=0, cal_date=date.today()):
         MixinBase.__init__(self)
         self.asset_class = asset_class
-        self.rate = rate
+        self.amount = amount
         self.type = type
-        self.method = method
         self.date = cal_date
 
     def __repr__(self):
-        return '<AssetRate id=%s, asset_class=%s, rate=%s, type=%s>' % (self.id, self.asset_class, self.rate, self.type)
+        return '<TradeRet id=%s, amount=%s, type=%s>' % (self.id, self.amount, self.type)
