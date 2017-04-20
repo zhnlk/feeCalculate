@@ -6,7 +6,7 @@ from datetime import date, timedelta
 
 from models.CashModel import Cash
 from models.CommonModel import session_deco
-from services.CommonService import save
+from services.CommonService import save, query
 from utils import StaticValue as SV
 
 
@@ -77,6 +77,15 @@ def get_cash_with_purchase(cash_records=[], cash_type=SV.CASH_TYPE_PURCHASE):
     return ret
 
 
+def get_cash_date(days=0):
+    dates = sorted(
+        list(set(map(lambda x: x.date, query(Cash)))))
+    if days:
+        return dates[-days:]
+    else:
+        return dates
+
+
 def add_cash_daily_data(cal_data=date.today(), draw_amount=0, draw_fee=0, deposit_amount=0, ret_amount=0):
     '''
     添加现在记录
@@ -114,11 +123,22 @@ def get_cash_daily_detail(cal_date=date.today()):
     return ret
 
 
-
+def get_cash_detail_by_days(days=0):
+    '''
+    按天数获取现金详情，天数为0时，获取所有详情
+    :param days:天数
+    :return:
+    '''
+    return list(map(lambda x: get_cash_daily_detail(cal_date=x), get_cash_date(days=days)))
 
 
 if __name__ == '__main__':
-    add_cash_daily_data(draw_amount=10001, draw_fee=10.01, deposit_amount=1000000, ret_amount=4000)
+    # add_cash_daily_data(cal_data=date.today() - timedelta(days=5), draw_amount=10001, draw_fee=10.01, deposit_amount=1000000,
+    #                     ret_amount=4000)
+    # print(get_cash_date())
+
+
+    print(get_cash_detail_by_days())
 
     # print(get_detail())
     # add_cash_with_type(amount=1000, cash_type=SV.CASH_TYPE_DEPOSIT)
