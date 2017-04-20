@@ -101,6 +101,10 @@ class MainEngine(object):
         duration = ['360', '360', '365']
         return rate, duration
 
+    def getTodayFee(self, date):
+        v = Valuation.findByDate(date)
+        return v.fee_1, v.fee_2, v.fee_3,v.fee_4
+
     # ----------------------------------------------------------------------
     def getCashDetail(self):
         """查询现金明细"""
@@ -110,6 +114,8 @@ class MainEngine(object):
             d.total_cash = d.getTodayTotalCash(d.date)
             # 计算协存与货基的相关数据
             d.getRelatedData()
+
+            print(d.__dict__)
             d.save()
         print('get Cash Detail')
         return detail

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
 
+import datetime
 from PyQt5 import QtCore
 from asyncio import Event
 
@@ -350,9 +351,9 @@ class DateMainView(BasicFcView):
         result = self.mainEngine.getMainCostData()
         self.setRowCount(1)
         row = 0
-        self.setItem(0,0,BasicCell(result[0]))
-        self.setItem(0,1,BasicCell(result[1]))
-        self.setItem(0,2,BasicCell(result[2]))
+        self.setItem(0, 0, BasicCell(result[0]))
+        self.setItem(0, 1, BasicCell(result[1]))
+        self.setItem(0, 2, BasicCell(result[2]))
         # for r in result:
         #     # 按照定义的表头，进行数据填充
         #     for n, header in enumerate(self.headerList):
@@ -416,11 +417,17 @@ class FeeTotalView(BasicFcView):
         c = 1
         for r in rate:
             self.setItem(0, c, BasicCell(r))
-            c = c + 1
+            c += 1
         c = 1
         for d in duration:
             self.setItem(1, c, BasicCell(d))
-            c = c + 1
+            c += 1
+        date = datetime.date(2017, 3, 10)
+        todayFee = self.mainEngine.getTodayFee(date)
+        c = 1
+        for tf in todayFee:
+            self.setItem(2, c, BasicCell(tf))
+            c += 1
 
 
 class AssertTotalView(BasicFcView):
@@ -509,6 +516,7 @@ class TotalValuationView(BasicFcView):
     def refresh(self):
         self.initData()
         # pass
+
     def addPopAction(self):
         """增加右键菜单内容"""
         refreshAction = QAction('刷新', self)
@@ -524,7 +532,6 @@ class TotalValuationView(BasicFcView):
         for r in result:
             # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
-
                 content = r.__getattribute__(header)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
