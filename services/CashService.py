@@ -14,13 +14,6 @@ def add_cash_with_type(amount=0, cash_type=SV.CASH_TYPE_DEPOSIT):
     save(Cash(amount=amount, type=cash_type))
 
 
-def add_cash(draw_amount=0, draw_fee=0, deposit_amount=0, ret_amount=0):
-    add_cash_with_type(amount=draw_amount, cash_type=SV.CASH_TYPE_DRAW) if draw_amount else None
-    add_cash_with_type(draw_fee, SV.CASH_TYPE_FEE) if draw_fee else None
-    add_cash_with_type(deposit_amount, SV.CASH_TYPE_DEPOSIT) if deposit_amount else None
-    add_cash_with_type(ret_amount, SV.CASH_TYPE_RET) if ret_amount else None
-
-
 def get_key_by_cash_type(cash_type=SV.CASH_TYPE_DEPOSIT):
     key_dict = {
         SV.CASH_TYPE_DEPOSIT: SV.CASH_KEY_INVESTOR_DEPOSIT,
@@ -84,7 +77,27 @@ def get_cash_with_purchase(cash_records=[], cash_type=SV.CASH_TYPE_PURCHASE):
     return ret
 
 
+def add_cash(draw_amount=0, draw_fee=0, deposit_amount=0, ret_amount=0):
+    '''
+    添加现在记录
+    :param draw_amount:兑付
+    :param draw_fee:提出费用
+    :param deposit_amount:流入
+    :param ret_amount:现金收入
+    :return: None
+    '''
+    add_cash_with_type(amount=draw_amount, cash_type=SV.CASH_TYPE_DRAW) if draw_amount else None
+    add_cash_with_type(draw_fee, SV.CASH_TYPE_FEE) if draw_fee else None
+    add_cash_with_type(deposit_amount, SV.CASH_TYPE_DEPOSIT) if deposit_amount else None
+    add_cash_with_type(ret_amount, SV.CASH_TYPE_RET) if ret_amount else None
+
+
 def get_detail(cal_date=date.today()):
+    '''
+    获取现金详情
+    :param cal_date:计算日期
+    :return: 详情字典
+    '''
     ret = {SV.CASH_KEY_CAL_DATE: cal_date}
     ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_PURCHASE))
     ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_REDEEM))
