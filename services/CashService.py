@@ -10,8 +10,8 @@ from services.CommonService import save
 from utils import StaticValue as SV
 
 
-def add_cash_with_type(amount=0, cash_type=SV.CASH_TYPE_DEPOSIT):
-    save(Cash(amount=amount, type=cash_type))
+def add_cash_with_type(amount=0, cash_type=SV.CASH_TYPE_DEPOSIT, cal_date=date.today()):
+    save(Cash(amount=amount, type=cash_type, cal_date=cal_date))
 
 
 def get_key_by_cash_type(cash_type=SV.CASH_TYPE_DEPOSIT):
@@ -77,7 +77,7 @@ def get_cash_with_purchase(cash_records=[], cash_type=SV.CASH_TYPE_PURCHASE):
     return ret
 
 
-def add_cash_daily_data(draw_amount=0, draw_fee=0, deposit_amount=0, ret_amount=0):
+def add_cash_daily_data(cal_data=date.today(), draw_amount=0, draw_fee=0, deposit_amount=0, ret_amount=0):
     '''
     添加现在记录
     :param draw_amount:兑付
@@ -86,13 +86,14 @@ def add_cash_daily_data(draw_amount=0, draw_fee=0, deposit_amount=0, ret_amount=
     :param ret_amount:现金收入
     :return: None
     '''
-    add_cash_with_type(amount=draw_amount, cash_type=SV.CASH_TYPE_DRAW) if draw_amount else None
-    add_cash_with_type(draw_fee, SV.CASH_TYPE_FEE) if draw_fee else None
-    add_cash_with_type(deposit_amount, SV.CASH_TYPE_DEPOSIT) if deposit_amount else None
-    add_cash_with_type(ret_amount, SV.CASH_TYPE_RET) if ret_amount else None
+    add_cash_with_type(amount=draw_amount, cash_type=SV.CASH_TYPE_DRAW, cal_date=cal_data) if draw_amount else None
+    add_cash_with_type(amount=draw_fee, cash_type=SV.CASH_TYPE_FEE, cal_date=cal_data) if draw_fee else None
+    add_cash_with_type(amount=deposit_amount, cash_type=SV.CASH_TYPE_DEPOSIT,
+                       cal_date=cal_data) if deposit_amount else None
+    add_cash_with_type(amount=ret_amount, cash_type=SV.CASH_TYPE_RET, cal_date=cal_data) if ret_amount else None
 
 
-def get_detail(cal_date=date.today()):
+def get_cash_daily_detail(cal_date=date.today()):
     '''
     获取现金详情
     :param cal_date:计算日期
@@ -113,8 +114,13 @@ def get_detail(cal_date=date.today()):
     return ret
 
 
+
+
+
 if __name__ == '__main__':
-    print(get_detail())
+    add_cash_daily_data(draw_amount=10001, draw_fee=10.01, deposit_amount=1000000, ret_amount=4000)
+
+    # print(get_detail())
     # add_cash_with_type(amount=1000, cash_type=SV.CASH_TYPE_DEPOSIT)
     # add_cash(0, 0, 10000, 10000)
     # print(get_cash_with_type(cal_date=cal_date,cash_type=SV.CASH_TYPE_REDEEM))
