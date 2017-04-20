@@ -2,8 +2,6 @@
 
 from __future__ import unicode_literals
 
-import logging
-import sys
 import unittest
 from datetime import date
 
@@ -81,7 +79,7 @@ class TestService(unittest.TestCase):
         self.assertTrue(trade_asset)
         self.assertEqual(trade_asset.count(), 1)
         self.assertEqual(trade_asset[0].type, SV.ASSET_TYPE_PURCHASE)
-        self.assertEqual(trade_asset[0].amount, 10000)
+        self.assertEqual(trade_asset[0].amount, 10000 - 20)
         # self.assertEqual(trade_asset[0].id, '')
         fees = get_trade_fee_by_asset_and_type(asset_trade_id=trade_asset[0].id, fee_type=SV.FEE_TYPE_PURCHASE)
         self.assertTrue(fees)
@@ -119,7 +117,7 @@ class TestService(unittest.TestCase):
         self.assertTrue(trade_asset)
         self.assertEqual(trade_asset.count(), 1)
         self.assertEqual(trade_asset[0].type, SV.ASSET_TYPE_REDEEM)
-        self.assertEqual(trade_asset[0].amount, 10000)
+        self.assertEqual(trade_asset[0].amount, 10000 - 150)
         fees = get_trade_fee_by_asset_and_type(asset_trade_id=trade_asset[0].id, fee_type=SV.FEE_TYPE_REDEEM)
         self.assertTrue(fees)
         self.assertEqual(fees.count(), 1)
@@ -190,6 +188,6 @@ class TestService(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(stream=sys.stdout)
-    logging.getLogger("LOG")
+    # logging.basicConfig(stream=sys.stdout)
+    # logging.getLogger("LOG")
     unittest.main()
