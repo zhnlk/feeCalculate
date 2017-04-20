@@ -92,12 +92,8 @@ def get_asset_by_name(name='', **kwargs):
 def purchase(asset=AssetClass(), amount=0.0, cal_date=date.today(), **kwargs):
     session = kwargs[SV.SESSION_KEY]
     session.add(Cash(amount=amount, asset_class=asset.id, type=SV.CASH_TYPE_PURCHASE, cal_date=cal_date))
-
-    # purchase_fees = session.query(AssetFeeRate).filter(AssetFeeRate.asset_class == asset.id,
-    #                                                    AssetFeeRate.type == SV.FEE_TYPE_PURCHASE)
     purchase_fees = filter(lambda x: x.type == SV.FEE_TYPE_PURCHASE, asset.asset_fee_rate_list)
     asset_trade = AssetTrade(amount=amount, type=SV.ASSET_TYPE_PURCHASE, asset_class=asset.id, cal_date=cal_date)
-    session.add(asset_trade)
     reduce_amount = amount
     for purchase_fee in purchase_fees:
         if purchase_fee.method == SV.FEE_METHOD_TIMES:
@@ -110,6 +106,8 @@ def purchase(asset=AssetClass(), amount=0.0, cal_date=date.today(), **kwargs):
             session.add(
                 TradeFee(asset_trade=asset_trade.id, type=SV.FEE_TYPE_PURCHASE, amount=amount * purchase_fee.rate,
                          cal_date=cal_date))
+    asset_trade.amount = reduce_amount
+    session.add(asset_trade)
 
 
 # 卖出资产
@@ -135,6 +133,8 @@ def redeem(asset=AssetClass(), amount=0.0, cal_date=date.today(), **kwargs):
             session.add(
                 TradeFee(asset_trade=asset_trade.id, type=SV.FEE_TYPE_REDEEM, amount=amount * redeem_fee.rate,
                          cal_date=cal_date))
+    asset_trade.amount = reduce_amount
+    session.add(asset_trade)
 
 
 # 统计各类资产的买入卖出
@@ -176,10 +176,10 @@ if __name__ == '__main__':
     # save(agree)
 
     # update(AssetClass, query_key='80f6f6baa8a343788c75abf10cf1bae9', update_data={AssetClass.is_active: True})
-
+    #
     asset = get_asset_by_name(name='联顺泰')
-    purchase(asset=asset, amount=10000, cal_date=date.today() + timedelta(days=10))
-    redeem(asset=asset, amount=5000)
+    purchase(asset=asset, amount=20000)
+    redeem(asset=asset, amount=10000)
     # print(get_asset_trade_change(asset_type=SV.ASSET_CLASS_FUND, trade_type=SV.ASSET_TYPE_REDEEM))
     # print(get_cash_trade_change())
     # print(asset.cash_list)

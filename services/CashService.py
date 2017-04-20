@@ -77,7 +77,7 @@ def get_cash_with_purchase(cash_records=[], cash_type=SV.CASH_TYPE_PURCHASE):
     return ret
 
 
-def add_cash(draw_amount=0, draw_fee=0, deposit_amount=0, ret_amount=0):
+def add_cash_daily_data(draw_amount=0, draw_fee=0, deposit_amount=0, ret_amount=0):
     '''
     添加现在记录
     :param draw_amount:兑付
