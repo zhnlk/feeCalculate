@@ -8,7 +8,7 @@ from models.AssetTradeModel import AssetTrade
 from models.AssetTradeRetModel import AssetTradeRet
 from models.CashModel import Cash
 from models.CommonModel import session_deco
-from services.CommonService import query, purchase, redeem
+from services.CommonService import query, purchase, redeem, save
 from utils import StaticValue as SV
 
 
@@ -36,6 +36,18 @@ def asset_ret_carry_to_cash(cal_date=date.today(), asset=AssetClass(), amount=0,
         pass
 
 
+def cal_agreement_ret(cal_date=date.today(), asset=AssetClass()):
+    purchase_amount = get_asset_trades_total_amount_by_type(cal_date=cal_date, asset=asset,
+                                                            trade_type=SV.ASSET_TYPE_PURCHASE)
+    redeem_amount = get_asset_trades_total_amount_by_type(cal_date=cal_date, asset=asset,
+                                                          trade_type=SV.ASSET_TYPE_REDEEM)
+    carry_amount = get_asset_trades_total_amount_by_type(cal_date=cal_date, asset=asset,
+                                                         trade_type=SV.ASSET_TYPE_RET_CARRY)
+    save(AssetTradeRet(asset_class=asset.id,
+                       amount=(purchase_amount - redeem_amount + carry_amount) * asset.ret_rate / 360,
+                       cal_date=cal_date))
+
+
 @session_deco
 def add_trade_ret(cal_date=date.today(), ret_amount=0, asset=AssetClass(), **kwargs):
     session = kwargs[SV.SESSION_KEY]
@@ -54,6 +66,8 @@ def add_daily_asset_data(cal_date=date.today(), asset_id='', ret_carry_asset_amo
     redeem(asset=asset, amount=redeem_amount, cal_date=cal_date) if redeem_amount else None
 
     add_trade_ret(cal_date=cal_date, ret_amount=ret_amount, asset=asset) if ret_amount else None
+    asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
+    cal_agreement_ret(cal_date=cal_date, asset=asset) if asset.type == SV.ASSET_CLASS_AGREEMENT_DEPOSIT else None
 
 
 def get_key_by_asset_type_and_asset_class(asset_type=SV.CASH_TYPE_DEPOSIT, asset_class=SV.ASSET_CLASS_MANAGEMENT):
@@ -195,11 +209,11 @@ if __name__ == '__main__':
 
     # add_daily_asset_data(asset_id='10e8743354f14fa383898d03a494c1af', ret_amount=1000)
 
-    # add_agreement_daily_data(asset_id='c455e260b3144c7c8dba518dd64aa82a', ret_carry_asset_amount=1001)
+    add_agreement_daily_data(asset_id='d34a2e853716489fa9529e8d7f2377ef', purchase_amount=10000000000000)
 
     # add_fund_daily_data(asset_id='10e8743354f14fa383898d03a494c1af', ret_carry_cash_amount=1005, purchase_amount=1005,
     #                     redeem_amount=1005, ret_amount=1005)
 
     # print((get_asset_agreement_detail(asset_id='c455e260b3144c7c8dba518dd64aa82a')))
-    print(get_asset_fund_detail(asset_id='10e8743354f14fa383898d03a494c1af'))
+    # print(get_asset_fund_detail(asset_id='10e8743354f14fa383898d03a494c1af'))
     # print(query(AssetClass).filter(AssetClass.id == 'c455e260b3144c7c8dba518dd64aa82a').one().asset_trade_list)
