@@ -1,6 +1,6 @@
 build/
 dist/
 __pycache__/
-.idea
+.idea/
 data-excel.db
 data-test.db
