@@ -13,7 +13,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 from fcConstant import SQLALCHEMY_DATABASE_URI
 from utils import StaticValue as SV
 
-engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
+engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=False)
 Base = declarative_base()
 Session = sessionmaker(bind=engine, autoflush=True, autocommit=False)
 
@@ -49,6 +49,11 @@ class MixinBase(Base):
     @declared_attr
     def __tablename__(cls):
         return '%s%s' % ('TB_', cls.__name__.upper())
+
+
+class MixinTotalBase(MixinBase):
+    __abstract__ = True
+    total_amount = Column(Float, default=0.0)
 
 
 def init_db():
