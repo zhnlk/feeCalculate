@@ -5,13 +5,8 @@ from __future__ import unicode_literals
 from datetime import date, timedelta
 
 from models.CashModel import Cash
-from models.CommonModel import session_deco
-from services.CommonService import save, query
+from services.CommonService import query, add_cash_with_type, get_cash_last_total_amount_by_type
 from utils import StaticValue as SV
-
-
-def add_cash_with_type(amount=0, cash_type=SV.CASH_TYPE_DEPOSIT, cal_date=date.today()):
-    save(Cash(amount=amount, type=cash_type, cal_date=cal_date))
 
 
 def get_key_by_cash_type(cash_type=SV.CASH_TYPE_DEPOSIT):
@@ -19,61 +14,21 @@ def get_key_by_cash_type(cash_type=SV.CASH_TYPE_DEPOSIT):
         SV.CASH_TYPE_DEPOSIT: SV.CASH_KEY_INVESTOR_DEPOSIT,
         SV.CASH_TYPE_DRAW: SV.CASH_KEY_INVESTOR_DRAW,
         SV.CASH_TYPE_FEE: SV.CASH_KEY_DRAW_FEE,
-        SV.CASH_TYPE_RET: SV.CASH_KEY_RET
+        SV.CASH_TYPE_RET: SV.CASH_KEY_RET,
+        SV.CASH_TYPE_PURCHASE_AGREEMENT: SV.CASH_KEY_PURCHASE_AGREEMENT,
+        SV.CASH_TYPE_PURCHASE_FUND: SV.CASH_KEY_PURCHASE_FUND,
+        SV.CASH_TYPE_PURCHASE_MANAGEMENT: SV.CASH_KEY_PURCHASE_MANAGEMENT,
+        SV.CASH_TYPE_REDEEM_AGREEMENT: SV.CASH_KEY_REDEEM_AGREEMENT,
+        SV.CASH_TYPE_REDEEM_FUND: SV.CASH_KEY_REDEEM_FUND,
+        SV.CASH_TYPE_REDEEM_MANAGEMENT: SV.CASH_KEY_REDEEM_MANAGEMENT
     }
     return key_dict[cash_type]
 
 
-def get_key_by_cash_type_and_asset_class(cash_type=SV.CASH_TYPE_DEPOSIT, asset_class=SV.ASSET_CLASS_MANAGEMENT):
-    key_dic = {
-        SV.CASH_TYPE_PURCHASE: {
-            SV.ASSET_CLASS_AGREEMENT_DEPOSIT: SV.CASH_KEY_PURCHASE_AGREEMENT,
-            SV.ASSET_CLASS_FUND: SV.CASH_KEY_PURCHASE_FUND,
-            SV.ASSET_CLASS_MANAGEMENT: SV.CASH_KEY_PURCHASE_MANAGEMENT
-
-        },
-        SV.CASH_TYPE_REDEEM: {
-            SV.ASSET_CLASS_AGREEMENT_DEPOSIT: SV.CASH_KEY_REDEEM_AGREEMENT,
-            SV.ASSET_CLASS_FUND: SV.CASH_KEY_REDEEM_FUND,
-            SV.ASSET_CLASS_MANAGEMENT: SV.CASH_KEY_REDEEM_MANAGEMENT
-        }
-    }
-    return key_dic[cash_type][asset_class]
-
-
-@session_deco
-def get_cash_with_type(cal_date=date.today(), cash_type=SV.CASH_TYPE_DEPOSIT, **kwargs):
+def get_cash_with_type(cal_date=date.today(), cash_type=SV.CASH_TYPE_DEPOSIT):
     ret = dict()
-    session = kwargs[SV.SESSION_KEY]
-    cash_records = session.query(Cash).filter(Cash.type == cash_type, Cash.date < cal_date + timedelta(days=1))
-    if cash_type not in [SV.CASH_TYPE_PURCHASE, SV.CASH_TYPE_REDEEM]:
-        ret.update({get_key_by_cash_type(cash_type=cash_type): sum(
-            list(map(lambda x: x.amount, cash_records)))}) if cash_records else ret.update(
-            {get_key_by_cash_type(cash_type=cash_type): 0})
-    else:
-        ret.update(get_cash_with_purchase(cash_records=cash_records, cash_type=cash_type))
-
-    return ret
-
-
-def get_cash_with_purchase(cash_records=[], cash_type=SV.CASH_TYPE_PURCHASE):
-    ret = {}
-    cash_purchase_agreements = list(filter(
-        lambda x: x.asset_class_obj.type == SV.ASSET_CLASS_AGREEMENT_DEPOSIT, cash_records))
-    ret.update(
-        {get_key_by_cash_type_and_asset_class(cash_type=cash_type, asset_class=SV.ASSET_CLASS_AGREEMENT_DEPOSIT): sum(
-            list(map(lambda x: x.amount, cash_purchase_agreements)))}) if cash_purchase_agreements else ret.update(
-        {get_key_by_cash_type_and_asset_class(cash_type=cash_type, asset_class=SV.ASSET_CLASS_AGREEMENT_DEPOSIT): 0})
-    cash_purchase_fund = list(filter(
-        lambda x: x.asset_class_obj.type == SV.ASSET_CLASS_FUND, cash_records))
-    ret.update({get_key_by_cash_type_and_asset_class(cash_type=cash_type, asset_class=SV.ASSET_CLASS_FUND): sum(
-        list(map(lambda x: x.amount, cash_purchase_fund)))}) if cash_purchase_fund else ret.update(
-        {get_key_by_cash_type_and_asset_class(cash_type=cash_type, asset_class=SV.ASSET_CLASS_FUND): 0})
-    cash_purchase_managements = list(filter(
-        lambda x: x.asset_class_obj.type == SV.ASSET_CLASS_MANAGEMENT, cash_records))
-    ret.update({get_key_by_cash_type_and_asset_class(cash_type=cash_type, asset_class=SV.ASSET_CLASS_MANAGEMENT): sum(
-        list(map(lambda x: x.amount, cash_purchase_managements)))}) if cash_purchase_managements else ret.update(
-        {get_key_by_cash_type_and_asset_class(cash_type=cash_type, asset_class=SV.ASSET_CLASS_MANAGEMENT): 0})
+    ret.update({get_key_by_cash_type(cash_type=cash_type): get_cash_last_total_amount_by_type(cal_date=cal_date,
+                                                                                              cash_type=cash_type)})
     return ret
 
 
@@ -109,8 +64,12 @@ def get_cash_daily_detail(cal_date=date.today()):
     :return: 详情字典
     '''
     ret = {SV.CASH_KEY_CAL_DATE: cal_date}
-    ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_PURCHASE))
-    ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_REDEEM))
+    ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_PURCHASE_AGREEMENT))
+    ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_PURCHASE_FUND))
+    ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_PURCHASE_MANAGEMENT))
+    ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_REDEEM_AGREEMENT))
+    ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_REDEEM_FUND))
+    ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_REDEEM_MANAGEMENT))
     ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_DEPOSIT))
     ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_DRAW))
     ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_FEE))
@@ -133,13 +92,23 @@ def get_cash_detail_by_days(days=0):
 
 
 if __name__ == '__main__':
-    # add_cash_daily_data(cal_data=date.today() - timedelta(days=5), draw_amount=10001, draw_fee=10.01, deposit_amount=1000000,
-    #                     ret_amount=4000)
+    # print((get_total_amount_before_by_type(cash_type=SV.CASH_TYPE_DEPOSIT)))
+    # print(get_last_total_amount_by_type(cash_type=SV.CASH_TYPE_PURCHASE))
+    add_cash_daily_data(cal_data=date.today() - timedelta(days=9), draw_amount=10001, draw_fee=10.01,
+                        deposit_amount=1000000,
+                        ret_amount=4000)
     # print(get_cash_date())
 
 
-    print(get_cash_detail_by_days())
-
+    print(get_cash_detail_by_days()[0])
+    # import time
+    #
+    # print(get_last_total_amount_by_type(cal_date=date.today() - timedelta(days=0), cash_type=SV.CASH_TYPE_DEPOSIT))
+    #
+    # start_time = time.time()
+    # print(get_cash_detail_by_days())
+    # end_time = time.time()
+    # print(end_time - start_time)
     # print(get_detail())
     # add_cash_with_type(amount=1000, cash_type=SV.CASH_TYPE_DEPOSIT)
     # add_cash(0, 0, 10000, 10000)

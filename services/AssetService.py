@@ -10,6 +10,7 @@ from models.CashModel import Cash
 from models.CommonModel import session_deco
 from services.CommonService import query, purchase, redeem, save
 from utils import StaticValue as SV
+from utils.Utils import timer
 
 
 @session_deco
@@ -67,19 +68,20 @@ def add_daily_asset_data(cal_date=date.today(), asset_id='', ret_carry_asset_amo
 
     add_trade_ret(cal_date=cal_date, ret_amount=ret_amount, asset=asset) if ret_amount else None
     asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
-    cal_agreement_ret(cal_date=cal_date, asset=asset) if asset.type == SV.ASSET_CLASS_AGREEMENT_DEPOSIT else None
+    cal_agreement_ret(cal_date=cal_date, asset=asset) if asset.type == SV.ASSET_CLASS_AGREEMENT else None
 
 
+@timer
 def get_key_by_asset_type_and_asset_class(asset_type=SV.CASH_TYPE_DEPOSIT, asset_class=SV.ASSET_CLASS_MANAGEMENT):
     key_dic = {
         SV.ASSET_TYPE_PURCHASE: {
-            SV.ASSET_CLASS_AGREEMENT_DEPOSIT: SV.CASH_KEY_PURCHASE_AGREEMENT,
+            SV.ASSET_CLASS_AGREEMENT: SV.CASH_KEY_PURCHASE_AGREEMENT,
             SV.ASSET_CLASS_FUND: SV.CASH_KEY_PURCHASE_FUND,
             SV.ASSET_CLASS_MANAGEMENT: SV.CASH_KEY_PURCHASE_MANAGEMENT
 
         },
         SV.ASSET_TYPE_REDEEM: {
-            SV.ASSET_CLASS_AGREEMENT_DEPOSIT: SV.CASH_KEY_REDEEM_AGREEMENT,
+            SV.ASSET_CLASS_AGREEMENT: SV.CASH_KEY_REDEEM_AGREEMENT,
             SV.ASSET_CLASS_FUND: SV.CASH_KEY_REDEEM_FUND,
             SV.ASSET_CLASS_MANAGEMENT: SV.CASH_KEY_REDEEM_MANAGEMENT
         }
@@ -150,6 +152,7 @@ def add_fund_daily_data(cal_date=date.today(), asset_id='', ret_carry_cash_amoun
                          purchase_amount=purchase_amount, redeem_amount=redeem_amount, ret_amount=ret_amount)
 
 
+@timer
 def get_asset_agreement_detail(cal_date=date.today(), asset_id=''):
     '''
     获取协存详情
@@ -198,6 +201,41 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=''):
     return ret
 
 
+def get_asset_date(days=0, asset_id=''):
+    asset_dates = sorted(set(map(lambda x: x.date, query(AssetTrade).filter(AssetTrade.asset_class == asset_id))))
+    if days:
+        return asset_dates[-days:]
+    return asset_dates
+
+
+@timer
+def get_single_agreement_detail_by_days(days=0, asset_id=''):
+    return list(map(lambda x: get_asset_agreement_detail(cal_date=x, asset_id=asset_id),
+                    get_asset_date(days=days, asset_id=asset_id)))
+
+
+@timer
+def get_agreement_detail_by_days(days=0):
+    agreement_ids = list(
+        map(lambda x: x.id, query(AssetClass).filter(AssetClass.type == SV.ASSET_CLASS_AGREEMENT)))
+
+    return dict(list(map(lambda x: (x, get_single_agreement_detail_by_days(days=days, asset_id=x)), agreement_ids)))
+
+
+def get_single_fund_detail_by_days(days=0, asset_id=''):
+    return list(map(lambda x: get_asset_fund_detail(cal_date=x, asset_id=asset_id),
+                    get_asset_date(days=days, asset_id=asset_id)))
+
+
+def get_fund_detail_by_days(days=0):
+    ret = dict()
+    fund_ids = list(
+        map(lambda x: x.id, query(AssetClass).filter(AssetClass.type == SV.ASSET_CLASS_FUND)))
+
+    map(lambda x: ret.update({x: get_single_fund_detail_by_days(days=days, asset_id=x)}), fund_ids)
+    return ret
+
+
 if __name__ == '__main__':
     '''
     agreement:{'rate': 0.035, 'asset_name': '浦发理财一号', 'cal_date': datetime.date(2017, 4, 20), 'cash_to_agreement': 20001.0, 'agreement_to_cash': 10001.0, 'ret_carry_principal': 1001.0, 'asset_ret': -1001.0, 'total_amount': 10000.0}
@@ -209,7 +247,25 @@ if __name__ == '__main__':
 
     # add_daily_asset_data(asset_id='10e8743354f14fa383898d03a494c1af', ret_amount=1000)
 
-    add_agreement_daily_data(asset_id='d34a2e853716489fa9529e8d7f2377ef', purchase_amount=10000000000000)
+    # add_agreement_daily_data(cal_date=date.today() - timedelta(days=5), asset_id='bfc873a575f44aea9b3e433170288562',
+    #                          purchase_amount=100000, redeem_amount=5000,
+    #                          ret_carry_asset_amount=1000)
+
+    # add_fund_daily_data(cal_date=date.today() - timedelta(days=3), asset_id='b62e634343614618966e0579d154711f',
+    #                     ret_carry_cash_amount=1001,
+    #                     purchase_amount=10001, ret_amount=2001, redeem_amount=5001)
+
+    # print(list(map(lambda x: x, map(lambda y: y, range(10)))))
+
+    # add_agreement_daily_data(cal_date=date.today() - timedelta(days=1), asset_id='31a3a48e41114308b69f34a2192508fc',
+    #                          purchase_amount=10003,
+    #                          redeem_amount=1003, ret_carry_asset_amount=5003)
+
+    print(get_agreement_detail_by_days())
+
+    # print(get_asset_date(days=2, asset_id='ec982b61c08d4c1688336a1b01ebb43c'))
+
+    # print(get_agreement_detail_by_days(asset_id='ec982b61c08d4c1688336a1b01ebb43c'))
 
     # add_fund_daily_data(asset_id='10e8743354f14fa383898d03a494c1af', ret_carry_cash_amount=1005, purchase_amount=1005,
     #                     redeem_amount=1005, ret_amount=1005)
