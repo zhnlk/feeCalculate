@@ -21,7 +21,7 @@ class TestBase(TestCase):
         tear_db()
 
     def init_base_data(self):
-        save(Cash(amount=100000, type=SV.CASH_TYPE_DEPOSIT))
+        # save(Cash(amount=100000, type=SV.CASH_TYPE_DEPOSIT))
         save(AssetClass(name='余额宝', code='10001', type=SV.ASSET_CLASS_FUND, ret_rate=0.04))
         save(AssetClass(name='浦发理财一号', code='20007', type=SV.ASSET_CLASS_AGREEMENT_DEPOSIT, ret_rate=0.035))
         agree = AssetClass(name='联顺泰', code='20007', type=SV.ASSET_CLASS_MANAGEMENT, ret_rate=0.08)

@@ -4,14 +4,170 @@ from __future__ import unicode_literals
 
 from datetime import date, timedelta
 
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 
 from models.AssetClassModel import AssetClass
 from models.AssetTradeModel import AssetTrade
+from models.AssetTradeRetModel import AssetTradeRet
 from models.CashModel import Cash
 from models.CommonModel import session_deco
 from models.TradeFeeModel import TradeFee
 from utils import StaticValue as SV
+
+
+##### Cash
+
+@session_deco
+def get_cash_total_amount_before_by_type(cal_date=date.today(), cash_type=SV.CASH_TYPE_DEPOSIT, **kwargs):
+    """
+    获取指定日期指定类型的现金总额
+    :param cal_date:计算日期
+    :param cash_type:现金类型
+    :param kwargs:可扩展产数
+    :return:指定日期及类型的总额
+    """
+    session = kwargs.get(SV.SESSION_KEY, None)
+    ret = session.query(func.sum(Cash.amount).label('total_amount')).filter(Cash.is_active,
+                                                                            Cash.type == cash_type,
+                                                                            Cash.date < cal_date + timedelta(
+                                                                                days=1)).one()
+    return ret.total_amount if ret.total_amount else 0.0
+
+
+@session_deco
+def get_cash_last_total_amount_by_type(cal_date=date.today(), cash_type=SV.CASH_TYPE_PURCHASE, **kwargs):
+    session = kwargs.get(SV.SESSION_KEY, None)
+    ret = session.query(Cash, func.max(Cash.time).label('max_time')).filter(Cash.is_active,
+                                                                            Cash.date < cal_date + timedelta(days=1),
+                                                                            Cash.type == cash_type).one()
+
+    return ret.Cash.total_amount if ret.Cash else 0.0
+
+
+def add_cash_with_type(amount=0, cash_type=SV.CASH_TYPE_DEPOSIT, asset_id='', cal_date=date.today()):
+    save(Cash(amount=amount, type=cash_type, cal_date=cal_date,
+              total_amount=get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=cash_type) + amount,
+              asset_class=asset_id))
+
+
+#### AssetTrade
+
+@session_deco
+def get_asset_total_amount_by_asset_and_type(cal_date=date.today(), asset_id='', trade_type=SV.ASSET_TYPE_PURCHASE,
+                                             **kwargs):
+    session = kwargs.get(SV.SESSION_KEY, None)
+    ret = session.query(func.sum(AssetTrade.amount).label('total_amount')).filter(AssetTrade.is_active,
+                                                                                  AssetTrade.type == trade_type,
+                                                                                  AssetTrade.asset_class == asset_id,
+                                                                                  AssetTrade.date < cal_date + timedelta(
+                                                                                      days=1)
+                                                                                  ).one()
+    return ret.total_amount if ret.total_amount else 0.0
+
+
+@session_deco
+def get_asset_last_total_amount_by_asset_and_type(cal_date=date.today(), asset_id='', trade_type=SV.ASSET_TYPE_PURCHASE,
+                                                  **kwargs):
+    session = kwargs.get(SV.SESSION_KEY, None)
+    ret = session.query(AssetTrade, func.max(AssetTrade.time).label('max_time')).filter(AssetTrade.is_active,
+                                                                                        AssetTrade.asset_class == asset_id,
+                                                                                        AssetTrade.type == trade_type,
+                                                                                        AssetTrade.date < cal_date + timedelta(
+                                                                                            days=1)
+                                                                                        ).one()
+    return ret.AssetTrade.total_amount if ret.AssetTrade else 0.0
+
+
+def add_asset_trade_with_asset_and_type(amount=0.0, trade_type=SV.ASSET_TYPE_PURCHASE, asset_id='',
+                                        cal_date=date.today()):
+    save(AssetTrade(asset_class=asset_id, amount=amount, type=trade_type,
+                    total_amount=get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                               trade_type=trade_type) + amount,
+                    cal_date=cal_date))
+
+
+###########AssetTradeRet
+@session_deco
+def get_asset_ret_last_total_amount_by_asset_and_type(cal_date=date.today(), asset_id='', ret_type=SV.RET_TYPE_CASH,
+                                                      **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    ret = session.query(AssetTradeRet, func.max(AssetTradeRet.time)).filter(AssetTradeRet.is_active,
+                                                                            AssetTradeRet.asset_class == asset_id,
+                                                                            AssetTradeRet.type == ret_type,
+                                                                            AssetTradeRet.date < cal_date + timedelta(
+                                                                                days=1)
+                                                                            ).one()
+    return ret.AssettradeRet.total_amount if ret.AssettradeRet else 0.0
+
+
+@session_deco
+def get_asset_ret_total_amount_by_asset_and_type(cal_date=date.today(), asset_id='', ret_type=SV.RET_TYPE_CASH,
+                                                 **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    ret = session.query(func.sum(AssetTradeRet.amount)).filter(AssetTradeRet.is_active,
+                                                               AssetTradeRet.asset_class == asset_id,
+                                                               AssetTradeRet.type == ret_type,
+                                                               AssetTradeRet.date < cal_date + timedelta(
+                                                                   days=1)
+                                                               ).one()
+    return ret.total_amount if ret.total_amount else 0.0
+
+
+def add_asset_ret_with_asset_and_type(amount=0.0, asset_id='', ret_type=SV.RET_TYPE_CASH, cal_date=date.today()):
+    save(
+        AssetTradeRet(
+            asset_class=asset_id,
+            amount=amount,
+            type=ret_type,
+            cal_date=cal_date,
+            total_amount=get_asset_ret_last_total_amount_by_asset_and_type(cal_date=cal_date,
+                                                                           asset_id=asset_id,
+                                                                           ret_type=ret_type
+                                                                           ) + amount
+        )
+    )
+
+
+# Asset Trade Fee
+# @session_deco
+# def get_asset_trade_fee_total_amount_by_asset_and_type(cal_date=date.today(), asset_id='',
+#                                                        fee_type=SV.FEE_TYPE_PURCHASE, **kwargs):
+#     session = kwargs.get(SV.SESSION_KEY)
+#     ret = session.query(func.sum(TradeFee.amount)).filter(TradeFee.is_active,
+#                                                           TradeFee.asset_class == asset_id,
+#                                                           TradeFee.type == fee_type,
+#                                                           TradeFee.date < cal_date + timedelta(
+#                                                               days=1)
+#                                                           ).one()
+#     return ret.total_amount if ret.total_amount else 0.0
+#
+#
+# @session_deco
+# def get_asset_trade_fee_last_total_amount_by_asset_and_type(cal_date=date.today(), asset_id='',
+#                                                             fee_type=SV.FEE_TYPE_PURCHASE, **kwargs):
+#     session = kwargs.get(SV.SESSION_KEY)
+#     ret = session.query(AssetTradeRet, func.max(AssetTradeRet.time)).filter(AssetTradeRet.is_active,
+#                                                                             AssetTradeRet.asset_class == asset_id,
+#                                                                             AssetTradeRet.type == fee_type,
+#                                                                             AssetTradeRet.date < cal_date + timedelta(
+#                                                                                 days=1)
+#                                                                             ).one()
+#     return ret.AssettradeRet.total_amount if ret.AssettradeRet else 0.0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # 通过资产id和交易类型获取现金记录
@@ -52,7 +208,7 @@ def delete(obj=None, key='', **kwargs):
 @session_deco
 def query(obj=None, **kwargs):
     session = kwargs[SV.SESSION_KEY]
-    return session.query(obj).filter(obj.is_active == True)
+    return session.query(obj).filter(obj.is_active)
 
 
 # 更新记录
@@ -91,7 +247,11 @@ def get_asset_by_name(name='', **kwargs):
 @session_deco
 def purchase(asset=AssetClass(), amount=0.0, cal_date=date.today(), **kwargs):
     session = kwargs[SV.SESSION_KEY]
-    session.add(Cash(amount=amount, asset_class=asset.id, type=SV.CASH_TYPE_PURCHASE, cal_date=cal_date))
+    # session.add(Cash(amount=amount, asset_class=asset.id, type=-asset.type, cal_date=cal_date))
+    # session.add(Cash(asset_class=asset.id, type=-asset.type, amount=amount,
+    #                  total_amount=get_last_total_amount_by_type(cal_date=cal_date, cash_type=-asset.type),
+    #                  cal_date=cal_date))
+    add_cash_with_type(amount=amount, cash_type=-asset.type, asset_id=asset.id, cal_date=cal_date)
     purchase_fees = filter(lambda x: x.type == SV.FEE_TYPE_PURCHASE, asset.asset_fee_rate_list)
     asset_trade = AssetTrade(amount=amount, type=SV.ASSET_TYPE_PURCHASE, asset_class=asset.id, cal_date=cal_date)
     reduce_amount = amount
@@ -114,9 +274,8 @@ def purchase(asset=AssetClass(), amount=0.0, cal_date=date.today(), **kwargs):
 @session_deco
 def redeem(asset=AssetClass(), amount=0.0, cal_date=date.today(), **kwargs):
     session = kwargs[SV.SESSION_KEY]
-    session.add(Cash(amount=amount, asset_class=asset.id, type=SV.CASH_TYPE_REDEEM, cal_date=cal_date))
-    # redeem_fees = session.query(AssetFeeRate).filter(AssetFeeRate.asset_class == asset.id,
-    #                                                  AssetFeeRate.type == SV.FEE_TYPE_REDEEM)
+    # session.add(Cash(amount=amount, asset_class=asset.id, type=SV.CASH_TYPE_REDEEM, cal_date=cal_date))
+    add_cash_with_type(amount=amount, cash_type=asset.type, asset_id=asset.id, cal_date=cal_date)
 
     redeem_fees = filter(lambda x: x.type == SV.FEE_TYPE_REDEEM, asset.asset_fee_rate_list)
     asset_trade = AssetTrade(amount=amount, type=SV.ASSET_TYPE_REDEEM, asset_class=asset.id, cal_date=cal_date)
@@ -139,7 +298,7 @@ def redeem(asset=AssetClass(), amount=0.0, cal_date=date.today(), **kwargs):
 
 # 统计各类资产的买入卖出
 @session_deco
-def get_asset_trade_change(cal_date=date.today(), asset_type=SV.ASSET_CLASS_AGREEMENT_DEPOSIT,
+def get_asset_trade_change(cal_date=date.today(), asset_type=SV.ASSET_CLASS_AGREEMENT,
                            trade_type=SV.ASSET_TYPE_PURCHASE, **kwargs):
     session = kwargs[SV.SESSION_KEY]
     assets = session.query(AssetClass).filter(AssetClass.type == asset_type)
@@ -168,7 +327,7 @@ def get_cash_trade_change(cal_date=date.today(), asset_type=SV.ASSET_CLASS_FUND,
 if __name__ == '__main__':
     # save(Cash(amount=100000, type=SV.CASH_TYPE_DEPOSIT))
     # save(AssetClass(name='余额宝', code='10001', type=SV.ASSET_CLASS_FUND, ret_rate=0.04))
-    # save(AssetClass(name='浦发理财一号', code='20007', type=SV.ASSET_CLASS_AGREEMENT_DEPOSIT, ret_rate=0.035))
+    # save(AssetClass(name='浦发理财一号', code='20007', type=SV.ASSET_CLASS_AGREEMENT, ret_rate=0.035))
     # agree = AssetClass(name='联顺泰', code='20007', type=SV.ASSET_CLASS_MANAGEMENT, ret_rate=0.08)
     #
     # save(AssetFeeRate(asset_class=agree.id, rate=20, type=SV.FEE_TYPE_PURCHASE, method=SV.FEE_METHOD_TIMES))
@@ -177,9 +336,16 @@ if __name__ == '__main__':
 
     # update(AssetClass, query_key='80f6f6baa8a343788c75abf10cf1bae9', update_data={AssetClass.is_active: True})
     #
-    asset = get_asset_by_name(name='联顺泰')
-    purchase(asset=asset, amount=20000)
-    redeem(asset=asset, amount=10000)
+
+    print(get_asset_last_total_amount_by_asset_and_type(cal_date=date.today(),
+                                                        asset_id='6a2686b23dae4296868c2288d28b6a7a',
+                                                        trade_type=SV.ASSET_TYPE_PURCHASE))
+
+    # add_asset_trade_with_asset_and_type(amount=10000, asset_id='41216cc75f9c455fa4c309a177eef9e7',
+    #                                     trade_type=SV.ASSET_TYPE_PURCHASE)
+    # asset = get_asset_by_name(name='余额宝')
+    # purchase(asset=asset, amount=20000)
+    # redeem(asset=asset, amount=10000)
     # print(get_asset_trade_change(asset_type=SV.ASSET_CLASS_FUND, trade_type=SV.ASSET_TYPE_REDEEM))
     # print(get_cash_trade_change())
     # print(asset.cash_list)
