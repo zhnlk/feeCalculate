@@ -15,7 +15,7 @@ class AssetRetRate(MixinBase):
     ret_rate = Column(Float, default=0.03)
     threshold = Column(Float, default=0.0)
 
-    asset_class_obj = relationship('AssetClass', cascade='all')
+    asset_class_obj = relationship('AssetClass', lazy='joined', cascade='all')
 
     def __init__(self, asset_id='', ret_rate=0.03, threshold=0.0, cal_date=date.today()):
         MixinBase.__init__(self)

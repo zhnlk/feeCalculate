@@ -8,8 +8,6 @@ from sqlalchemy import and_, func
 
 from models.AssetClassModel import AssetClass
 from models.AssetFeeModel import AssetFee
-from models.AssetFeeRateModel import AssetFeeRate
-from models.AssetRetRateModel import AssetRetRate
 from models.AssetTradeModel import AssetTrade
 from models.AssetTradeRetModel import AssetTradeRet
 from models.CashModel import Cash
@@ -225,6 +223,12 @@ def delete(obj=None, key='', **kwargs):
 def query(obj=None, **kwargs):
     session = kwargs[SV.SESSION_KEY]
     return session.query(obj).filter(obj.is_active)
+
+
+@session_deco
+def query_by_id(obj=AssetClass(), obj_id='', **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    return session.query(obj).filter(obj.is_active, obj.id == obj_id).one()
 
 
 # 更新记录

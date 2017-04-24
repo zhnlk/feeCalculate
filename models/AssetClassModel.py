@@ -21,7 +21,7 @@ class AssetClass(MixinBase):
     cash_list = relationship('Cash', cascade='all', lazy='subquery')
     trade_ret_list = relationship('AssetTradeRet', lazy='subquery', cascade='all')
     asset_fee_list = relationship('AssetFee', lazy='subquery', cascade='all')
-    asset_ret_rate_list = relationship('AssetRetRate', cascade='all')
+    asset_ret_rate_list = relationship('AssetRetRate', lazy='subquery', cascade='all')
 
     def __init__(self, name='', code='', start_date=None, expiry_date=None, type=1, ret_rate=0, ret_cal_method=0,
                  cal_date=date.today()):

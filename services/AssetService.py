@@ -11,7 +11,7 @@ from services.CommonService import (
     add_cash_with_type,
     get_asset_last_total_amount_by_asset_and_type,
     get_asset_ret_last_total_amount_by_asset_and_type,
-    get_asset_by_name)
+    get_asset_by_name, query_by_id)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
 from utils.Utils import timer
@@ -40,9 +40,9 @@ def asset_ret_carry_to_principal(cal_date=date.today(), asset=AssetClass(), amou
 def get_asset_rate_by_amount(rates=AssetClass().asset_ret_rate_list, amount=10000):
     rate = 0.0
     if len(rates) == 1:
-        rate = asset.asset_ret_rate_list[0].rate
+        rate = rates[0].rate
     elif len(rates) > 1:
-        rate = list(filter(lambda x: x.threshold < amount, asset.asset_ret_rate_list))[-1].ret_rate
+        rate = list(filter(lambda x: x.threshold < amount, rates))[-1].ret_rate
     return rate
 
 
@@ -188,7 +188,9 @@ def cal_agreement_ret(cal_date=date.today(), asset=AssetClass()):
     )
 
     total_amount = purchase_amount + carry_amount - redeem_amount
-    rate = get_asset_rate_by_amount(rates=asset.asset_ret_rate_list, amount=total_amount)
+    asset = query_by_id(obj=AssetClass, obj_id=asset.id)
+    rates = asset.asset_ret_rate_list
+    rate = get_asset_rate_by_amount(rates=rates, amount=total_amount)
     add_asset_ret_with_asset_and_type(
         amount=total_amount * rate / 360,
         asset_id=asset.id,
@@ -209,8 +211,6 @@ def get_asset_agreement_detail(cal_date=date.today(), asset_id=''):
     asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
     ret[SV.ASSET_KEY_RATE] = list(map(lambda x: x.ret_rate, asset.asset_ret_rate_list))[
         0] if len(asset.asset_ret_rate_list) > 0 else 0.0
-
-    # ret.update({SV.ASSET_KEY_RATE: asset.ret_rate})
     ret.update(get_asset_base_detail(cal_date=cal_date, asset=asset))
     ret[SV.ASSET_KEY_RET_CARRY_PRINCIPAL] = get_asset_ret_last_total_amount_by_asset_and_type(
         asset_id=asset_id,
@@ -325,7 +325,7 @@ if __name__ == '__main__':
     cash:{'cal_date': datetime.date(2017, 4, 20), 'cash_to_agreement': 20001.0, 'cash_to_fund': 13009.0, 'cash_to_management': 20000.0, 'agreement_to_cash': 10001.0, 'fund_to_cash': 8011.0, 'management_to_cash': 15000.0, 'investor_to_cash': 100000.0, 'cash_to_investor': 0, 'cash_draw_fee': 0, 'cash_return': 0, 'total_amount': 80001.0}
     '''
     asset = get_asset_by_name(name='浦发理财一号')
-    print(asset.asset_ret_rate_list)
+    # print(asset.asset_ret_rate_list)
     cal_agreement_ret(asset=asset)
     # asset_ret_carry_to_principal()
 
