@@ -8,6 +8,7 @@ from sqlalchemy import and_, func
 
 from models.AssetClassModel import AssetClass
 from models.AssetFeeModel import AssetFee
+from models.AssetFeeRateModel import AssetFeeRate
 from models.AssetRetRateModel import AssetRetRate
 from models.AssetTradeModel import AssetTrade
 from models.AssetTradeRetModel import AssetTradeRet
@@ -292,9 +293,11 @@ def redeem(asset=AssetClass(), amount=0.0, cal_date=date.today()):
 @session_deco
 def get_management_asset_all_ret(asset_id='', cal_date=date.today(), **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
+    asset = session.query(AssetClass).filter(AssetClass.is_active, AssetClass.id == asset_id).one()
     asset_ret = session.query(AssetRetRate).filter(AssetRetRate.is_active, AssetRetRate.asset_class == asset_id).one()
     return asset_ret.ret_rate * get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
-                                                                              trade_type=SV.ASSET_TYPE_PURCHASE)
+                                                                              trade_type=SV.ASSET_TYPE_PURCHASE) * (
+               asset.expiry_date - asset.start_date).days / asset_ret.interest_days
 
 
 # 统计各类资产的买入卖出
@@ -325,8 +328,34 @@ def get_cash_trade_change(cal_date=date.today(), asset_type=SV.ASSET_CLASS_FUND,
     return list(cashs)
 
 
+@session_deco
+def get_management_trade_amount(asset_id='', **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    managements = session.query(AssetTrade).filter(AssetTrade.is_active, AssetTrade.asset_class == asset_id)
+    return managements[-1].total_amount
+
+
+@session_deco
+def get_management_trade_fees(asset_id='', **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    total_amount = get_management_trade_amount(asset_id=asset_id)
+    fees = session.query(AssetFeeRate).filter(AssetFeeRate.is_active, AssetFeeRate.asset_class == asset_id)
+    asset = query_by_id(obj=AssetClass, obj_id=asset_id)
+    return list(map(lambda x: x, fees))
+
+
+@session_deco
+def get_all_mamangement_ids(**kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    ids = session.query(AssetClass.id).filter(AssetClass.is_active, AssetClass.type == SV.ASSET_CLASS_MANAGEMENT)
+    return list(map(lambda x: x[0], ids))
+
+
 if __name__ == '__main__':
-    print(get_management_asset_all_ret(asset_id='8f62d3fb42ec49459de78934753f57ae'))
+    print(get_all_mamangement_ids())
+    # print(get_management_asset_all_ret(asset_id='8f62d3fb42ec49459de78934753f57ae'))
+    # print(get_management_trade_amount(asset_id='8f62d3fb42ec49459de78934753f57ae'))
+    # print(get_management_trade_fees(asset_id='8f62d3fb42ec49459de78934753f57ae'))
     # save(Cash(amount=100000, type=SV.CASH_TYPE_DEPOSIT))
     # save(AssetClass(name='余额宝', code='10001', type=SV.ASSET_CLASS_FUND))
     # agreement = (AssetClass(name='浦发理财一号', code='20007', type=SV.ASSET_CLASS_AGREEMENT))

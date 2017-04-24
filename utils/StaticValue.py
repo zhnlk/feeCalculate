@@ -56,6 +56,13 @@ ASSET_KEY_RATE = 'rate'
 ASSET_KEY_RET_CARRY_PRINCIPAL = 'ret_carry_principal'
 ASSET_KEY_RET_CARRY_CASH = 'ret_carry_cash'
 ASSET_KEY_RET_NOT_CARRY = 'ret_not_carry'
+ASSET_KEY_START_DATE = 'start_date'
+ASSET_KEY_EXPIRY_DATE = 'expiry_date'
+ASSET_KEY_MANAGEMENT_DUE = 'management_due'
+ASSET_KEY_MANAGEMENT_BANK_FEE = 'bank_fee'
+ASSET_KEY_MANAGEMENT_MANAGE_FEE = 'manage_fee'
+ASSET_KEY_MANAGEMENT_AMOUNT = 'management_amount'
+ASSET_KEY_MANAGEMENT_DAILY_RET = 'mamangement_daily_ret'
 
 # 收益变化类型
 RET_TYPE_INTEREST = 1

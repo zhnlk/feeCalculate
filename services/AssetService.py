@@ -14,7 +14,8 @@ from services.CommonService import (
     get_asset_last_total_amount_by_asset_and_type,
     get_asset_ret_last_total_amount_by_asset_and_type,
     add_asset_fee_with_asset_and_type,
-    query_by_id, save, get_management_asset_all_ret)
+    query_by_id, save, get_management_asset_all_ret, get_management_trade_amount, get_management_trade_fees,
+    get_all_mamangement_ids)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
 from utils.Utils import timer
@@ -408,12 +409,45 @@ def management_carry_ret_to_cash(cal_date=date.today(), asset_id=''):
             )
 
 
+def get_single_management_detail(asset_id=''):
+    asset = query_by_id(obj=AssetClass, obj_id=asset_id)
+    ret = dict()
+    ret.update({SV.ASSET_KEY_NAME: asset.name})
+    ret.update({SV.ASSET_KEY_START_DATE: asset.start_date})
+    ret.update({SV.ASSET_KEY_EXPIRY_DATE: asset.expiry_date})
+    ret.update({SV.ASSET_KEY_MANAGEMENT_DUE: (asset.expiry_date - asset.start_date).days})
+    ret.update({SV.ASSET_KEY_ASSET_RET: get_management_asset_all_ret(asset_id=asset.id)})
+    ret.update({SV.ASSET_KEY_MANAGEMENT_AMOUNT: get_management_trade_amount(asset_id=asset_id)})
+
+    fees = get_management_trade_fees(asset_id=asset_id)
+    ret.update({SV.ASSET_KEY_MANAGEMENT_BANK_FEE: ret.get(SV.ASSET_KEY_MANAGEMENT_AMOUNT) * fees[0].rate * ret.get(
+        SV.ASSET_KEY_MANAGEMENT_DUE) / fees[0].fee_days})
+    ret.update({SV.ASSET_KEY_MANAGEMENT_MANAGE_FEE: ret.get(SV.ASSET_KEY_MANAGEMENT_AMOUNT) * fees[1].rate * ret.get(
+        SV.ASSET_KEY_MANAGEMENT_DUE) / fees[1].fee_days})
+    ret.update({SV.ASSET_KEY_MANAGEMENT_DAILY_RET: (
+                                                       ret.get(SV.ASSET_KEY_ASSET_RET) - ret.get(
+                                                           SV.ASSET_KEY_MANAGEMENT_BANK_FEE) - ret.get(
+                                                           SV.ASSET_KEY_MANAGEMENT_MANAGE_FEE)) / ret.get(
+        SV.ASSET_KEY_MANAGEMENT_DUE)})
+    return ret
+
+
+def get_all_management_detail():
+    ret = dict()
+    ids = get_all_mamangement_ids()
+    for id in ids:
+        ret.update({id: get_single_management_detail(asset_id=id)})
+    return ret
+
+
 if __name__ == '__main__':
     '''
     agreement:{'rate': 0.035, 'asset_name': '浦发理财一号', 'cal_date': datetime.date(2017, 4, 20), 'cash_to_agreement': 20001.0, 'agreement_to_cash': 10001.0, 'ret_carry_principal': 1001.0, 'asset_ret': -1001.0, 'total_amount': 10000.0}
     fund:{'asset_name': '余额宝', 'cal_date': datetime.date(2017, 4, 20), 'cash_to_fund': 13009.0, 'fund_to_cash': 8011.0, 'asset_ret': 3005.0, 'ret_carry_cash': 1005.0, 'ret_not_carry': 2000.0, 'total_amount': 8003.0}
     cash:{'cal_date': datetime.date(2017, 4, 20), 'cash_to_agreement': 20001.0, 'cash_to_fund': 13009.0, 'cash_to_management': 20000.0, 'agreement_to_cash': 10001.0, 'fund_to_cash': 8011.0, 'management_to_cash': 15000.0, 'investor_to_cash': 100000.0, 'cash_to_investor': 0, 'cash_draw_fee': 0, 'cash_return': 0, 'total_amount': 80001.0}
     '''
+    print(get_all_management_detail())
+    # print(get_single_management_detail(asset_id='8f62d3fb42ec49459de78934753f57ae'))
     # cal_daily_ret_and_fee(asset_id='7fe9c108cd874c10b167782f798e1d35')
     # cal_agreement_ret(cal_date=date.today(),
     #                   asset=query_by_id(obj=AssetClass, obj_id='7fe9c108cd874c10b167782f798e1d35'))
