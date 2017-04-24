@@ -7,6 +7,7 @@ from datetime import date, timedelta
 from models.CashModel import Cash
 from services.CommonService import query, add_cash_with_type, get_cash_last_total_amount_by_type
 from utils import StaticValue as SV
+from utils.Utils import timer
 
 
 def get_key_by_cash_type(cash_type=SV.CASH_TYPE_DEPOSIT):
@@ -26,10 +27,14 @@ def get_key_by_cash_type(cash_type=SV.CASH_TYPE_DEPOSIT):
 
 
 def get_cash_with_type(cal_date=date.today(), cash_type=SV.CASH_TYPE_DEPOSIT):
-    ret = dict()
-    ret.update({get_key_by_cash_type(cash_type=cash_type): get_cash_last_total_amount_by_type(cal_date=cal_date,
-                                                                                              cash_type=cash_type)})
-    return ret
+    return {
+        get_key_by_cash_type(cash_type=cash_type):
+            get_cash_last_total_amount_by_type(
+                cal_date=cal_date,
+                cash_type=cash_type
+            )
+
+    }
 
 
 def get_cash_date(days=0):
@@ -82,6 +87,7 @@ def get_cash_daily_detail(cal_date=date.today()):
     return ret
 
 
+@timer
 def get_cash_detail_by_days(days=0):
     '''
     按天数获取现金详情，天数为0时，获取所有详情
@@ -100,7 +106,7 @@ if __name__ == '__main__':
     # print(get_cash_date())
 
 
-    print(get_cash_detail_by_days()[0])
+    print(get_cash_detail_by_days(days=3))
     # import time
     #
     # print(get_last_total_amount_by_type(cal_date=date.today() - timedelta(days=0), cash_type=SV.CASH_TYPE_DEPOSIT))
