@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 from datetime import date
 
 from models.AssetClassModel import AssetClass
+from models.AssetFeeRateModel import AssetFeeRate
+from models.AssetRetRateModel import AssetRetRate
 from models.AssetTradeModel import AssetTrade
 from services.CommonService import (
     add_asset_ret_with_asset_and_type,
@@ -11,7 +13,8 @@ from services.CommonService import (
     add_cash_with_type,
     get_asset_last_total_amount_by_asset_and_type,
     get_asset_ret_last_total_amount_by_asset_and_type,
-    get_asset_by_name, query_by_id)
+    add_asset_fee_with_asset_and_type,
+    query_by_id, save, get_management_asset_all_ret)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
 from utils.Utils import timer
@@ -42,7 +45,7 @@ def get_asset_rate_by_amount(rates=AssetClass().asset_ret_rate_list, amount=1000
     if len(rates) == 1:
         rate = rates[0].rate
     elif len(rates) > 1:
-        rate = list(filter(lambda x: x.threshold < amount, rates))[-1].ret_rate
+        rate = list(filter(lambda x: x.threshold <= amount, rates))[-1].ret_rate
     return rate
 
 
@@ -68,6 +71,36 @@ def asset_ret_carry_to_cash(cal_date=date.today(), asset=AssetClass(), amount=0)
 
 
 # Management
+
+def add_management(
+        name='',
+        trade_amount=1000000,
+        ret_rate=0.1,
+        rate_days=360,
+        start_date=date.today(),
+        end_date=date.today(),
+        bank_fee_rate=0.0003,
+        bank_days=360,
+        manage_fee_rate=0.0012,
+        manage_days=360,
+        cal_date=date.today()
+):
+    asset = AssetClass(name=name, start_date=start_date, expiry_date=end_date, type=SV.ASSET_CLASS_MANAGEMENT,
+                       ret_cal_method=SV.RET_TYPE_CASH_CUT_INTEREST, cal_date=cal_date)
+
+    asset_rate = AssetRetRate(asset_id=asset.id, ret_rate=ret_rate, interest_days=rate_days, cal_date=cal_date)
+
+    asset_fee_rate_bank = AssetFeeRate(asset_class=asset.id, rate=bank_fee_rate, type=SV.FEE_TYPE_PURCHASE,
+                                       fee_days=bank_days, cal_date=cal_date)
+    asset_fee_rate_manage = AssetFeeRate(asset_class=asset.id, rate=manage_fee_rate, type=SV.FEE_TYPE_PURCHASE,
+                                         fee_days=manage_days, cal_date=cal_date)
+
+    purchase(asset=asset, amount=trade_amount, cal_date=cal_date)
+    save(asset)
+    save(asset_rate)
+    save(asset_fee_rate_bank)
+    save(asset_fee_rate_manage)
+
 
 def add_trade_ret(cal_date=date.today(), ret_amount=0, asset=AssetClass()):
     add_asset_ret_with_asset_and_type(
@@ -196,7 +229,7 @@ def cal_agreement_ret(cal_date=date.today(), asset=AssetClass()):
         asset_id=asset.id,
         ret_type=SV.RET_TYPE_INTEREST,
         cal_date=cal_date
-    )
+    ) if total_amount else None
 
 
 # @timer
@@ -318,45 +351,77 @@ def get_fund_detail_by_days(days=0):
     return dict(map(lambda x: (x, get_single_fund_detail_by_days(days=days, asset_id=x)), fund_ids))
 
 
+def cal_daily_ret_and_fee(cal_date=date.today(), asset_id=''):
+    '''
+    计算资管的收益和费用
+    :param cal_date:计算日期
+    :param asset_id:资产id
+    :return:
+    '''
+    assetclass = query_by_id(obj=AssetClass, obj_id=asset_id)
+    if cal_date < assetclass.expiry_date:
+        asset_ret_rates = assetclass.asset_ret_rate_list
+        asset_fee_rates = assetclass.asset_fee_rate_list
+        asset_trade_amount = get_asset_last_total_amount_by_asset_and_type(asset_id=assetclass.id,
+                                                                           trade_type=SV.ASSET_TYPE_PURCHASE,
+                                                                           cal_date=cal_date)
+
+        rate = asset_ret_rates[0]
+        add_asset_ret_with_asset_and_type(amount=asset_trade_amount * rate.ret_rate / rate.interest_days,
+                                          asset_id=asset_id, ret_type=SV.RET_TYPE_INTEREST, cal_date=cal_date)
+
+        for x in asset_fee_rates:
+            add_asset_fee_with_asset_and_type(
+                amount=asset_trade_amount * x.rate / x.fee_days,
+                asset_id=asset_id, fee_type=SV.FEE_TYPE_PURCHASE,
+                cal_date=cal_date)
+
+
+def cal_adjust_fee(cal_date=date.today(), fee_amount=200, asset_id=''):
+    '''
+    添加调整费用
+    :param cal_date:计算日期
+    :param fee_amount:调整费用
+    :param asset_id:资产id
+    :return:
+    '''
+    add_asset_fee_with_asset_and_type(cal_date=cal_date, asset_id=asset_id, fee_type=SV.FEE_TYPE_ADJUST,
+                                      amount=fee_amount)
+
+
+def management_carry_ret_to_cash(cal_date=date.today(), asset_id=''):
+    asset = query_by_id(obj=AssetClass, obj_id=asset_id)
+    if asset.ret_cal_method == SV.RET_TYPE_CASH_CUT_INTEREST:
+        if asset.start_date == cal_date:
+            add_asset_ret_with_asset_and_type(
+                cal_date=cal_date,
+                amount=get_management_asset_all_ret(asset_id=asset_id, cal_date=cal_date),
+                asset_id=asset_id,
+                ret_type=SV.RET_TYPE_CASH_CUT_INTEREST
+            )
+    elif asset.ret_cal_method == SV.RET_TYPE_CASH_ONE_TIME:
+        if asset.expiry_date == cal_date:
+            add_asset_ret_with_asset_and_type(
+                cal_date=cal_date,
+                amount=get_management_asset_all_ret(asset_id=asset_id, cal_date=cal_date),
+                ret_type=SV.RET_TYPE_CASH_ONE_TIME
+            )
+
+
 if __name__ == '__main__':
     '''
     agreement:{'rate': 0.035, 'asset_name': '浦发理财一号', 'cal_date': datetime.date(2017, 4, 20), 'cash_to_agreement': 20001.0, 'agreement_to_cash': 10001.0, 'ret_carry_principal': 1001.0, 'asset_ret': -1001.0, 'total_amount': 10000.0}
     fund:{'asset_name': '余额宝', 'cal_date': datetime.date(2017, 4, 20), 'cash_to_fund': 13009.0, 'fund_to_cash': 8011.0, 'asset_ret': 3005.0, 'ret_carry_cash': 1005.0, 'ret_not_carry': 2000.0, 'total_amount': 8003.0}
     cash:{'cal_date': datetime.date(2017, 4, 20), 'cash_to_agreement': 20001.0, 'cash_to_fund': 13009.0, 'cash_to_management': 20000.0, 'agreement_to_cash': 10001.0, 'fund_to_cash': 8011.0, 'management_to_cash': 15000.0, 'investor_to_cash': 100000.0, 'cash_to_investor': 0, 'cash_draw_fee': 0, 'cash_return': 0, 'total_amount': 80001.0}
     '''
-    asset = get_asset_by_name(name='浦发理财一号')
-    # print(asset.asset_ret_rate_list)
-    cal_agreement_ret(asset=asset)
-    # asset_ret_carry_to_principal()
-
-    # print(list(query(AssetTrade).filter(AssetTrade.type == SV.ASSET_TYPE_REDEEM, AssetTrade.asset_class_obj.has(
-    #     AssetClass.type == SV.ASSET_CLASS_FUND))))
-
-    # add_daily_asset_data(asset_id='10e8743354f14fa383898d03a494c1af', ret_amount=1000)
-
-    # add_agreement_daily_data(cal_date=date.today() - timedelta(days=0), asset_id='a4d124f92eba4d9c92fa1db44a21bc1d',
-    #                          purchase_amount=10001, redeem_amount=5001,
-    #                          ret_carry_asset_amount=1001)
-
-    # add_fund_daily_data(cal_date=date.today() - timedelta(days=3), asset_id='9e272b078a3f46d0bed66e8665449fa5',
-    #                     ret_carry_cash_amount=1002,
-    #                     purchase_amount=10002, ret_amount=2002, redeem_amount=5002)
-
-    # print(list(map(lambda x: x, map(lambda y: y, range(10)))))
-
-    # add_agreement_daily_data(cal_date=date.today() - timedelta(days=1), asset_id='31a3a48e41114308b69f34a2192508fc',
-    #                          purchase_amount=10003,
-    #                          redeem_amount=1003, ret_carry_asset_amount=5003)
-
+    # cal_daily_ret_and_fee(asset_id='7fe9c108cd874c10b167782f798e1d35')
+    # cal_agreement_ret(cal_date=date.today(),
+    #                   asset=query_by_id(obj=AssetClass, obj_id='7fe9c108cd874c10b167782f798e1d35'))
+    # print(get_management_all_ret(asset_id='7fe9c108cd874c10b167782f798e1d35'))
     # print(get_agreement_detail_by_days())
 
-    # print(get_asset_date(days=2, asset_id='ec982b61c08d4c1688336a1b01ebb43c'))
+    # cal_adjust_fee(cal_date=date.today(), fee_amount=200, asset_id='85b05920001c41b2bfdef220d86c0125')
 
-    # print(get_agreement_detail_by_days(asset_id='ec982b61c08d4c1688336a1b01ebb43c'))
-
-    # add_fund_daily_data(asset_id='10e8743354f14fa383898d03a494c1af', ret_carry_cash_amount=1005, purchase_amount=1005,
-    #                     redeem_amount=1005, ret_amount=1005)
-
-    # print((get_asset_agreement_detail(asset_id='c455e260b3144c7c8dba518dd64aa82a')))
-    # print(get_asset_fund_detail(asset_id='10e8743354f14fa383898d03a494c1af'))
-    # print(query(AssetClass).filter(AssetClass.id == 'c455e260b3144c7c8dba518dd64aa82a').one().asset_trade_list)
+    # add_management(name='management1', trade_amount=100000, ret_rate=0.1, rate_days=360, start_date=date.today(),
+    #                end_date=date.today() + timedelta(days=365), bank_fee_rate=0.0003, bank_days=360,
+    #                manage_fee_rate=0.0012, manage_days=360, cal_date=date.today())

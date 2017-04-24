@@ -14,15 +14,17 @@ class AssetFeeRate(MixinBase):
     rate = Column(Float, default='0.0')
     type = Column(Integer, default=-1)
     method = Column(Integer, default=0)
+    fee_days = Column(Integer, default=360)
 
     asset_class_obj = relationship('AssetClass', lazy='joined', cascade='all')
 
-    def __init__(self, asset_class='', rate=0.0, type=1, method=1, cal_date=date.today()):
+    def __init__(self, asset_class='', rate=0.0, type=1, method=1, fee_days=0, cal_date=date.today()):
         MixinBase.__init__(self)
         self.asset_class = asset_class
         self.rate = rate
         self.type = type
         self.method = method
+        self.fee_days = fee_days
         self.date = cal_date
 
     def __repr__(self):

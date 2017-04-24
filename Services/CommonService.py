@@ -8,6 +8,7 @@ from sqlalchemy import and_, func
 
 from models.AssetClassModel import AssetClass
 from models.AssetFeeModel import AssetFee
+from models.AssetRetRateModel import AssetRetRate
 from models.AssetTradeModel import AssetTrade
 from models.AssetTradeRetModel import AssetTradeRet
 from models.CashModel import Cash
@@ -16,8 +17,6 @@ from utils import StaticValue as SV
 
 
 ##### Cash
-
-
 @session_deco
 def get_cash_total_amount_by_type(cal_date=date.today(), cash_type=SV.CASH_TYPE_DEPOSIT, **kwargs):
     """
@@ -166,7 +165,7 @@ def get_asset_fee_total_amount_by_asset_and_type(cal_date=date.today(), asset_id
     return ret.total_amount if ret.total_amount else 0.0
 
 
-def add_asest_fee_with_asset_and_type(amount=0, asset_id='', fee_type=SV.FEE_TYPE_PURCHASE, cal_date=date.today()):
+def add_asset_fee_with_asset_and_type(amount=0, asset_id='', fee_type=SV.FEE_TYPE_PURCHASE, cal_date=date.today()):
     save(
         AssetFee(
             asset_class=asset_id,
@@ -178,6 +177,11 @@ def add_asest_fee_with_asset_and_type(amount=0, asset_id='', fee_type=SV.FEE_TYP
             ) + amount
         )
     )
+
+
+# Management
+
+
 
 
 #########################
@@ -283,22 +287,14 @@ def redeem(asset=AssetClass(), amount=0.0, cal_date=date.today()):
         trade_type=SV.ASSET_TYPE_REDEEM,
         cal_date=cal_date
     )
-    # asset_trade = AssetTrade(amount=amount, type=SV.ASSET_TYPE_REDEEM, asset_class=asset.id, cal_date=cal_date)
-    # reduce_amount = amount
-    # session.add(asset_trade)
-    # # for redeem_fee in redeem_fees:
-    # #     if redeem_fee.method == SV.FEE_METHOD_TIMES:
-    # #         reduce_amount -= redeem_fee.rate
-    # #         session.add(TradeFee(asset_trade=asset_trade.id, type=SV.FEE_TYPE_REDEEM, amount=redeem_fee.rate,
-    # #                              cal_date=cal_date))
-    # #
-    # #     elif redeem_fee.method == SV.FEE_METHOD_RATIO:
-    # #         reduce_amount -= amount * redeem_fee.rate
-    # #         session.add(
-    # #             TradeFee(asset_trade=asset_trade.id, type=SV.FEE_TYPE_REDEEM, amount=amount * redeem_fee.rate,
-    # #                      cal_date=cal_date))
-    # asset_trade.amount = reduce_amount
-    # session.add(asset_trade)
+
+
+@session_deco
+def get_management_asset_all_ret(asset_id='', cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    asset_ret = session.query(AssetRetRate).filter(AssetRetRate.is_active, AssetRetRate.asset_class == asset_id).one()
+    return asset_ret.ret_rate * get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                              trade_type=SV.ASSET_TYPE_PURCHASE)
 
 
 # 统计各类资产的买入卖出
@@ -330,13 +326,14 @@ def get_cash_trade_change(cal_date=date.today(), asset_type=SV.ASSET_CLASS_FUND,
 
 
 if __name__ == '__main__':
+    print(get_management_asset_all_ret(asset_id='8f62d3fb42ec49459de78934753f57ae'))
     # save(Cash(amount=100000, type=SV.CASH_TYPE_DEPOSIT))
-    # save(AssetClass(name='余额宝', code='10001', type=SV.ASSET_CLASS_FUND, ret_rate=0.04))
-    # agreement = (AssetClass(name='浦发理财一号', code='20007', type=SV.ASSET_CLASS_AGREEMENT, ret_rate=0.035))
+    # save(AssetClass(name='余额宝', code='10001', type=SV.ASSET_CLASS_FUND))
+    # agreement = (AssetClass(name='浦发理财一号', code='20007', type=SV.ASSET_CLASS_AGREEMENT))
     # save(AssetRetRate(asset_id=agreement.id, ret_rate=0.03, threshold=0))
     # save(AssetRetRate(asset_id=agreement.id, ret_rate=0.1, threshold=10000))
     # save(agreement)
-    # agree = AssetClass(name='联顺泰', code='20007', type=SV.ASSET_CLASS_MANAGEMENT, ret_rate=0.08)
+    # agree = AssetClass(name='联顺泰', code='20007', type=SV.ASSET_CLASS_MANAGEMENT)
     #
     # save(AssetFeeRate(asset_class=agree.id, rate=20, type=SV.FEE_TYPE_PURCHASE, method=SV.FEE_METHOD_RATIO_ONE_TIME))
     # save(AssetFeeRate(asset_class=agree.id, rate=0.015, type=SV.FEE_TYPE_REDEEM, method=SV.FEE_METHOD_RATIO_EVERY_DAY))
@@ -351,8 +348,11 @@ if __name__ == '__main__':
     # add_asset_trade_with_asset_and_type(amount=10000, asset_id='41216cc75f9c455fa4c309a177eef9e7',
     #                                     trade_type=SV.ASSET_TYPE_PURCHASE)
     # cal_date = date.today() - timedelta(days=5)
-    asset = get_asset_by_name(name='浦发理财一号')
-    purchase(asset=asset, amount=6000)
+    # asset = get_asset_by_name(name='浦发理财一号')
+    # # purchase(asset=asset, amount=7000)
+    # redeem(asset=asset, amount=7000)
+
+    # redeem(asset=asset, amount=10000)
     # redeem(asset=asset, amount=15000, cal_date=cal_date)
     # print(get_asset_trade_change(asset_type=SV.ASSET_CLASS_FUND, trade_type=SV.ASSET_TYPE_REDEEM))
     # print(get_cash_trade_change())
