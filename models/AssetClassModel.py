@@ -23,13 +23,13 @@ class AssetClass(MixinBase):
     asset_fee_list = relationship('AssetFee', lazy='subquery', cascade='all')
     asset_ret_rate_list = relationship('AssetRetRate', lazy='subquery', cascade='all')
 
-    def __init__(self, name='', code='', start_date=None, expiry_date=None, type=1, ret_rate=0, ret_cal_method=0,
+    def __init__(self, name='', code='', start_date=None, expiry_date=None, type=1,
+                 ret_cal_method=SV.RET_TYPE_CASH_CUT_INTEREST,
                  cal_date=date.today()):
         MixinBase.__init__(self)
         self.name = name
         self.type = type
         self.code = code
-        self.ret_rate = ret_rate
         self.ret_cal_method = ret_cal_method
         self.start_date = start_date
         self.expiry_date = expiry_date
