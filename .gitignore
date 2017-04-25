@@ -4,3 +4,4 @@ __pycache__/
 .idea
 data-excel.db
 data-test.db
+.idea/dataSources.xml
