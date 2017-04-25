@@ -1,0 +1,4 @@
+psutil==5.2.0
+SQLAlchemy==1.1.6
+PyQt5==5.8.2
+xlsxwriter==0.9.6
