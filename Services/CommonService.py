@@ -357,17 +357,28 @@ def get_all_mamangement_ids(**kwargs):
     return list(map(lambda x: x[0], ids))
 
 
+@session_deco
+def get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_AGREEMENT, **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+
+    assets = session.query(AssetClass.id, AssetClass.name).filter(AssetClass.is_active, AssetClass.type == asset_type)
+    return list(assets)
+
+    # return list(map(lambda x: {x[0]: x[1]}, assets))
+
+
 if __name__ == '__main__':
-    print(get_all_mamangement_ids())
+    print((get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_AGREEMENT)))
+    # print(get_all_mamangement_ids())
     # print(get_management_asset_all_ret(asset_id='8f62d3fb42ec49459de78934753f57ae'))
     # print(get_management_trade_amount(asset_id='8f62d3fb42ec49459de78934753f57ae'))
     # print(get_management_trade_fees(asset_id='8f62d3fb42ec49459de78934753f57ae'))
     # save(Cash(amount=100000, type=SV.CASH_TYPE_DEPOSIT))
     # save(AssetClass(name='余额宝', code='10001', type=SV.ASSET_CLASS_FUND))
-    # agreement = (AssetClass(name='浦发理财一号', code='20007', type=SV.ASSET_CLASS_AGREEMENT))
-    # save(AssetRetRate(asset_id=agreement.id, ret_rate=0.03, threshold=0))
-    # save(AssetRetRate(asset_id=agreement.id, ret_rate=0.1, threshold=10000))
-    # save(agreement)
+    agreement = (AssetClass(name='浦发理财一号', code='20007', type=SV.ASSET_CLASS_AGREEMENT))
+    save(AssetRetRate(asset_id=agreement.id, ret_rate=0.03, threshold=0))
+    save(AssetRetRate(asset_id=agreement.id, ret_rate=0.1, threshold=10000))
+    save(agreement)
     # agree = AssetClass(name='联顺泰', code='20007', type=SV.ASSET_CLASS_MANAGEMENT)
     #
     # save(AssetFeeRate(asset_class=agree.id, rate=20, type=SV.FEE_TYPE_PURCHASE, method=SV.FEE_METHOD_RATIO_ONE_TIME))

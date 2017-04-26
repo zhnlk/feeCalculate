@@ -15,7 +15,7 @@ from services.CommonService import (
     get_asset_ret_last_total_amount_by_asset_and_type,
     add_asset_fee_with_asset_and_type,
     query_by_id, save, get_management_asset_all_ret, get_management_trade_amount, get_management_trade_fees,
-    get_all_mamangement_ids)
+    get_all_mamangement_ids, get_all_asset_ids_by_type)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
 from utils.Utils import timer
@@ -445,7 +445,7 @@ def get_all_management_detail():
     return ret
 
 
-def get_total_fund_statistic(cal_date=date.today(), asset_id=''):
+def get_total_fund_statistic_by_id(cal_date=date.today(), asset_id=''):
     total_purchase_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
                                                                           trade_type=SV.ASSET_TYPE_PURCHASE)
     total_redeem_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
@@ -461,13 +461,21 @@ def get_total_fund_statistic(cal_date=date.today(), asset_id=''):
     }
 
 
+def get_total_fund_statistic(cal_date=date.today()):
+    assets = get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_FUND)
+    ret = list()
+    for asset in assets:
+        ret.append({asset[1]: get_total_fund_statistic_by_id(cal_date=cal_date, asset_id=asset[0])})
+    return ret
+
+
 if __name__ == '__main__':
     '''
     agreement:{'rate': 0.035, 'asset_name': '浦发理财一号', 'cal_date': datetime.date(2017, 4, 20), 'cash_to_agreement': 20001.0, 'agreement_to_cash': 10001.0, 'ret_carry_principal': 1001.0, 'asset_ret': -1001.0, 'total_amount': 10000.0}
     fund:{'asset_name': '余额宝', 'cal_date': datetime.date(2017, 4, 20), 'cash_to_fund': 13009.0, 'fund_to_cash': 8011.0, 'asset_ret': 3005.0, 'ret_carry_cash': 1005.0, 'ret_not_carry': 2000.0, 'total_amount': 8003.0}
     cash:{'cal_date': datetime.date(2017, 4, 20), 'cash_to_agreement': 20001.0, 'cash_to_fund': 13009.0, 'cash_to_management': 20000.0, 'agreement_to_cash': 10001.0, 'fund_to_cash': 8011.0, 'management_to_cash': 15000.0, 'investor_to_cash': 100000.0, 'cash_to_investor': 0, 'cash_draw_fee': 0, 'cash_return': 0, 'total_amount': 80001.0}
     '''
-    print(get_all_management_detail())
+    print(get_total_fund_statistic())
     # print(get_single_management_detail(asset_id='8f62d3fb42ec49459de78934753f57ae'))
     # cal_daily_ret_and_fee(asset_id='7fe9c108cd874c10b167782f798e1d35')
     # cal_agreement_ret(cal_date=date.today(),
