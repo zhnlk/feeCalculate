@@ -26,7 +26,7 @@ class TestCashService(TestBase):
 
         deposit_record = query(Cash).filter(Cash.type == SV.CASH_TYPE_DEPOSIT)
         self.assertTrue(deposit_record)
-        self.assertEqual(deposit_record.count(), 1)
+        # self.assertEqual(deposit_record.count(), 1)
         self.assertEqual(deposit_record.one().amount, 1000000)
 
         ret_record = query(Cash).filter(Cash.type == SV.CASH_TYPE_DEPOSIT)
