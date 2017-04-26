@@ -20,25 +20,19 @@ class ProtocolListView(BasicFcView):
         self.mainEngine = mainEngine
 
         d = OrderedDict()
-        d['pd_project_name'] = {'chinese': '协存项目名称', 'cellType': BasicCell}
-        d['pd_project_rate'] = {'chinese': '协存项目利率', 'cellType': BasicCell}
+        d['asset_name'] = {'chinese': '协存项目名称', 'cellType': BasicCell}
+        d['rate'] = {'chinese': '协存项目利率', 'cellType': BasicCell}
 
-        d['date'] = {'chinese': '计算日', 'cellType': BasicCell}
-        # d['protocol_deposit_amount'] = {'chinese': '协存总额', 'cellType': NumCell}
-        # d['protocol_deposit_revenue'] = {'chinese': '协存收益', 'cellType': NumCell}
-        # d['cash_to_protocol_deposit'] = {'chinese': '现金->协存', 'cellType': NumCell}
-        # d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': NumCell}
+        d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
 
         # 协存项目
-        d['pd_amount'] = {'chinese': '总额', 'cellType': BasicCell}
-        d['pd_principal'] = {'chinese': '协存本金', 'cellType': BasicCell}
-        d['pd_interest'] = {'chinese': '协存利息', 'cellType': BasicCell}
+        d['total_amount'] = {'chinese': '总额', 'cellType': BasicCell}
+        d['asset_ret'] = {'chinese': '协存本金', 'cellType': BasicCell}
+        # d['pd_interest'] = {'chinese': '协存利息', 'cellType': BasicCell}
         # 协存项目 输入项
-        d['pd_interest_to_principal'] = {'chinese': '利息转结本金', 'cellType': BasicCell}
-        # d['pd_investor_to_pd'] = {'chinese': '投资人资金->协存', 'cellType': BasicCell}
-        d['pd_cash_to_pd'] = {'chinese': '现金->协存', 'cellType': BasicCell}
-        # d['pd_pd_to_investor'] = {'chinese': '协存->总付投资人', 'cellType': BasicCell}
-        d['pd_pd_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
+        d['ret_carry_principal'] = {'chinese': '利息转结本金', 'cellType': BasicCell}
+        d['cash_to_agreement'] = {'chinese': '现金->协存', 'cellType': BasicCell}
+        d['agreement_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
 
         self.setHeaderDict(d)
 
@@ -58,30 +52,20 @@ class ProtocolListView(BasicFcView):
     # ----------------------------------------------------------------------
     def showProtocolListDetail(self):
         """显示所有合约数据"""
-        # result0 = self.mainEngine.getProtocol()
-        result2 = self.mainEngine.getProtocolListDetail()
-        # self.setRowCount(len(result1)+len(result2))
-        self.setRowCount(len(result2))
+        result = mainEngine.get_agreement_detail_by_days()
+        print(result)
+        self.setRowCount(len(result))
         row = 0
-        for r in result2:
+        for r in result:
             # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
-                name, rate = r.getPdProjectInfo()
-                if header is 'pd_project_name':
-                    content = name
-                elif header is 'pd_project_rate':
-                    content = rate
-                else:
-                    content = r.__getattribute__(header)
+                # name, rate = r.getPdProjectInfo()
+                content = r[header]
 
                 if isinstance(content, float):
-                    content = float('%.2f' % content)
+                    content = float('%.4f' % content)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
-                print(cell.text())
-                # if self.font:
-                #     cell.setFont(self.font)  # 如果设置了特殊字体，则进行单元格设置
-
                 self.setItem(row, n, cell)
 
             row = row + 1

@@ -64,7 +64,7 @@ class CashListView(BasicFcView):
 
         result = self.mainEngine.get_cash_detail_by_days(7)
 
-        print(len(result))
+        print(result)
         self.setRowCount(len(result))
         row = 0
         for r in result:

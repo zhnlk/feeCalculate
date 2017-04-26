@@ -1,6 +1,7 @@
 # encoding: UTF-8
-from datetime import datetime
+import datetime
 
+import AssetService
 import CashService
 from Cash import Cash
 from EventEngine import *
@@ -16,7 +17,7 @@ class MainEngine(object):
     def __init__(self):
         """Constructor"""
         # 记录今日日期
-        self.todayDate = datetime.now().strftime('%Y%m%d')
+        self.todayDate = datetime.datetime.today()
 
         # 创建事件引擎
         self.eventEngine = EventEngine()
@@ -130,44 +131,28 @@ class MainEngine(object):
         """
         CashService.add_cash_daily_data(draw_amount,draw_fee,deposit_amount,ret_amount)
 
-    def getProtocolDeposit(self, date):
-        """查询协存汇总"""
-        pd = ProtocolDeposit(date)
+    def get_agreement_detail_by_days(self,days=0):
+        """
+        获取协存明细记录
+        :param days: 
+        :return: 
+        """
+        return [{'rate': 0.035, 'asset_name': '浦发理财一号', 'cal_date': datetime.date(2017, 4, 20), 'cash_to_agreement': 20001.0, 'agreement_to_cash': 10001.0, 'ret_carry_principal': 1001.0, 'asset_ret': -1001.0, 'total_amount': 10000.0}]
+        # return AssetService.get_agreement_detail_by_days(days)
 
-        # protocolDepositList = PdProjectList.listByDate(date)
-        # for p in protocolDepositList:
-        #     pd.protocol_deposit_amount += p.pd_amount
-        #     pd.protocol_deposit_revenue += p.pd_interest
-        #     pd.cash_to_protocol_deposit += p.pd_cash_to_pd
-        #     pd.protocol_deposit_to_cash += p.pd_pd_to_cash
-        pd.save()
+    def get_fund_detail_by_days(self,days=0):
+        """
+        获取货基明细记录
+        :param days: 
+        :return: 
+        """
+        return [{'asset_name': '余额宝', 'cal_date': datetime.date(2017, 4, 20), 'cash_to_fund': 13009.0, 'fund_to_cash': 8011.0, 'asset_ret': 3005.0, 'ret_carry_cash': 1005.0, 'ret_not_carry': 2000.0, 'total_amount': 8003.0}]
+        # return AssetService.get_fund_detail_by_days(days)
 
-        return pd
+    def get_all_management_detail(self):
+        """
+        资管相关明细
+        :return: 
+        """
+        return AssetService.get_all_management_detail()
 
-    def getProtocolDetail(self):
-        """查询协存"""
-        detail = PdProject.listAll()
-        for d in detail:
-            print('getProtocolDetail' + d.uuid)
-        return detail
-
-    def getProtocolListDetail(self):
-        """查询协存列表明细"""
-        detail = PdProjectList.listAll()
-        for d in detail:
-            self.getProtocolDeposit(d.date)
-            print('getProtocolListDetail.........' + d.uuid)
-        return detail
-
-    def getMoneyFundDetail(self):
-        """查询货基列表明细"""
-        detail = MfProjectList.listAll()
-        for m in detail:
-            print('getMoneyFundListDetail' + m.uuid)
-        return detail
-
-    def getMoneyFundSummary(self, date):
-        res = MfProjectList.listAllForSummary(date)
-        for r in res:
-            print(r[0], r[1], r[2], r[3])
-        return res
