@@ -467,8 +467,36 @@ def get_total_fund_statistic(cal_date=date.today()):
     for asset in assets:
         fund_ret = get_total_fund_statistic_by_id(cal_date=cal_date, asset_id=asset[0])
         fund_ret.update({SV.ASSET_KEY_NAME: asset[1]})
-        # ret.append({asset[1]: get_total_fund_statistic _by_id(cal_date=cal_date, asset_id=asset[0])})
         ret.append(fund_ret)
+    return ret
+
+
+def get_total_management_statistic_by_id(cal_date=date.today(), asset_id=''):
+    total_purchase_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                          trade_type=SV.ASSET_TYPE_PURCHASE)
+    total_redeem_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                        trade_type=SV.ASSET_TYPE_REDEEM)
+    total_amount = total_purchase_amount - total_redeem_amount
+
+    total_ret_amount = get_asset_ret_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                         ret_type=SV.RET_TYPE_INTEREST)
+
+    return {
+        SV.ASSET_KEY_MANAGEMENT_AMOUNT: total_amount + total_ret_amount,
+        SV.ASSET_KEY_PURCHASE_MANAGEMENT: total_purchase_amount,
+        SV.ASSET_KEY_MANAGEMENT_RET: total_ret_amount,
+        SV.CASH_KEY_CAL_DATE: cal_date,
+    }
+
+
+def get_total_management_statistic(cal_date=date.today()):
+    assets = get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_MANAGEMENT)
+    ret = list()
+    for asset in assets:
+        management_ret = get_total_management_statistic_by_id(cal_date=cal_date, asset_id=asset[0])
+        management_ret.update({SV.ASSET_KEY_NAME: asset[1]})
+        ret.append(management_ret)
+
     return ret
 
 
