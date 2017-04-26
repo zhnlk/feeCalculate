@@ -1,7 +1,6 @@
 build/
 dist/
 __pycache__/
-.idea
-data-test.db
-.idea/dataSources.xml
+.idea/
 data-excel.db
+data-test.db
