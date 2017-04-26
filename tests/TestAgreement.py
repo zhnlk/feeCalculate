@@ -135,5 +135,7 @@ class TestAgreement(TestBase):
         self.assertEqual(cash.type, SV.ASSET_CLASS_AGREEMENT)
 
 
+
+
 if __name__ == '__main__':
     unittest.main()
