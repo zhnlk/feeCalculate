@@ -465,7 +465,10 @@ def get_total_fund_statistic(cal_date=date.today()):
     assets = get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_FUND)
     ret = list()
     for asset in assets:
-        ret.append({asset[1]: get_total_fund_statistic_by_id(cal_date=cal_date, asset_id=asset[0])})
+        fund_ret = get_total_fund_statistic_by_id(cal_date=cal_date, asset_id=asset[0])
+        fund_ret.update({SV.ASSET_KEY_NAME: asset[1]})
+        # ret.append({asset[1]: get_total_fund_statistic _by_id(cal_date=cal_date, asset_id=asset[0])})
+        ret.append(fund_ret)
     return ret
 
 
