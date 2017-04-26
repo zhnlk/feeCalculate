@@ -64,6 +64,11 @@ ASSET_KEY_MANAGEMENT_MANAGE_FEE = 'manage_fee'
 ASSET_KEY_MANAGEMENT_AMOUNT = 'management_amount'
 ASSET_KEY_MANAGEMENT_DAILY_RET = 'mamangement_daily_ret'
 
+ASSET_KEY_FUND_TOTAL_AMOUNT = 'total_amount'
+ASSET_KEY_FUND_TOTAL_PURCHASE_AMOUNT = 'total_purchase_amount'
+ASSET_KEY_FUND_TOTAL_REDEEM_AMOUNT = 'total_redeem_amount'
+ASSET_KEY_FUND_TOTAL_RET_AMOUNT = 'total_ret_amount'
+
 # 收益变化类型
 RET_TYPE_INTEREST = 1
 RET_TYPE_PRINCIPAL = 0

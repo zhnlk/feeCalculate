@@ -14,6 +14,7 @@ from fcConstant import SQLALCHEMY_DATABASE_URI
 from utils import StaticValue as SV
 
 engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=False)
+# engine = create_engine('mysql+mysqldb://root:Passw0rd@127.0.0.1:3306/fec', echo=False)
 Base = declarative_base()
 Session = sessionmaker(bind=engine, autoflush=True, autocommit=False)
 

@@ -29,7 +29,7 @@ def asset_ret_carry_to_principal(cal_date=date.today(), asset=AssetClass(), amou
             amount=amount,
             asset_id=asset.id,
             cal_date=cal_date,
-            ret_type=SV.RET_TYPE_CASH
+            ret_type=SV.RET_TYPE_PRINCIPAL
         )
         add_asset_trade_with_asset_and_type(
             amount=amount,
@@ -411,23 +411,28 @@ def management_carry_ret_to_cash(cal_date=date.today(), asset_id=''):
 
 def get_single_management_detail(asset_id=''):
     asset = query_by_id(obj=AssetClass, obj_id=asset_id)
+    print(asset)
     ret = dict()
     ret.update({SV.ASSET_KEY_NAME: asset.name})
     ret.update({SV.ASSET_KEY_START_DATE: asset.start_date})
     ret.update({SV.ASSET_KEY_EXPIRY_DATE: asset.expiry_date})
-    ret.update({SV.ASSET_KEY_MANAGEMENT_DUE: (asset.expiry_date - asset.start_date).days})
+    ret.update({SV.ASSET_KEY_MANAGEMENT_DUE: (
+        asset.expiry_date - asset.start_date).days}) if asset.expiry_date and asset.start_date else ret.update(
+        {SV.ASSET_KEY_MANAGEMENT_DUE: 360})
     ret.update({SV.ASSET_KEY_ASSET_RET: get_management_asset_all_ret(asset_id=asset.id)})
     ret.update({SV.ASSET_KEY_MANAGEMENT_AMOUNT: get_management_trade_amount(asset_id=asset_id)})
 
     fees = get_management_trade_fees(asset_id=asset_id)
+    print(ret)
     ret.update({SV.ASSET_KEY_MANAGEMENT_BANK_FEE: ret.get(SV.ASSET_KEY_MANAGEMENT_AMOUNT) * fees[0].rate * ret.get(
-        SV.ASSET_KEY_MANAGEMENT_DUE) / fees[0].fee_days})
+        SV.ASSET_KEY_MANAGEMENT_DUE) / fees[0].fee_days}) if ret.get(SV.ASSET_KEY_MANAGEMENT_DUE) else ret.update(
+        {SV.ASSET_KEY_MANAGEMENT_BANK_FEE: 200})
     ret.update({SV.ASSET_KEY_MANAGEMENT_MANAGE_FEE: ret.get(SV.ASSET_KEY_MANAGEMENT_AMOUNT) * fees[1].rate * ret.get(
-        SV.ASSET_KEY_MANAGEMENT_DUE) / fees[1].fee_days})
-    ret.update({SV.ASSET_KEY_MANAGEMENT_DAILY_RET: (
-                                                       ret.get(SV.ASSET_KEY_ASSET_RET) - ret.get(
-                                                           SV.ASSET_KEY_MANAGEMENT_BANK_FEE) - ret.get(
-                                                           SV.ASSET_KEY_MANAGEMENT_MANAGE_FEE)) / ret.get(
+        SV.ASSET_KEY_MANAGEMENT_DUE) / fees[1].fee_days}) if ret.get(SV.ASSET_KEY_MANAGEMENT_DUE) else ret.update(
+        {SV.ASSET_KEY_MANAGEMENT_MANAGE_FEE: 100})
+    ret.update({SV.ASSET_KEY_MANAGEMENT_DAILY_RET: (ret.get(SV.ASSET_KEY_ASSET_RET) - ret.get(
+        SV.ASSET_KEY_MANAGEMENT_BANK_FEE) - ret.get(
+        SV.ASSET_KEY_MANAGEMENT_MANAGE_FEE)) / ret.get(
         SV.ASSET_KEY_MANAGEMENT_DUE)})
     return ret
 
@@ -438,6 +443,22 @@ def get_all_management_detail():
     for id in ids:
         ret.update({id: get_single_management_detail(asset_id=id)})
     return ret
+
+
+def get_total_fund_statistic(cal_date=date.today(), asset_id=''):
+    total_purchase_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                          trade_type=SV.ASSET_TYPE_PURCHASE)
+    total_redeem_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                        trade_type=SV.ASSET_TYPE_REDEEM)
+    total_amount = total_purchase_amount - total_redeem_amount
+    total_ret_amount = get_asset_ret_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                         ret_type=SV.RET_TYPE_INTEREST)
+    return {
+        SV.ASSET_KEY_FUND_TOTAL_AMOUNT: total_amount,
+        SV.ASSET_KEY_FUND_TOTAL_PURCHASE_AMOUNT: total_purchase_amount,
+        SV.ASSET_KEY_FUND_TOTAL_REDEEM_AMOUNT: total_redeem_amount,
+        SV.ASSET_KEY_FUND_TOTAL_RET_AMOUNT: total_ret_amount
+    }
 
 
 if __name__ == '__main__':
@@ -456,6 +477,8 @@ if __name__ == '__main__':
 
     # cal_adjust_fee(cal_date=date.today(), fee_amount=200, asset_id='85b05920001c41b2bfdef220d86c0125')
 
-    # add_management(name='management1', trade_amount=100000, ret_rate=0.1, rate_days=360, start_date=date.today(),
+    # add_management(name='management2', trade_amount=100000, ret_rate=0.1, rate_days=360, start_date=date.today(),
     #                end_date=date.today() + timedelta(days=365), bank_fee_rate=0.0003, bank_days=360,
     #                manage_fee_rate=0.0012, manage_days=360, cal_date=date.today())
+
+    # cal_daily_ret_and_fee(asset_id='327574da3cf14b368f150fcf7cda6b65')
