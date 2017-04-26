@@ -1,6 +1,7 @@
 # encoding: UTF-8
 from datetime import datetime
 
+import CashService
 from Cash import Cash
 from EventEngine import *
 from MoneyFund import MfProjectList, MoneyFund
@@ -103,22 +104,31 @@ class MainEngine(object):
 
     def getTodayFee(self, date):
         v = Valuation.findByDate(date)
-        return v.fee_1, v.fee_2, v.fee_3,v.fee_4
+        if v is None:
+            return '0', '0', '0', '0'
+        else:
+            return v.fee_1, v.fee_2, v.fee_3, v.fee_4
 
     # ----------------------------------------------------------------------
-    def getCashDetail(self):
-        """查询现金明细"""
-        detail = Cash.listAll()
-        # 计算每日的现金明细
-        for d in detail:
-            d.total_cash = d.getTodayTotalCash(d.date)
-            # 计算协存与货基的相关数据
-            d.getRelatedData()
 
-            print(d.__dict__)
-            d.save()
-        print('get Cash Detail')
-        return detail
+    def get_cash_detail_by_days(self, days):
+        """
+        获取现金明细
+        :param days:获取days内的现金明细
+        :return 现金明细的dict
+        """
+        return CashService.get_cash_detail_by_days(days)
+
+    def add_cash_daily_data(self,draw_amount,draw_fee,deposit_amount,ret_amount):
+        """
+        增加现金明细记录
+        :param draw_amount: 兑付
+        :param draw_fee: 提取费用
+        :param deposit_amount: 流入
+        :param ret_amount:现金收入
+        :return None 
+        """
+        CashService.add_cash_daily_data(draw_amount,draw_fee,deposit_amount,ret_amount)
 
     def getProtocolDeposit(self, date):
         """查询协存汇总"""
