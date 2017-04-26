@@ -445,6 +445,22 @@ def get_all_management_detail():
     return ret
 
 
+def get_total_fund_statistic(cal_date=date.today(), asset_id=''):
+    total_purchase_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                          trade_type=SV.ASSET_TYPE_PURCHASE)
+    total_redeem_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                        trade_type=SV.ASSET_TYPE_REDEEM)
+    total_amount = total_purchase_amount - total_redeem_amount
+    total_ret_amount = get_asset_ret_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                         ret_type=SV.RET_TYPE_INTEREST)
+    return {
+        SV.ASSET_KEY_FUND_TOTAL_AMOUNT: total_amount,
+        SV.ASSET_KEY_FUND_TOTAL_PURCHASE_AMOUNT: total_purchase_amount,
+        SV.ASSET_KEY_FUND_TOTAL_REDEEM_AMOUNT: total_redeem_amount,
+        SV.ASSET_KEY_FUND_TOTAL_RET_AMOUNT: total_ret_amount
+    }
+
+
 if __name__ == '__main__':
     '''
     agreement:{'rate': 0.035, 'asset_name': '浦发理财一号', 'cal_date': datetime.date(2017, 4, 20), 'cash_to_agreement': 20001.0, 'agreement_to_cash': 10001.0, 'ret_carry_principal': 1001.0, 'asset_ret': -1001.0, 'total_amount': 10000.0}
