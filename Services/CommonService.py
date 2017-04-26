@@ -364,8 +364,6 @@ def get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_AGREEMENT, **kwargs):
     assets = session.query(AssetClass.id, AssetClass.name).filter(AssetClass.is_active, AssetClass.type == asset_type)
     return list(assets)
 
-    # return list(map(lambda x: {x[0]: x[1]}, assets))
-
 
 if __name__ == '__main__':
     print((get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_AGREEMENT)))
