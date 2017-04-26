@@ -28,7 +28,7 @@ class AdjustValuationView(BasicFcView):
         d['pd_project_rate'] = {'chinese': '转账费用', 'cellType': BasicCell}
 
         d['date'] = {'chinese': '支票费用', 'cellType': BasicCell}
-        d['pd_pd_to_cash'] = {'chinese': '总调整费用', 'cellType': BasicCell}
+        d['total_to_cash'] = {'chinese': '总调整费用', 'cellType': BasicCell}
         d['pd_pd_to_cash'] = {'chinese': '调整结果', 'cellType': BasicCell}
 
         self.setHeaderDict(d)

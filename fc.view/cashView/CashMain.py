@@ -22,18 +22,18 @@ class CashListView(BasicFcView):
         self.mainEngine = mainEngine
 
         d = OrderedDict()
-        d['date'] = {'chinese': '计算日', 'cellType': BasicCell}
-        d['total_cash'] = {'chinese': '现金总额', 'cellType': BasicCell}
-        d['cash_to_assert_mgt'] = {'chinese': '现金->资管', 'cellType': BasicCell}
-        d['cash_to_money_fund'] = {'chinese': '现金->货基', 'cellType': BasicCell}
-        d['cash_to_protocol_deposit'] = {'chinese': '现金->协存', 'cellType': BasicCell}
+        d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
+        d['total_amount'] = {'chinese': '现金总额', 'cellType': BasicCell}
+        d['cash_to_management'] = {'chinese': '现金->资管', 'cellType': BasicCell}
+        d['cash_to_fund'] = {'chinese': '现金->货基', 'cellType': BasicCell}
+        d['cash_to_agreement'] = {'chinese': '现金->协存', 'cellType': BasicCell}
         d['cash_to_investor'] = {'chinese': '现金->兑付投资人', 'cellType': BasicCell}
-        d['assert_mgt_to_cash'] = {'chinese': '资管->现金', 'cellType': BasicCell}
-        d['money_fund_to_cash'] = {'chinese': '货基->现金', 'cellType': BasicCell}
-        d['protocol_deposit_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
+        d['management_to_cash'] = {'chinese': '资管->现金', 'cellType': BasicCell}
+        d['fund_to_cash'] = {'chinese': '货基->现金', 'cellType': BasicCell}
+        d['agreement_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
         d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': BasicCell}
-        d['cash_revenue'] = {'chinese': '现金收入', 'cellType': BasicCell}
-        d['extract_fee'] = {'chinese': '提取费用', 'cellType': BasicCell}
+        d['cash_return'] = {'chinese': '现金收入', 'cellType': BasicCell}
+        d['cash_draw_fee'] = {'chinese': '提取费用', 'cellType': BasicCell}
 
         self.setEventType(EVENT_CASH)
 
@@ -62,7 +62,7 @@ class CashListView(BasicFcView):
     def showCashListDetail(self):
         """显示现金记录明细"""
 
-        result = self.mainEngine.getCashDetail()
+        result = self.mainEngine.get_cash_detail_by_days(7)
 
         print(len(result))
         self.setRowCount(len(result))
@@ -70,15 +70,10 @@ class CashListView(BasicFcView):
         for r in result:
             # 按照定义的表头，进行填充数据
             for n, header in enumerate(self.headerList):
-                content = r.__getattribute__(header)
+                content = r[header]
                 print(content)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
-                # print(cell)
-
-                if self.font:
-                    cell.setFont(self.font)  # 如果设置了特殊字体，则进行单元格设置
-
                 self.setItem(row, n, cell)
 
             row = row + 1
