@@ -21,7 +21,14 @@ from utils import StaticValue as SV
 from utils.Utils import timer
 
 
+################################################################
 # Agreement relation method
+#
+#
+#
+#
+#
+################################################################
 
 def add_agreement_class(name='', rate=0.03, threshold_amount=0, threshold_rate=0):
     '''
@@ -85,6 +92,81 @@ def add_agreement_daily_data(cal_date=date.today(), asset_id='', ret_carry_asset
                          purchase_amount=purchase_amount, redeem_amount=redeem_amount)
 
 
+def cal_agreement_ret(cal_date=date.today(), asset=AssetClass()):
+    '''
+    计算协存的利息
+    :param cal_date:计算日期
+    :param asset:资产对象
+    :return:
+    '''
+    purchase_amount = get_asset_last_total_amount_by_asset_and_type(
+        cal_date=cal_date,
+        asset_id=asset.id,
+        trade_type=SV.ASSET_TYPE_PURCHASE
+    )
+
+    redeem_amount = get_asset_last_total_amount_by_asset_and_type(
+        cal_date=cal_date,
+        asset_id=asset.id,
+        trade_type=SV.ASSET_TYPE_REDEEM
+    )
+    carry_amount = get_asset_last_total_amount_by_asset_and_type(
+        cal_date=cal_date,
+        asset_id=asset.id,
+        trade_type=SV.ASSET_TYPE_RET_CARRY
+    )
+
+    total_amount = purchase_amount + carry_amount - redeem_amount
+    asset = query_by_id(obj=AssetClass, obj_id=asset.id)
+    rates = asset.asset_ret_rate_list
+    rate = get_asset_rate_by_amount(rates=rates, amount=total_amount)
+    add_asset_ret_with_asset_and_type(
+        amount=total_amount * rate / 360,
+        asset_id=asset.id,
+        ret_type=SV.RET_TYPE_INTEREST,
+        cal_date=cal_date
+    ) if total_amount else None
+
+
+# @timer
+def get_asset_agreement_detail(cal_date=date.today(), asset_id=''):
+    '''
+    获取协存详情
+    :param cal_date:计算日期
+    :param asset_id:协存资产id
+    :return:协存详情字典
+    '''
+    ret = dict()
+    asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
+    ret[SV.ASSET_KEY_RATE] = list(map(lambda x: x.ret_rate, asset.asset_ret_rate_list))[
+        0] if len(asset.asset_ret_rate_list) > 0 else 0.0
+    ret.update(get_asset_base_detail(cal_date=cal_date, asset=asset))
+    ret[SV.ASSET_KEY_RET_CARRY_PRINCIPAL] = get_asset_ret_last_total_amount_by_asset_and_type(
+        asset_id=asset_id,
+        cal_date=cal_date,
+        ret_type=SV.RET_CARRY_TO_PRINCIPAL
+    )
+    ret[SV.ASSET_KEY_ASSET_RET] = get_asset_ret_last_total_amount_by_asset_and_type(
+        asset_id=asset_id,
+        cal_date=cal_date,
+        ret_type=SV.RET_TYPE_INTEREST
+    )
+    ret.update({SV.ASSET_KEY_RET_CARRY_PRINCIPAL: get_asset_ret_last_total_amount_by_asset_and_type(
+        asset_id=asset.id,
+        cal_date=cal_date,
+        ret_type=SV.RET_TYPE_PRINCIPAL
+    )})
+    ret.update({SV.ASSET_KEY_ASSET_RET: get_asset_ret_last_total_amount_by_asset_and_type(
+        asset_id=asset.id,
+        cal_date=cal_date,
+        ret_type=SV.RET_TYPE_INTEREST
+    ) - ret[SV.ASSET_KEY_RET_CARRY_PRINCIPAL]})
+    ret.update({SV.ASSET_KEY_ASSET_TOTAL: ret[SV.ASSET_KEY_PURCHASE_AGREEMENT] + ret[SV.ASSET_KEY_RET_CARRY_PRINCIPAL] +
+                                          ret[SV.ASSET_KEY_ASSET_RET] - ret.get(SV.ASSET_KEY_REDEEM_AGREEMENT, 0)})
+
+    return ret
+
+
 # @timer
 def get_single_agreement_detail_by_days(days=0, asset_id=''):
     return list(map(lambda x: get_asset_agreement_detail(cal_date=x, asset_id=asset_id),
@@ -98,41 +180,32 @@ def get_agreement_detail_by_days(days=0):
     :param days:
     :return:
     '''
-    agreement_ids = list(
-        map(lambda x: x.id, query(AssetClass).filter(AssetClass.type == SV.ASSET_CLASS_AGREEMENT)))
+    # agreement_ids = list(
+    #     map(lambda x: x.id, query(AssetClass).filter(AssetClass.type == SV.ASSET_CLASS_AGREEMENT)))
+    ret = list()
 
-    return dict((map(lambda x: (x, get_single_agreement_detail_by_days(days=days, asset_id=x)), agreement_ids)))
+    agreement_ids = get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_AGREEMENT)
 
+    for agreement_id in agreement_ids:
+        agreement_ret = get_single_agreement_detail_by_days(days=days, asset_id=agreement_id[0])
+        agreement_ret.update({'asset_name': agreement_id[1]})
+        ret.append(agreement_ret)
 
-def cal_daily_ret_and_fee(cal_date=date.today(), asset_id=''):
-    '''
-    计算资管的收益和费用
-    :param cal_date:计算日期
-    :param asset_id:资产id
-    :return:
-    '''
-    assetclass = query_by_id(obj=AssetClass, obj_id=asset_id)
-    if cal_date < assetclass.expiry_date:
-        asset_ret_rates = assetclass.asset_ret_rate_list
-        asset_fee_rates = assetclass.asset_fee_rate_list
-        asset_trade_amount = get_asset_last_total_amount_by_asset_and_type(asset_id=assetclass.id,
-                                                                           trade_type=SV.ASSET_TYPE_PURCHASE,
-                                                                           cal_date=cal_date)
+    return ret
 
-        rate = asset_ret_rates[0]
-        add_asset_ret_with_asset_and_type(amount=asset_trade_amount * rate.ret_rate / rate.interest_days,
-                                          asset_id=asset_id, ret_type=SV.RET_TYPE_INTEREST, cal_date=cal_date)
-
-        for x in asset_fee_rates:
-            add_asset_fee_with_asset_and_type(
-                amount=asset_trade_amount * x.rate / x.fee_days,
-                asset_id=asset_id, fee_type=SV.FEE_TYPE_PURCHASE,
-                cal_date=cal_date)
+    # return dict((map(lambda x: (x, get_single_agreement_detail_by_days(days=days, asset_id=x)), agreement_ids)))
 
 
 ## end agreement
 
-# Fund
+################################################################
+#
+#
+# Fund relation method
+#
+#
+#
+################################################################
 
 
 def add_fund_class(name='XX FUND', code=''):
@@ -218,6 +291,52 @@ def get_total_fund_statistic(cal_date=date.today()):
     return ret
 
 
+def get_asset_fund_detail(cal_date=date.today(), asset_id=''):
+    '''
+    获取货基详情
+    :param cal_date:计算日期
+    :param asset_id:货基资产id
+    :return:货基详情字典
+    '''
+    ret = dict()
+    asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
+    ret.update(get_asset_base_detail(cal_date=cal_date, asset=asset))
+    ret.update({
+        SV.ASSET_KEY_ASSET_RET:
+            get_asset_ret_last_total_amount_by_asset_and_type(
+                cal_date=cal_date,
+                asset_id=asset_id,
+                ret_type=SV.RET_TYPE_INTEREST
+            )})
+
+    ret.update({
+        SV.ASSET_KEY_RET_CARRY_CASH:
+            get_asset_ret_last_total_amount_by_asset_and_type(
+                asset_id=asset_id,
+                ret_type=SV.RET_TYPE_CASH,
+                cal_date=cal_date
+            )
+    })
+
+    ret.update({
+        SV.ASSET_KEY_RET_NOT_CARRY:
+            ret[SV.ASSET_KEY_ASSET_RET] - ret[SV.ASSET_KEY_RET_CARRY_CASH]})
+    total_purchase = get_asset_last_total_amount_by_asset_and_type(
+        cal_date=cal_date,
+        asset_id=asset_id,
+        trade_type=SV.ASSET_TYPE_PURCHASE
+    )
+    total_redeem = get_asset_last_total_amount_by_asset_and_type(
+        cal_date=cal_date,
+        asset_id=asset_id,
+        trade_type=SV.ASSET_TYPE_REDEEM
+    )
+
+    ret.update({SV.ASSET_KEY_ASSET_TOTAL: total_purchase - total_redeem + ret[SV.ASSET_KEY_ASSET_RET]})
+
+    return ret
+
+
 def get_single_fund_detail_by_days(days=0, asset_id=''):
     return list(map(lambda x: get_asset_fund_detail(cal_date=x, asset_id=asset_id),
                     get_asset_date(days=days, asset_id=asset_id)))
@@ -229,15 +348,25 @@ def get_fund_detail_by_days(days=0):
     :param days:计算日期
     :return:
     '''
-    fund_ids = list(
-        map(lambda x: x.id, query(AssetClass).filter(AssetClass.type == SV.ASSET_CLASS_FUND)))
 
-    return dict(map(lambda x: (x, get_single_fund_detail_by_days(days=days, asset_id=x)), fund_ids))
+    ret = list()
+    fund_ids = get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_FUND)
+    for fund_id in fund_ids:
+        fund_ret = get_single_fund_detail_by_days(days=days, asset_id=fund_id[0])
+        fund_ret.update({SV.ASSET_KEY_NAME: fund_id[1]})
+        ret.append(fund_ret)
+    return ret
+    # return dict(map(lambda x: (x, get_single_fund_detail_by_days(days=days, asset_id=x)), fund_ids))
 
 
-# End fund
-
-# Management
+################################################################
+#
+#
+#
+# Management relation detail
+#
+#
+################################################################
 
 def add_management_class(
         name='',
@@ -388,11 +517,40 @@ def management_carry_ret_to_cash(cal_date=date.today(), asset_id=''):
             )
 
 
-##end management method
+def cal_daily_ret_and_fee(cal_date=date.today(), asset_id=''):
+    '''
+    计算资管的收益和费用
+    :param cal_date:计算日期
+    :param asset_id:资产id
+    :return:
+    '''
+    assetclass = query_by_id(obj=AssetClass(), obj_id=asset_id)
+    if cal_date < assetclass.expiry_date:
+        asset_ret_rates = assetclass.asset_ret_rate_list
+        asset_fee_rates = assetclass.asset_fee_rate_list
+        asset_trade_amount = get_asset_last_total_amount_by_asset_and_type(asset_id=assetclass.id,
+                                                                           trade_type=SV.ASSET_TYPE_PURCHASE,
+                                                                           cal_date=cal_date)
+
+        rate = asset_ret_rates[0]
+        add_asset_ret_with_asset_and_type(amount=asset_trade_amount * rate.ret_rate / rate.interest_days,
+                                          asset_id=asset_id, ret_type=SV.RET_TYPE_INTEREST, cal_date=cal_date)
+
+        for x in asset_fee_rates:
+            add_asset_fee_with_asset_and_type(
+                amount=asset_trade_amount * x.rate / x.fee_days,
+                asset_id=asset_id, fee_type=SV.FEE_TYPE_PURCHASE,
+                cal_date=cal_date)
 
 
-# common method
-
+################################################################
+#
+#
+#
+# Common Method
+#
+#
+################################################################
 
 def get_asset_rate_by_amount(rates=AssetClass().asset_ret_rate_list, amount=10000):
     rate = 0.0
@@ -463,127 +621,6 @@ def get_asset_base_detail(cal_date=date.today(), asset=AssetClass()):
     ret.update({SV.ASSET_KEY_NAME: asset.name, SV.ASSET_KEY_CAL_DATE: cal_date})
     ret.update(get_asset_trades_sum_dic_by_type(cal_date=cal_date, asset=asset, trade_type=SV.ASSET_TYPE_PURCHASE))
     ret.update(get_asset_trades_sum_dic_by_type(cal_date=cal_date, asset=asset, trade_type=SV.ASSET_TYPE_REDEEM))
-    return ret
-
-
-def cal_agreement_ret(cal_date=date.today(), asset=AssetClass()):
-    '''
-    计算协存的利息
-    :param cal_date:计算日期
-    :param asset:资产对象
-    :return:
-    '''
-    purchase_amount = get_asset_last_total_amount_by_asset_and_type(
-        cal_date=cal_date,
-        asset_id=asset.id,
-        trade_type=SV.ASSET_TYPE_PURCHASE
-    )
-
-    redeem_amount = get_asset_last_total_amount_by_asset_and_type(
-        cal_date=cal_date,
-        asset_id=asset.id,
-        trade_type=SV.ASSET_TYPE_REDEEM
-    )
-    carry_amount = get_asset_last_total_amount_by_asset_and_type(
-        cal_date=cal_date,
-        asset_id=asset.id,
-        trade_type=SV.ASSET_TYPE_RET_CARRY
-    )
-
-    total_amount = purchase_amount + carry_amount - redeem_amount
-    asset = query_by_id(obj=AssetClass, obj_id=asset.id)
-    rates = asset.asset_ret_rate_list
-    rate = get_asset_rate_by_amount(rates=rates, amount=total_amount)
-    add_asset_ret_with_asset_and_type(
-        amount=total_amount * rate / 360,
-        asset_id=asset.id,
-        ret_type=SV.RET_TYPE_INTEREST,
-        cal_date=cal_date
-    ) if total_amount else None
-
-
-# @timer
-def get_asset_agreement_detail(cal_date=date.today(), asset_id=''):
-    '''
-    获取协存详情
-    :param cal_date:计算日期
-    :param asset_id:协存资产id
-    :return:协存详情字典
-    '''
-    ret = dict()
-    asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
-    ret[SV.ASSET_KEY_RATE] = list(map(lambda x: x.ret_rate, asset.asset_ret_rate_list))[
-        0] if len(asset.asset_ret_rate_list) > 0 else 0.0
-    ret.update(get_asset_base_detail(cal_date=cal_date, asset=asset))
-    ret[SV.ASSET_KEY_RET_CARRY_PRINCIPAL] = get_asset_ret_last_total_amount_by_asset_and_type(
-        asset_id=asset_id,
-        cal_date=cal_date,
-        ret_type=SV.RET_CARRY_TO_PRINCIPAL
-    )
-    ret[SV.ASSET_KEY_ASSET_RET] = get_asset_ret_last_total_amount_by_asset_and_type(
-        asset_id=asset_id,
-        cal_date=cal_date,
-        ret_type=SV.RET_TYPE_INTEREST
-    )
-    ret.update({SV.ASSET_KEY_RET_CARRY_PRINCIPAL: get_asset_ret_last_total_amount_by_asset_and_type(
-        asset_id=asset.id,
-        cal_date=cal_date,
-        ret_type=SV.RET_TYPE_PRINCIPAL
-    )})
-    ret.update({SV.ASSET_KEY_ASSET_RET: get_asset_ret_last_total_amount_by_asset_and_type(
-        asset_id=asset.id,
-        cal_date=cal_date,
-        ret_type=SV.RET_TYPE_INTEREST
-    ) - ret[SV.ASSET_KEY_RET_CARRY_PRINCIPAL]})
-    ret.update({SV.ASSET_KEY_ASSET_TOTAL: ret[SV.ASSET_KEY_PURCHASE_AGREEMENT] + ret[SV.ASSET_KEY_RET_CARRY_PRINCIPAL] +
-                                          ret[SV.ASSET_KEY_ASSET_RET] - ret.get(SV.ASSET_KEY_REDEEM_AGREEMENT, 0)})
-
-    return ret
-
-
-def get_asset_fund_detail(cal_date=date.today(), asset_id=''):
-    '''
-    获取货基详情
-    :param cal_date:计算日期
-    :param asset_id:货基资产id
-    :return:货基详情字典
-    '''
-    ret = dict()
-    asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
-    ret.update(get_asset_base_detail(cal_date=cal_date, asset=asset))
-    ret.update({
-        SV.ASSET_KEY_ASSET_RET:
-            get_asset_ret_last_total_amount_by_asset_and_type(
-                cal_date=cal_date,
-                asset_id=asset_id,
-                ret_type=SV.RET_TYPE_INTEREST
-            )})
-
-    ret.update({
-        SV.ASSET_KEY_RET_CARRY_CASH:
-            get_asset_ret_last_total_amount_by_asset_and_type(
-                asset_id=asset_id,
-                ret_type=SV.RET_TYPE_CASH,
-                cal_date=cal_date
-            )
-    })
-
-    ret.update({
-        SV.ASSET_KEY_RET_NOT_CARRY:
-            ret[SV.ASSET_KEY_ASSET_RET] - ret[SV.ASSET_KEY_RET_CARRY_CASH]})
-    total_purchase = get_asset_last_total_amount_by_asset_and_type(
-        cal_date=cal_date,
-        asset_id=asset_id,
-        trade_type=SV.ASSET_TYPE_PURCHASE
-    )
-    total_redeem = get_asset_last_total_amount_by_asset_and_type(
-        cal_date=cal_date,
-        asset_id=asset_id,
-        trade_type=SV.ASSET_TYPE_REDEEM
-    )
-
-    ret.update({SV.ASSET_KEY_ASSET_TOTAL: total_purchase - total_redeem + ret[SV.ASSET_KEY_ASSET_RET]})
-
     return ret
 
 
