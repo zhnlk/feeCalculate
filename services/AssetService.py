@@ -138,6 +138,7 @@ def get_asset_agreement_detail(cal_date=date.today(), asset_id=''):
     '''
     ret = dict()
     asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
+    ret.update({SV.ASSET_KEY_NAME: asset.name})
     ret[SV.ASSET_KEY_RATE] = list(map(lambda x: x.ret_rate, asset.asset_ret_rate_list))[
         0] if len(asset.asset_ret_rate_list) > 0 else 0.0
     ret.update(get_asset_base_detail(cal_date=cal_date, asset=asset))
@@ -188,7 +189,6 @@ def get_agreement_detail_by_days(days=0):
 
     for agreement_id in agreement_ids:
         agreement_ret = get_single_agreement_detail_by_days(days=days, asset_id=agreement_id[0])
-        # agreement_ret.update({'asset_name': agreement_id[1]})
         ret.append({agreement_id[1]: agreement_ret})
 
     return ret
@@ -300,6 +300,7 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=''):
     '''
     ret = dict()
     asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
+    ret.update({SV.ASSET_KEY_NAME: asset.name})
     ret.update(get_asset_base_detail(cal_date=cal_date, asset=asset))
     ret.update({
         SV.ASSET_KEY_ASSET_RET:
@@ -353,7 +354,6 @@ def get_fund_detail_by_days(days=0):
     fund_ids = get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_FUND)
     for fund_id in fund_ids:
         fund_ret = get_single_fund_detail_by_days(days=days, asset_id=fund_id[0])
-        # fund_ret.update({SV.ASSET_KEY_NAME: fund_id[1]})
         ret.append({fund_id[1]: fund_ret})
     return ret
     # return dict(map(lambda x: (x, get_single_fund_detail_by_days(days=days, asset_id=x)), fund_ids))
