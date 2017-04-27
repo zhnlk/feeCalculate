@@ -170,8 +170,11 @@ def get_asset_agreement_detail(cal_date=date.today(), asset_id=''):
 
 # @timer
 def get_single_agreement_detail_by_days(days=0, asset_id=''):
+    asset_dates = get_asset_date(days=days, asset_id=asset_id)
+    if not asset_dates:
+        asset_dates = [date.today()]
     return list(map(lambda x: get_asset_agreement_detail(cal_date=x, asset_id=asset_id),
-                    get_asset_date(days=days, asset_id=asset_id)))
+                    asset_dates))
 
 
 # @timer
@@ -339,8 +342,14 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=''):
 
 
 def get_single_fund_detail_by_days(days=0, asset_id=''):
-    return list(map(lambda x: get_asset_fund_detail(cal_date=x, asset_id=asset_id),
-                    get_asset_date(days=days, asset_id=asset_id)))
+    asset_dates = get_asset_date(days=days, asset_id=asset_id)
+    if not asset_dates:
+        asset_dates = [date.today()]
+    return list(
+        map(
+            lambda x: get_asset_fund_detail(cal_date=x, asset_id=asset_id), asset_dates
+        )
+    )
 
 
 def get_fund_detail_by_days(days=0):
