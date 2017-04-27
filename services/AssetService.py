@@ -92,7 +92,7 @@ def add_agreement_daily_data(cal_date=date.today(), asset_id='', ret_carry_asset
                          purchase_amount=purchase_amount, redeem_amount=redeem_amount)
 
 
-def cal_agreement_ret(cal_date=date.today(), asset=AssetClass()):
+def cal_agreement_ret(cal_date=date.today(), asset_id=''):
     '''
     计算协存的利息
     :param cal_date:计算日期
@@ -101,23 +101,23 @@ def cal_agreement_ret(cal_date=date.today(), asset=AssetClass()):
     '''
     purchase_amount = get_asset_last_total_amount_by_asset_and_type(
         cal_date=cal_date,
-        asset_id=asset.id,
+        asset_id=asset_id,
         trade_type=SV.ASSET_TYPE_PURCHASE
     )
 
     redeem_amount = get_asset_last_total_amount_by_asset_and_type(
         cal_date=cal_date,
-        asset_id=asset.id,
+        asset_id=asset_id,
         trade_type=SV.ASSET_TYPE_REDEEM
     )
     carry_amount = get_asset_last_total_amount_by_asset_and_type(
         cal_date=cal_date,
-        asset_id=asset.id,
+        asset_id=asset_id,
         trade_type=SV.ASSET_TYPE_RET_CARRY
     )
 
     total_amount = purchase_amount + carry_amount - redeem_amount
-    asset = query_by_id(obj=AssetClass, obj_id=asset.id)
+    asset = query_by_id(obj=AssetClass, obj_id=asset_id)
     rates = asset.asset_ret_rate_list
     rate = get_asset_rate_by_amount(rates=rates, amount=total_amount)
     add_asset_ret_with_asset_and_type(
@@ -126,6 +126,17 @@ def cal_agreement_ret(cal_date=date.today(), asset=AssetClass()):
         ret_type=SV.RET_TYPE_INTEREST,
         cal_date=cal_date
     ) if total_amount else None
+
+
+def cal_all_agreement_ret(cal_date=date.today()):
+    '''
+    计算所有协存的利息
+    :param cal_date:计算日期
+    :return:
+    '''
+    asset_ids = get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_AGREEMENT)
+    for asset_id in asset_ids:
+        cal_agreement_ret(cal_date=cal_date, asset_id=asset_id[0])
 
 
 # @timer
@@ -468,18 +479,23 @@ def get_single_management_detail(asset_id=''):
     ret.update({SV.ASSET_KEY_EXPIRY_DATE: asset.expiry_date})
     ret.update({SV.ASSET_KEY_MANAGEMENT_DUE: (
         asset.expiry_date - asset.start_date).days}) if asset.expiry_date and asset.start_date else ret.update(
-        {SV.ASSET_KEY_MANAGEMENT_DUE: 360})
+        {SV.ASSET_KEY_MANAGEMENT_DUE: 1})
     ret.update({SV.ASSET_KEY_ASSET_RET: get_management_asset_all_ret(asset_id=asset.id)})
     ret.update({SV.ASSET_KEY_MANAGEMENT_AMOUNT: get_management_trade_amount(asset_id=asset_id)})
 
     fees = get_management_trade_fees(asset_id=asset_id)
-    print(ret)
-    ret.update({SV.ASSET_KEY_MANAGEMENT_BANK_FEE: ret.get(SV.ASSET_KEY_MANAGEMENT_AMOUNT) * fees[0].rate * ret.get(
-        SV.ASSET_KEY_MANAGEMENT_DUE) / fees[0].fee_days}) if ret.get(SV.ASSET_KEY_MANAGEMENT_DUE) else ret.update(
-        {SV.ASSET_KEY_MANAGEMENT_BANK_FEE: 200})
-    ret.update({SV.ASSET_KEY_MANAGEMENT_MANAGE_FEE: ret.get(SV.ASSET_KEY_MANAGEMENT_AMOUNT) * fees[1].rate * ret.get(
-        SV.ASSET_KEY_MANAGEMENT_DUE) / fees[1].fee_days}) if ret.get(SV.ASSET_KEY_MANAGEMENT_DUE) else ret.update(
-        {SV.ASSET_KEY_MANAGEMENT_MANAGE_FEE: 100})
+    if fees:
+        ret.update({SV.ASSET_KEY_MANAGEMENT_BANK_FEE: ret.get(SV.ASSET_KEY_MANAGEMENT_AMOUNT) * fees[0].rate * ret.get(
+            SV.ASSET_KEY_MANAGEMENT_DUE) / fees[0].fee_days}) if ret.get(SV.ASSET_KEY_MANAGEMENT_DUE) else ret.update(
+            {SV.ASSET_KEY_MANAGEMENT_BANK_FEE: 0})
+        ret.update(
+            {SV.ASSET_KEY_MANAGEMENT_MANAGE_FEE: ret.get(SV.ASSET_KEY_MANAGEMENT_AMOUNT) * fees[1].rate * ret.get(
+                SV.ASSET_KEY_MANAGEMENT_DUE) / fees[1].fee_days}) if ret.get(
+            SV.ASSET_KEY_MANAGEMENT_DUE) else ret.update(
+            {SV.ASSET_KEY_MANAGEMENT_MANAGE_FEE: 0})
+
+    else:
+        ret.update({SV.ASSET_KEY_MANAGEMENT_BANK_FEE: 0, SV.ASSET_KEY_MANAGEMENT_MANAGE_FEE: 0})
     ret.update({SV.ASSET_KEY_MANAGEMENT_DAILY_RET: (ret.get(SV.ASSET_KEY_ASSET_RET) - ret.get(
         SV.ASSET_KEY_MANAGEMENT_BANK_FEE) - ret.get(
         SV.ASSET_KEY_MANAGEMENT_MANAGE_FEE)) / ret.get(
