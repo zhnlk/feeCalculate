@@ -175,7 +175,7 @@ def add_asset_fee_with_asset_and_type(amount=0, asset_id='', fee_type=SV.FEE_TYP
             cal_date=cal_date,
             total_amount=get_asset_fee_last_total_amount_by_asset_and_type(
                 cal_date=cal_date, asset_id=asset_id, fee_type=fee_type
-            ) + amount
+            ) + amount,
         )
     )
 
