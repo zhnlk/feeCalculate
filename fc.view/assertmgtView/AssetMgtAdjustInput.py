@@ -23,13 +23,13 @@ from ProtocolDeposit import ProtocolDeposit
 from Valuation import Valuation
 
 
-class AdjustValuationView(BasicFcView):
+class AdjustValuationInput(BasicFcView):
     """资管项目输入"""
 
     # ----------------------------------------------------------------------
     def __init__(self, mainEngine, eventEngine=None, parent=None):
         """Constructor"""
-        super(AdjustValuationView, self).__init__(parent=parent)
+        super(AdjustValuationInput, self).__init__(parent=parent)
 
         self.mainEngine = mainEngine
         self.eventEngine = eventEngine
@@ -58,7 +58,7 @@ class AdjustValuationView(BasicFcView):
         adjust_transfer_fee_Label = QLabel("转账费用")
         adjust_check_fee_Label = QLabel("支票费用")
 
-        self.adjust_date_Edit = QLineEdit("0.00")
+        self.adjust_date_Edit = QLineEdit("2017-04-20")
         self.adjust_transfer_fee_Edit = QLineEdit("0.00")
         self.adjust_check_Edit = QLineEdit("0.00")
 
@@ -124,6 +124,6 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    cashInput = AdjustValuationView(mainEngine, mainEngine.eventEngine)
+    cashInput = AdjustValuationInput(mainEngine, mainEngine.eventEngine)
     cashInput.show()
     sys.exit(app.exec_())

@@ -11,11 +11,8 @@ from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
 from BasicWidget import BASIC_FONT, BasicFcView
-from Cash import Cash
 from MainEngine import MainEngine
-from MoneyFund import MoneyFund, MfProjectList, MfProject
-from ProtocolDeposit import ProtocolDeposit
-from Valuation import Valuation
+from utils import StaticValue as SV
 
 
 class MoneyFundInput(BasicFcView):
@@ -79,19 +76,19 @@ class MoneyFundInput(BasicFcView):
         buttonHBox.addWidget(cancelButton)
 
         grid = QGridLayout()
-        grid.addWidget(mf_ComboBox_Label,0,0)
+        grid.addWidget(mf_ComboBox_Label, 0, 0)
         grid.addWidget(mf_subscribe_from_cash_Label, 1, 0)
         grid.addWidget(mf_redeem_to_cash_Label, 2, 0)
         grid.addWidget(mf_not_carry_forward_revenue_Label, 3, 0)
         grid.addWidget(mf_carry_forward_revenue_Label, 4, 0)
-        grid.addWidget(date_Label,5,0)
+        grid.addWidget(date_Label, 5, 0)
 
-        grid.addWidget(self.mf_ComboBox,0,1)
+        grid.addWidget(self.mf_ComboBox, 0, 1)
         grid.addWidget(self.mf_subscribe_from_cash_Edit, 1, 1)
         grid.addWidget(self.mf_redeem_to_cash_Edit, 2, 1)
         grid.addWidget(self.mf_not_carry_forward_revenue_Edit, 3, 1)
         grid.addWidget(self.mf_carry_forward_revenue_Edit, 4, 1)
-        grid.addWidget(self.date_Edit,5,1)
+        grid.addWidget(self.date_Edit, 5, 1)
 
         grid.addLayout(buttonHBox, 6, 0, 1, 2)
 
@@ -119,27 +116,15 @@ class MoneyFundInput(BasicFcView):
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
 
-        mfProjectList = MfProjectList(date,mf_subscribe_from_cash,mf_redeem_to_cash,mf_not_carry_forward_revenue,mf_carry_forward_revenue)
-
-        mfProjectList.save(mf_uuid)
-
-        moneyFund = MoneyFund(date)
-        moneyFund.update()
-
-        v = Valuation(date)
-        v.save()
-
+        self.mainEngine.add_fund_daily_data(date,mf_uuid,mf_carry_forward_revenue,mf_subscribe_from_cash,mf_redeem_to_cash,mf_not_carry_forward_revenue)
 
     def prepareData(self):
 
-        result = MfProject.listAll()
-        print('prepareData running.....')
+        result = self.mainEngine.get_all_asset_ids_by_type(SV.ASSET_CLASS_FUND)
         for mf in result:
-            print(mf.mf_project_name)
-            self.mf_ComboBox.addItem(mf.mf_project_name)
-
-            self.mf_ComboBox_list.append(mf.uuid)
-            print(str(mf.uuid) + ',' + str(mf.mf_project_name))
+            print(mf)
+            self.mf_ComboBox_list.append(mf[0])
+            self.mf_ComboBox.addItem(mf[1])
 
 
 if __name__ == "__main__":

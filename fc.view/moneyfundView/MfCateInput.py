@@ -80,8 +80,7 @@ class MfCateInput(BasicFcView):
     def insertDB(self, mf_project_name):
         """向数据库增加数据"""
         print(mf_project_name)
-        mfProject = MfProject(mf_project_name)
-        mfProject.save()
+        self.mainEngine.add_fund_class(mf_project_name)
 
 if __name__ == "__main__":
     import sys
