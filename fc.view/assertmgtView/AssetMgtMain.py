@@ -3,21 +3,20 @@ import datetime
 from PyQt5 import QtCore
 from collections import OrderedDict
 
-from PyQt5.QtWidgets import QAction, QApplication, QMainWindow, QDockWidget
+from PyQt5.QtWidgets import QAction, QMainWindow, QDockWidget, QApplication
 
-from BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
-from EventType import EVENT_MF
+from BasicWidget import BASIC_FONT, BasicFcView, BasicCell
+from EventType import EVENT_AM
 from MainEngine import MainEngine
-from MoneyFund import MfProjectList
 
 
-class MoneyFundMain(QMainWindow, BasicFcView):
+class AssetMgtListView(QMainWindow, BasicFcView):
     """现金详情"""
 
     # ----------------------------------------------------------------------
-    def __init__(self, mainEngine):
+    def __init__(self, mainEngine, parent=None):
         """Constructor"""
-        super(MoneyFundMain, self).__init__()
+        super(AssetMgtListView, self).__init__()
 
         self.mainEngine = mainEngine
 
@@ -26,10 +25,14 @@ class MoneyFundMain(QMainWindow, BasicFcView):
         self.initUi()
 
     # ----------------------------------------------------------------------
-
     def initUi(self):
         """初始化界面"""
-        self.setWindowTitle('货基')
+        self.setWindowTitle('资管明细')
+        # self.setFont(BASIC_FONT)
+        # self.initTable()
+        # self.addMenuAction()
+
+        """初始化界面"""
         self.setMinimumSize(1200, 600)
         # self.setFont(BASIC_FONT)
         # self.initTable()
@@ -39,11 +42,12 @@ class MoneyFundMain(QMainWindow, BasicFcView):
 
     def initDock(self):
         # 创建浮动布局
-        vidgetView1, dockView1 = self.createDock(MoneyFundDetailView, '货基明细', QtCore.Qt.TopDockWidgetArea)
-        vidgetView2, dockView2 = self.createDock(MoneyFundSummaryView, '今日货基总额统计', QtCore.Qt.BottomDockWidgetArea)
+        vidgetView1, dockView1 = self.createDock(AssetDailyInventoryView, '资管每日存量表', QtCore.Qt.TopDockWidgetArea)
+        vidgetView2, dockView2 = self.createDock(CommitteeDetailView, '委贷明细', QtCore.Qt.BottomDockWidgetArea)
+
+
         # self.tabifyDockWidget(dockView1,dockView2)
 
-    # ----------------------------------------------------------------------
     def addMenuAction(self):
         """增加右键菜单内容"""
         refreshAction = QAction('刷新', self)
@@ -60,26 +64,24 @@ class MoneyFundMain(QMainWindow, BasicFcView):
         dock.setFeatures(dock.DockWidgetFloatable | dock.DockWidgetMovable)
         self.addDockWidget(widgetArea, dock)
         return widget, dock
+        # ----------------------------------------------------------------------
 
 
-class MoneyFundDetailView(BasicFcView):
+class AssetDailyInventoryView(BasicFcView):
     # ----------------------------------------------------------------------
     def __init__(self, mainEngine, parent=None):
         """Constructor"""
-        super(MoneyFundDetailView, self).__init__(parent=parent)
+        super(AssetDailyInventoryView, self).__init__(parent=parent)
 
         self.mainEngine = mainEngine
 
         d = OrderedDict()
 
-        d['asset_name'] = {'chinese': '货基项目名称', 'cellType': BasicCell}
         d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
-        d['total_amount'] = {'chinese': '金额', 'cellType': BasicCell}
-        d['asset_ret'] = {'chinese': '收益', 'cellType': BasicCell}
-        d['cash_to_fund'] = {'chinese': '申购(现金)', 'cellType': BasicCell}
-        d['fund_to_cash'] = {'chinese': '赎回(进现金)', 'cellType': BasicCell}
-        d['ret_not_carry'] = {'chinese': '未结转收益', 'cellType': BasicCell}
-        d['ret_carry_cash'] = {'chinese': '结转金额', 'cellType': BasicCell}
+        # d['input_date'] = {'chinese': '填表日', 'cellType': BasicCell}
+        d['management_amount'] = {'chinese': '存量总额', 'cellType': BasicCell}
+        d['management_ret'] = {'chinese': '存量日收益', 'cellType': BasicCell}
+        d['cash_to_management'] = {'chinese': '总净流入', 'cellType': BasicCell}
 
         self.setHeaderDict(d)
 
@@ -89,7 +91,7 @@ class MoneyFundDetailView(BasicFcView):
 
     def initUi(self):
         """初始化界面"""
-        self.setWindowTitle('货基明细')
+        self.setWindowTitle('资管每日存量表')
         # self.setMinimumSize(1200, 600)
         # self.setFont(BASIC_FONT)
         self.initTable()
@@ -100,7 +102,7 @@ class MoneyFundDetailView(BasicFcView):
 
     def show(self):
         """显示"""
-        super(MoneyFundDetailView, self).show()
+        super(AssetDailyInventoryView, self).show()
         self.refresh()
 
     def refresh(self):
@@ -114,8 +116,8 @@ class MoneyFundDetailView(BasicFcView):
 
     def showMoneyFundListDetail(self):
         """显示所有合约数据"""
+        result = self.mainEngine.get_total_management_statistic()
 
-        result = self.mainEngine.get_fund_detail_by_days(7)
         print(result)
         self.setRowCount(len(result))
         row = 0
@@ -131,21 +133,30 @@ class MoneyFundDetailView(BasicFcView):
             row = row + 1
 
 
-class MoneyFundSummaryView(BasicFcView):
+class CommitteeDetailView(BasicFcView):
     def __init__(self, mainEngine, parent=None):
         """Constructor"""
-        super(MoneyFundSummaryView, self).__init__(parent=parent)
+        super(CommitteeDetailView, self).__init__(parent=parent)
 
         self.mainEngine = mainEngine
 
         d = OrderedDict()
 
-        d['asset_name'] = {'chinese': '货基项目名称', 'cellType': BasicCell}
         # 货基项目
-        d['total_amount'] = {'chinese': '金额', 'cellType': BasicCell}
-        d['total_ret_amount'] = {'chinese': '收益', 'cellType': BasicCell}
-        d['total_purchase_amount'] = {'chinese': '申购总额', 'cellType': BasicCell}
-        d['total_redeem_amount'] = {'chinese': '赎回总额', 'cellType': BasicCell}
+        d['no'] = {'chinese': '序号', 'cellType': BasicCell}
+        d['loan'] = {'chinese': '借款人', 'cellType': BasicCell}
+        d['loan_amount'] = {'chinese': '放款金额', 'cellType': BasicCell}
+        d['committee_rate'] = {'chinese': '委贷利率(年化)', 'cellType': BasicCell}
+        d['start_date'] = {'chinese': '起息日', 'cellType': BasicCell}
+        d['expiry_date'] = {'chinese': '到期日', 'cellType': BasicCell}
+        d['management_due'] = {'chinese': '期限', 'cellType': BasicCell}
+        d['committee_interest'] = {'chinese': '委贷利息', 'cellType': BasicCell}
+        d['committee_bank_fee'] = {'chinese': '委贷银行费用', 'cellType': BasicCell}
+        d['asset_plan_fee'] = {'chinese': '资管计划费用', 'cellType': BasicCell}
+        d['asset_ret'] = {'chinese': '资管计划总收益', 'cellType': BasicCell}
+        d['asset_plan_daily_revenue'] = {'chinese': '资管计划每日收益', 'cellType': BasicCell}
+        d['asset_plan_daily_valuation'] = {'chinese': '正常情况资管计划\n每日收益估值', 'cellType': BasicCell}
+        d['valuation_adjust'] = {'chinese': '估值调整', 'cellType': BasicCell}
 
         self.setHeaderDict(d)
 
@@ -164,7 +175,7 @@ class MoneyFundSummaryView(BasicFcView):
 
     def show(self):
         """显示"""
-        super(MoneyFundSummaryView, self).show()
+        super(CommitteeDetailView, self).show()
         self.refresh()
 
     def refresh(self):
@@ -178,14 +189,15 @@ class MoneyFundSummaryView(BasicFcView):
 
     def showMoneyFundSummary(self):
         """显示所有合约数据"""
-
-        result = self.mainEngine.get_total_fund_statistic()
+        # result = self.mainEngine.get_all_management_detail()
+        result = [{}]
         self.setRowCount(len(result))
         row = 0
         for r in result:
             # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
-                content = r[header]
+                # content = r[header]
+                content = ""
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
                 print(row, n, cell.text())
@@ -199,10 +211,11 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    mfm = MoneyFundMain(mainEngine)
-    # mflv = MoneyFundDetailView(mainEngine)
+    # mfm = AssetMgtListView(mainEngine)
+    mflv = AssetDailyInventoryView(mainEngine)
     # mainfdv = MoneyFundSummaryView(mainEngine)
     # mflv.showMaximized()
     # mainfdv.showMaximized()
-    mfm.showMaximized()
+    mflv.showMaximized()
     sys.exit(app.exec_())
+

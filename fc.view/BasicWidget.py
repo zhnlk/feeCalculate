@@ -238,7 +238,6 @@ class BasicFcView(QTableWidget):
                     print(headers)
                     writer.writerow(headers)
 
-
                     # 保存每行内容
                     for row in range(self.rowCount()):
                         rowdata = []
@@ -286,9 +285,9 @@ class BasicCell(QTableWidgetItem):
     def setContent(self, text):
         """设置内容"""
         if text == '0' or text == '0.0' or text is None:
-        # if text is None:
+            # if text is None:
             self.setText('0.00')
-        else :
+        else:
             self.setText(str(text))
 
 
@@ -312,3 +311,21 @@ class NumCell(QTableWidgetItem):
             self.setData(Qt.DisplayRole, num)
         except ValueError:
             self.setText(text)
+
+
+class DateCell(QTableWidgetItem):
+    """用来显示日期"""
+
+    def __init__(self, text=None, mainEngine=None):
+        """Constructor"""
+        super(DateCell, self).__init__()
+        self.data = None
+        if text:
+            self.setContent(text)
+
+    def setContent(self, text):
+        """设置内容"""
+        try:
+            date = text.strftime('%Y-%m-%d')
+        except ValueError:
+            self.setText(date)

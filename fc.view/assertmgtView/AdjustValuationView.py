@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+# @Author:zhnlk
+# @Date:  2017/4/25
+# @Email: dG9tbGVhZGVyMDgyOEBnbWFpbC5jb20=  
+# @Github:github/zhnlk
 from collections import OrderedDict
 
 from PyQt5.QtWidgets import QAction
@@ -9,30 +13,23 @@ from EventType import EVENT_PD
 from MainEngine import MainEngine
 
 
-class ProtocolListView(BasicFcView):
+class AdjustValuationView(BasicFcView):
     """协存详情"""
 
     # ----------------------------------------------------------------------
     def __init__(self, mainEngine, parent=None):
         """Constructor"""
-        super(ProtocolListView, self).__init__(parent=parent)
+        super(AdjustValuationView, self).__init__(parent=parent)
 
         self.mainEngine = mainEngine
 
         d = OrderedDict()
-        d['asset_name'] = {'chinese': '协存项目名称', 'cellType': BasicCell}
-        d['rate'] = {'chinese': '协存项目利率', 'cellType': BasicCell}
+        d['pd_project_name'] = {'chinese': '调整日期', 'cellType': BasicCell}
+        d['pd_project_rate'] = {'chinese': '转账费用', 'cellType': BasicCell}
 
-        d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
-
-        # 协存项目
-        d['total_amount'] = {'chinese': '总额', 'cellType': BasicCell}
-        d['asset_ret'] = {'chinese': '协存本金', 'cellType': BasicCell}
-        # d['pd_interest'] = {'chinese': '协存利息', 'cellType': BasicCell}
-        # 协存项目 输入项
-        d['ret_carry_principal'] = {'chinese': '利息转结本金', 'cellType': BasicCell}
-        d['cash_to_agreement'] = {'chinese': '现金->协存', 'cellType': BasicCell}
-        d['agreement_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
+        d['date'] = {'chinese': '支票费用', 'cellType': BasicCell}
+        d['total_to_cash'] = {'chinese': '总调整费用', 'cellType': BasicCell}
+        d['pd_pd_to_cash'] = {'chinese': '调整结果', 'cellType': BasicCell}
 
         self.setHeaderDict(d)
 
@@ -43,29 +40,38 @@ class ProtocolListView(BasicFcView):
     # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
-        self.setWindowTitle('协存明细')
-        self.setMinimumSize(1200, 600)
+        self.setWindowTitle('估值调整明细')
+        self.setMinimumSize(600, 200)
         self.setFont(BASIC_FONT)
         self.initTable()
+        self.verticalHeader().setVisible(True)
         self.addMenuAction()
 
     # ----------------------------------------------------------------------
     def showProtocolListDetail(self):
         """显示所有合约数据"""
-        result = self.mainEngine.get_agreement_detail_by_days()
-        print(result)
-        self.setRowCount(len(result))
+        result2 = self.mainEngine.getProtocolListDetail()
+        self.setRowCount(len(result2))
         row = 0
-        for r in result:
+        for r in result2:
             # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
-                # name, rate = r.getPdProjectInfo()
-                content = r[header]
+                name, rate = r.getPdProjectInfo()
+                if header is 'pd_project_name':
+                    content = name
+                elif header is 'pd_project_rate':
+                    content = rate
+                else:
+                    content = r.__getattribute__(header)
 
                 if isinstance(content, float):
-                    content = float('%.4f' % content)
+                    content = float('%.2f' % content)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
+                print(cell.text())
+                # if self.font:
+                #     cell.setFont(self.font)  # 如果设置了特殊字体，则进行单元格设置
+
                 self.setItem(row, n, cell)
 
             row = row + 1
@@ -89,7 +95,7 @@ class ProtocolListView(BasicFcView):
     # ----------------------------------------------------------------------
     def show(self):
         """显示"""
-        super(ProtocolListView, self).show()
+        super(AdjustValuationView, self).show()
         self.refresh()
 
 
@@ -98,7 +104,8 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    plv = ProtocolListView(mainEngine)
+    plv = AdjustValuationView(mainEngine)
 
     plv.show()
     sys.exit(app.exec_())
+

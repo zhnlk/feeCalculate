@@ -20,15 +20,15 @@ class AboutWidget(QDialog):
         self.setWindowTitle('About Fee Calculate')
 
         text = """
-                Developed by zhnlk.
+                Developed by zhnlk && wzjwhtur
 
                 Version: 0.0.1
 
                 License：MIT
 
-                Mail：yanan.zhang@creditcloud.com
+                Mail：zhangyanan@ktjr.com && wangzhijie@ktjr.com
 
-                Github：www.github.com/zhnlk
+                Github：github.com/zhnlk && github.com/wzjwhtur
 
                 """
 

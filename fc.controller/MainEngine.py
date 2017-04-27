@@ -1,6 +1,9 @@
 # encoding: UTF-8
-from datetime import datetime
+import datetime
 
+import AssetService
+import CashService
+import CommonService
 from Cash import Cash
 from EventEngine import *
 from MoneyFund import MfProjectList, MoneyFund
@@ -15,7 +18,7 @@ class MainEngine(object):
     def __init__(self):
         """Constructor"""
         # 记录今日日期
-        self.todayDate = datetime.now().strftime('%Y%m%d')
+        self.todayDate = datetime.datetime.today()
 
         # 创建事件引擎
         self.eventEngine = EventEngine()
@@ -103,61 +106,143 @@ class MainEngine(object):
 
     def getTodayFee(self, date):
         v = Valuation.findByDate(date)
-        return v.fee_1, v.fee_2, v.fee_3,v.fee_4
+        if v is None:
+            return '0', '0', '0', '0'
+        else:
+            return v.fee_1, v.fee_2, v.fee_3, v.fee_4
 
     # ----------------------------------------------------------------------
-    def getCashDetail(self):
-        """查询现金明细"""
-        detail = Cash.listAll()
-        # 计算每日的现金明细
-        for d in detail:
-            d.total_cash = d.getTodayTotalCash(d.date)
-            # 计算协存与货基的相关数据
-            d.getRelatedData()
+    def add_agreement_class(self, name='', rate=0.03, threshold_amount=0, threshold_rate=0):
+        """
+        增加协存类别
+        :param name: 
+        :param rate: 
+        :param threshold_amount: 
+        :param threshold_rate: 
+        :return: 
+        """
+        AssetService.add_agreement_class(name, rate, threshold_amount, threshold_rate)
 
-            print(d.__dict__)
-            d.save()
-        print('get Cash Detail')
-        return detail
+    def add_fund_class(self, name):
+        """
+        增加基金类别
+        :param name: 
+        :return: 
+        """
+        AssetService.add_fund_class(name=name)
 
-    def getProtocolDeposit(self, date):
-        """查询协存汇总"""
-        pd = ProtocolDeposit(date)
+    def add_management_class(self, name, trade_amount, ret_rate, rate_days, start_date, end_date,
+                             bank_fee_rate, bank_days, manage_fee_rate, manage_days, cal_date):
+        """
+        增加资管类别
+        :param name: 
+        :param trade_amount: 
+        :param ret_rate: 
+        :param rate_days: 
+        :param start_date: 
+        :param end_date: 
+        :param bank_fee_rate: 
+        :param bank_days: 
+        :param manage_fee_rate: 
+        :param manage_days: 
+        :param cal_date: 
+        :return: 
+        """
+        AssetService.add_management_class(name, trade_amount, ret_rate, rate_days, start_date, end_date,
+                                          bank_fee_rate, bank_days, manage_fee_rate, manage_days, cal_date)
 
-        # protocolDepositList = PdProjectList.listByDate(date)
-        # for p in protocolDepositList:
-        #     pd.protocol_deposit_amount += p.pd_amount
-        #     pd.protocol_deposit_revenue += p.pd_interest
-        #     pd.cash_to_protocol_deposit += p.pd_cash_to_pd
-        #     pd.protocol_deposit_to_cash += p.pd_pd_to_cash
-        pd.save()
+    def get_all_asset_ids_by_type(self, asset_type):
+        """
+        根据资产类型获取对应的uuid与asset_name
+        :param asset_type: 资产类型
+        :return: 
+        """
+        CommonService.get_all_asset_ids_by_type(asset_type)
 
-        return pd
+    def get_cash_detail_by_days(self, days):
+        """
+        获取现金明细
+        :param days:获取days内的现金明细
+        :return 现金明细的dict
+        """
+        return CashService.get_cash_detail_by_days(days)
 
-    def getProtocolDetail(self):
-        """查询协存"""
-        detail = PdProject.listAll()
-        for d in detail:
-            print('getProtocolDetail' + d.uuid)
-        return detail
+    def add_cash_daily_data(self, draw_amount, draw_fee, deposit_amount, ret_amount):
+        """
+        增加现金明细记录
+        :param draw_amount: 兑付
+        :param draw_fee: 提取费用
+        :param deposit_amount: 流入
+        :param ret_amount:现金收入
+        :return None 
+        """
+        CashService.add_cash_daily_data(draw_amount, draw_fee, deposit_amount, ret_amount)
 
-    def getProtocolListDetail(self):
-        """查询协存列表明细"""
-        detail = PdProjectList.listAll()
-        for d in detail:
-            self.getProtocolDeposit(d.date)
-            print('getProtocolListDetail.........' + d.uuid)
-        return detail
+    def add_agreement_daily_data(self, cal_date, asset_id, ret_carry_asset_amount, purchase_amount,
+                                 redeem_amount):
+        """
+        添加协存每日记录
+        :param asset_id: 
+        :param ret_carry_asset_amount: 
+        :param purchase_amount: 
+        :param redeem_amount: 
+        :return: 
+        """
+        AssetService.add_agreement_daily_data(cal_date, asset_id, ret_carry_asset_amount, purchase_amount,
+                                              redeem_amount)
 
-    def getMoneyFundDetail(self):
-        """查询货基列表明细"""
-        detail = MfProjectList.listAll()
-        for m in detail:
-            print('getMoneyFundListDetail' + m.uuid)
-        return detail
+    def add_fund_daily_data(self, cal_date, asset_id, ret_carry_cash_amount, purchase_amount, redeem_amount,
+                            ret_amount):
 
-    def getMoneyFundSummary(self, date):
-        res = MfProjectList.listAllForSummary(date)
-        for r in res:
-            print(r[0], r[1], r[2], r[3])
-        return res
+        '''
+        添加货基每日记录
+        :param asset_id:计算日期
+        :param ret_carry_cash_amount:收益结转现金
+        :param purchase_amount:申购金额
+        :param redeem_amount:赎回金额
+        :param ret_amount:收益
+        :return:None
+        '''
+        AssetService.add_fund_daily_data(cal_date, asset_id, ret_carry_cash_amount, purchase_amount, redeem_amount,
+                                         ret_amount)
+
+    def get_agreement_detail_by_days(self, days=0):
+        """
+        获取协存明细记录
+        :param days: 
+        :return: 
+        """
+        # return [{'rate': 0.035, 'asset_name': '浦发理财一号', 'cal_date': datetime.date(2017, 4, 20), 'cash_to_agreement': 20001.0,
+        #          'agreement_to_cash': 10001.0, 'ret_carry_principal': 1001.0, 'asset_ret': -1001.0, 'total_amount': 10000.0}]
+        return AssetService.get_agreement_detail_by_days(days)
+
+    def get_fund_detail_by_days(self, days=0):
+        """
+        获取货基明细记录
+        :param days: 
+        :return: 
+        """
+        # return [{'asset_name': '余额宝', 'cal_date': datetime.date(2017, 4, 20), 'cash_to_fund': 13009.0, 'fund_to_cash': 8011.0, 'asset_ret': 3005.0,
+        #          'ret_carry_cash': 1005.0, 'ret_not_carry': 2000.0, 'total_amount': 8003.0}]
+        return AssetService.get_fund_detail_by_days(days)
+
+    def get_total_fund_statistic(self):
+        """
+        获取当天货基汇总
+        :return: 
+        """
+        return AssetService.get_total_fund_statistic()
+
+    def get_total_management_statistic(self):
+        """
+        资管汇总表
+        :return: 
+        """
+        return AssetService.get_total_management_statistic()
+
+    def get_all_management_detail(self):
+        """
+        资管相关明细
+        :return: 
+        """
+        return AssetService.get_all_management_detail()

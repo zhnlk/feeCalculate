@@ -113,20 +113,11 @@ class CashInput(BasicFcView):
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
 
         """向数据库增加数据"""
-        print(cash_to_investor)
-        print(extract_fee)
-        print(invest_to_cash)
-        print(cash_revenue)
+        print(cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
+        self.mainEngine.add_cash_daily_data(cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
 
-        cash = Cash(date, cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
-
-        print(cash.__dict__)
-        cash.save()
-
-        v = Valuation(date)
-        v.save()
-        # cash.total_cash = cash.getTodayTotalCash(d)
-        # cash.save()
+        # v = Valuation(date)
+        # v.save()
 
         # self.mainEngine.eventEngine.put(EVENT_CASH)
         # self.connect(okButton, SIGNAL("clicked()"), self.slotInformation)

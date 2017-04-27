@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from BasicWidget import BASIC_FONT, BasicFcView
 from Cash import Cash
 from MainEngine import MainEngine
+from utils import StaticValue as SV
 from ProtocolDeposit import ProtocolDeposit, PdProject, PdProjectList
 from Valuation import Valuation
 
@@ -87,8 +88,7 @@ class ProtocolInput(BasicFcView):
         grid.addWidget(cash_to_pd_Label, 3, 0)
         # grid.addWidget(pd_to_investor_Label, 4, 0)
         grid.addWidget(pd_to_cash_Label, 5, 0)
-        grid.addWidget(date_Label,6,0)
-
+        grid.addWidget(date_Label, 6, 0)
 
         grid.addWidget(self.pd_ComboBox, 0, 1)
         grid.addWidget(self.interest_to_principal_Edit, 1, 1)
@@ -96,7 +96,7 @@ class ProtocolInput(BasicFcView):
         grid.addWidget(self.cash_to_pd_Edit, 3, 1)
         # grid.addWidget(self.pd_to_investor_Edit, 4, 1)
         grid.addWidget(self.pd_to_cash_Edit, 5, 1)
-        grid.addWidget(self.date_Edit,6,1)
+        grid.addWidget(self.date_Edit, 6, 1)
         grid.addLayout(buttonHBox, 7, 0, 1, 2)
 
         self.setLayout(grid)
@@ -113,9 +113,7 @@ class ProtocolInput(BasicFcView):
         # ----------------------------------------------------------------------
         """向数据库增加数据"""
         print(interest_to_principal)
-        # print(investor_to_pd)
         print(cash_to_pd)
-        # print(pd_to_investor)
         print(pd_to_cash)
 
         pd_uuid = self.pd_ComboBox_list[int(pd_project_name_index)]
@@ -132,35 +130,16 @@ class ProtocolInput(BasicFcView):
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
 
-
-        d = datetime.date.today()
-        pdProjectList = PdProjectList(date, interest_to_principal, cash_to_pd, pd_to_cash)
-        # pdProjectList.pd_obj = pdProject
-        pdProjectList.pd_obj_uuid = pdProject.uuid
-
-        ret = pdProjectList.save(pd_uuid)
-        protocolDeposit = ProtocolDeposit(date)
-        protocolDeposit.save()
-
-        v = Valuation(date)
-        v.save()
-
-        if ret:
-            print('insert success')
-        else:
-            print('failed')
-        if protocolDeposit:
-            print('synchronize success')
+        self.mainEngine.add_agreement_daily_data(date, pd_uuid, interest_to_principal, cash_to_pd, pd_to_cash)
 
     def prepareData(self):
 
-        result = PdProject.listAll()
+        result = self.mainEngine.get_all_asset_ids_by_type(SV.ASSET_CLASS_AGREEMENT)
         print('prepareData running.....')
-        for pd in result:
-            self.pd_ComboBox.addItem(pd.pd_project_name)
-
-            self.pd_ComboBox_list.append(pd.uuid)
-            print(str(pd.pd_project_name) + ',' + str(pd.uuid) + ',' + str(pd.pd_project_rate))
+        for mf in result:
+            print(mf)
+            self.pd_ComboBox_list.append(mf[0])
+            self.pd_ComboBox.addItem(mf[1])
 
 
 if __name__ == "__main__":

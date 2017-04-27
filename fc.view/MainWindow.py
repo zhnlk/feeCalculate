@@ -17,6 +17,10 @@ from PyQt5.QtWidgets import QMessageBox
 import EventType
 from BasicWidget import BasicCell, BasicFcView, BASIC_FONT
 from MainEngine import MainEngine
+from assertmgtView.AdjustValuationView import AdjustValuationView
+from assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
+from assertmgtView.AssetMgtInput import AssetMgtInput
+from assertmgtView.AssetMgtMain import AssetMgtListView
 from cashView.CashInput import CashInput
 from cashView.CashMain import CashListView
 from miscView.AboutMain import AboutWidget
@@ -99,9 +103,10 @@ class MainWindow(QMainWindow, BasicFcView):
         sysMenu.addSeparator()
         # 资管
         assertMgtMenu = menubar.addMenu('资管明细')
-        assertMgtMenu.addAction(self.createAction('显示明细', self.openAssertMgtListDetail))
-        assertMgtMenu.addAction(self.createAction('增加记录', self.oepnAddAssertMgtDetail))
-        assertMgtMenu.addAction(self.createAction('导出记录', self.openOutAssertMgtData))
+        assertMgtMenu.addAction(self.createAction('显示明细', self.openAssetMgtListDetail))
+        assertMgtMenu.addAction(self.createAction('资管估值调整', self.oepnAdjustValuation))
+        assertMgtMenu.addAction(self.createAction('增加资管类别', self.openAddAssetMgtCate))
+        assertMgtMenu.addAction(self.createAction('导出记录', self.openOutAssetMgtData))
         sysMenu.addSeparator()
         # 帮助
         helpMenu = menubar.addMenu('帮助')
@@ -172,14 +177,29 @@ class MainWindow(QMainWindow, BasicFcView):
             self.widgetDict['openMoneyFundListDetail'] = MoneyFundMain(self.mainEngine)
             self.widgetDict['openMoneyFundListDetail'].show()
 
-    def openAssertMgtListDetail(self):
+    def openAssetMgtListDetail(self):
         """打开资管明细"""
         try:
-            self.widgetDict['openAssertMgtListDetail'].show()
+            self.widgetDict['openAssetMgtListDetail'].show()
         except KeyError:
-            # self.widgetDict['openAssertMgtListDetail'] = AssertMgtListView(self.mainEngine)
-            self.widgetDict['openAssertMgtListDetail'] = ErrorWidget(self)
-            self.widgetDict['openAssertMgtListDetail'].show()
+            self.widgetDict['openAssetMgtListDetail'] = AssetMgtListView(self.mainEngine)
+            self.widgetDict['openAssetMgtListDetail'].show()
+
+    def oepnAdjustValuation(self):
+        """资管估值调整"""
+        try:
+            self.widgetDict['oepnAdjustValuationInput'].show()
+        except KeyError:
+            self.widgetDict['oepnAdjustValuationInput'] = AdjustValuationInput(self.mainEngine)
+            self.widgetDict['oepnAdjustValuationInput'].show()
+
+    def openAddAssetMgtCate(self):
+        """增加资管类别"""
+        try:
+            self.widgetDict['openAddAssetMgtCate'].show()
+        except KeyError:
+            self.widgetDict['openAddAssetMgtCate'] = AssetMgtInput(self.mainEngine)
+            self.widgetDict['openAddAssetMgtCate'].show()
 
     def openAddCashDetail(self):
         """打开现金输入界面"""
@@ -234,19 +254,12 @@ class MainWindow(QMainWindow, BasicFcView):
             self.widgetDict['openOutMoneFundData'] = ErrorWidget(self)
             self.widgetDict['openOutMoneFundData'].show()
 
-    def oepnAddAssertMgtDetail(self):
-        """打开资管输入界面"""
+    def openOutAssetMgtData(self):
         try:
-            self.widgetDict['oepnAddAssertMgtDetail'].show()
+            self.widgetDict['openOutAssetMgtData'].show()
         except KeyError:
-            self.widgetDict['oepnAddAssertMgtDetail'] = ErrorWidget(self)
-
-    def openOutAssertMgtData(self):
-        try:
-            self.widgetDict['openOutAssertMgtData'].show()
-        except KeyError:
-            self.widgetDict['openOutAssertMgtData'] = ErrorWidget(self)
-            self.widgetDict['openOutAssertMgtData'].show()
+            self.widgetDict['openOutAssetMgtData'] = ErrorWidget(self)
+            self.widgetDict['openOutAssetMgtData'].show()
 
     # ----------------------------------------------------------------------
     def openOutCashData(self):
