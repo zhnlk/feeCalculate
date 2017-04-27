@@ -40,7 +40,7 @@ class AdjustValuationView(BasicFcView):
     # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
-        self.setWindowTitle('协存明细')
+        self.setWindowTitle('估值调整明细')
         self.setMinimumSize(600, 200)
         self.setFont(BASIC_FONT)
         self.initTable()
@@ -50,9 +50,7 @@ class AdjustValuationView(BasicFcView):
     # ----------------------------------------------------------------------
     def showProtocolListDetail(self):
         """显示所有合约数据"""
-        # result0 = self.mainEngine.getProtocol()
         result2 = self.mainEngine.getProtocolListDetail()
-        # self.setRowCount(len(result1)+len(result2))
         self.setRowCount(len(result2))
         row = 0
         for r in result2:
