@@ -18,6 +18,7 @@ import EventType
 from BasicWidget import BasicCell, BasicFcView, BASIC_FONT
 from MainEngine import MainEngine
 from assertmgtView.AdjustValuationView import AdjustValuationView
+from assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
 from assertmgtView.AssetMgtInput import AssetMgtInput
 from assertmgtView.AssetMgtMain import AssetMgtListView
 from cashView.CashInput import CashInput
@@ -187,10 +188,10 @@ class MainWindow(QMainWindow, BasicFcView):
     def oepnAdjustValuation(self):
         """资管估值调整"""
         try:
-            self.widgetDict['oepnAdjustValuation'].show()
+            self.widgetDict['oepnAdjustValuationInput'].show()
         except KeyError:
-            self.widgetDict['oepnAdjustValuation'] = AdjustValuationView(self.mainEngine)
-            self.widgetDict['oepnAdjustValuation'].show()
+            self.widgetDict['oepnAdjustValuationInput'] = AdjustValuationInput(self.mainEngine)
+            self.widgetDict['oepnAdjustValuationInput'].show()
 
     def openAddAssetMgtCate(self):
         """增加资管类别"""
@@ -198,7 +199,7 @@ class MainWindow(QMainWindow, BasicFcView):
             self.widgetDict['openAddAssetMgtCate'].show()
         except KeyError:
             self.widgetDict['openAddAssetMgtCate'] = AssetMgtInput(self.mainEngine)
-            self.widgetDict['AssetMgtInput'].show()
+            self.widgetDict['openAddAssetMgtCate'].show()
 
     def openAddCashDetail(self):
         """打开现金输入界面"""

@@ -49,31 +49,31 @@ class AssetMgtInput(BasicFcView):
         """设置输入框"""
 
         # 设置组件
-        am_loan_person_Label = QLabel("借款人")
-        am_loan_amount_Label = QLabel("放款金额")
-        am_committee_rate_Label = QLabel("委贷利率")
-        am_interested_days_Label = QLabel("全年计息天数")
+        am_name_Label = QLabel("借款方")
+        am_trade_amount_Label = QLabel("放款金额")
+        am_ret_rate_Label = QLabel("委贷利率")
+        am_rate_days_Label = QLabel("全年计息天数")
 
-        am_value_date_Label = QLabel("起息日")
-        am_due_date_Label = QLabel("到期日")
+        am_start_date_Label = QLabel("起息日")
+        am_end_date_Label = QLabel("到期日")
 
-        am_committee_bank_rate_Label = QLabel("委贷银行费率")
-        am_c_count_interest_days_Label = QLabel("全年计息天数")
-        am_channel_fee_Label = QLabel("资管通道费率")
-        am_a_count_interest_days_Label = QLabel("全年计息天数")
+        am_bank_fee_rate_Label = QLabel("委贷银行费率")
+        am_bank_days_Label = QLabel("全年计息天数")
+        am_manage_fee_rate = QLabel("资管通道费率")
+        am_manage_days_Label = QLabel("全年计息天数")
 
-        self.am_loan_person_Edit = QLineEdit("0.00")
-        self.am_loan_amount_Edit = QLineEdit("0.00")
-        self.am_committee_rate_Edit = QLineEdit("0.00")
-        self.am_interested_days_Edit = QLineEdit("0.00")
+        self.am_name_Edit = QLineEdit("借款方")
+        self.am_trade_amount_Edit = QLineEdit("0.003")
+        self.am_ret_rate_Edit = QLineEdit("0.00")
+        self.am_rate_days_Edit = QLineEdit("0.00")
 
-        self.am_value_date_Edit = QLineEdit("2017-02-12")
-        self.am_due_date_Edit = QLineEdit("2017-05-12")
+        self.am_start_date_Edit = QLineEdit("2017-02-12")
+        self.am_end_date_Edit = QLineEdit("2017-05-12")
 
-        self.am_committee_bank_rate_Edit = QLineEdit("0.00")
-        self.am_c_count_interest_days_Edit = QLineEdit("0.00")
-        self.am_channel_fee_Edit = QLineEdit("0.00")
-        self.am_a_count_interest_days_Edit = QLineEdit("0.00")
+        self.am_bank_fee_rate_Edit = QLineEdit("0.003")
+        self.am_bank_days_Edit = QLineEdit("0.00")
+        self.am_manage_fee_rate_Edit = QLineEdit("0.005")
+        self.am_manage_days_Edit = QLineEdit("0.00")
 
         okButton = QPushButton("新增借款")
         cancelButton = QPushButton("取消")
@@ -87,29 +87,29 @@ class AssetMgtInput(BasicFcView):
         buttonHBox.addWidget(cancelButton)
 
         grid = QGridLayout()
-        grid.addWidget(am_loan_person_Label, 0, 0)
-        grid.addWidget(am_loan_amount_Label, 1, 0)
-        grid.addWidget(am_committee_rate_Label, 2, 0)
-        grid.addWidget(am_interested_days_Label, 3, 0)
-        grid.addWidget(am_value_date_Label, 4, 0)
-        grid.addWidget(am_due_date_Label, 5, 0)
-        grid.addWidget(am_committee_bank_rate_Label, 6, 0)
-        grid.addWidget(am_c_count_interest_days_Label, 7, 0)
-        grid.addWidget(am_channel_fee_Label, 6, 2)
-        grid.addWidget(am_a_count_interest_days_Label, 7, 2)
+        grid.addWidget(am_name_Label, 0, 0)
+        grid.addWidget(am_trade_amount_Label, 1, 0)
+        grid.addWidget(am_ret_rate_Label, 2, 0)
+        grid.addWidget(am_rate_days_Label, 3, 0)
+        grid.addWidget(am_start_date_Label, 4, 0)
+        grid.addWidget(am_end_date_Label, 5, 0)
+        grid.addWidget(am_bank_fee_rate_Label, 6, 0)
+        grid.addWidget(am_bank_days_Label, 7, 0)
+        grid.addWidget(am_manage_fee_rate, 6, 2)
+        grid.addWidget(am_manage_days_Label, 7, 2)
 
-        grid.addWidget(self.am_loan_person_Edit, 0, 1)
-        grid.addWidget(self.am_loan_amount_Edit, 1, 1)
-        grid.addWidget(self.am_committee_rate_Edit, 2, 1)
-        grid.addWidget(self.am_interested_days_Edit, 3, 1)
+        grid.addWidget(self.am_name_Edit, 0, 1)
+        grid.addWidget(self.am_trade_amount_Edit, 1, 1)
+        grid.addWidget(self.am_ret_rate_Edit, 2, 1)
+        grid.addWidget(self.am_rate_days_Edit, 3, 1)
 
-        grid.addWidget(self.am_value_date_Edit, 4, 1)
-        grid.addWidget(self.am_due_date_Edit, 5, 1)
+        grid.addWidget(self.am_start_date_Edit, 4, 1)
+        grid.addWidget(self.am_end_date_Edit, 5, 1)
 
-        grid.addWidget(self.am_committee_bank_rate_Edit, 6, 1)
-        grid.addWidget(self.am_c_count_interest_days_Edit, 7, 1)
-        grid.addWidget(self.am_channel_fee_Edit, 6, 3)
-        grid.addWidget(self.am_a_count_interest_days_Edit, 7, 3)
+        grid.addWidget(self.am_bank_fee_rate_Edit, 6, 1)
+        grid.addWidget(self.am_bank_days_Edit, 7, 1)
+        grid.addWidget(self.am_manage_fee_rate_Edit, 6, 3)
+        grid.addWidget(self.am_manage_days_Edit, 7, 3)
 
         grid.addLayout(buttonHBox, 8, 1, 1, 2)
 
@@ -118,34 +118,35 @@ class AssetMgtInput(BasicFcView):
     # ----------------------------------------------------------------------
     def addData(self):
         """增加数据"""
-        # mf_project_name_index = str(self.mf_ComboBox.currentIndex())
-        #
-        # mf_subscribe_from_cash = str(self.mf_subscribe_from_cash_Edit.text())
-        # mf_redeem_to_cash = str(self.mf_redeem_to_cash_Edit.text())
-        # mf_not_carry_forward_revenue = str(self.mf_not_carry_forward_revenue_Edit.text())
-        # mf_carry_forward_revenue = str(self.mf_carry_forward_revenue_Edit.text())
-        #
-        # mf_uuid = self.mf_ComboBox_list[int(mf_project_name_index)]
-        # """向数据库增加数据"""
-        #
-        # date_str = str(self.date_Edit.text()).split('-')
-        # d = datetime.date.today()
-        # if date_str is None:
-        #     date = datetime.date(d.year, d.month, d.day)
-        # else:
-        #     date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[0])),
-        #                          int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
-        #                          int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
-        #
-        # mfProjectList = MfProjectList(date,mf_subscribe_from_cash,mf_redeem_to_cash,mf_not_carry_forward_revenue,mf_carry_forward_revenue)
-        #
-        # mfProjectList.save(mf_uuid)
-        #
-        # moneyFund = MoneyFund(date)
-        # moneyFund.update()
-        #
-        # v = Valuation(date)
-        # v.save()
+        am_name = str(self.am_name_Edit)
+        am_trade_amount = str(self.am_trade_amount_Edit)
+        am_ret_rate = str(self.am_ret_rate_Edit)
+        am_rate_days = str(self.am_rate_days_Edit)
+        am_start_date = str(self.am_start_date_Edit)
+        am_end_date = str(self.am_end_date_Edit)
+        am_bank_fee = str(self.am_bank_fee_rate_Edit)
+        am_bank_days = str(self.am_bank_days_Edit)
+        am_manage_fee_rate = str(self.am_manage_fee_rate_Edit)
+        am_manage_days = str(self.am_manage_days_Edit)
+        """向数据库增加数据"""
+
+        start_date_str = str(self.am_start_date.text()).split('-')
+        end_date_str = str(self.am_end_date.text()).split('-')
+
+        d = datetime.date.today()
+        if start_date_str is None or end_date_str is None:
+            start_date = datetime.date(d.year, d.month, d.day)
+            end_date = datetime.date(d.year, d.month, d.day)
+        else:
+            start_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", start_date_str[0])),
+                                       int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", start_date_str[1])),
+                                       int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", start_date_str[2])))
+            end_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", end_date_str[0])),
+                                     int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", end_date_str[1])),
+                                     int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", end_date_str[2])))
+
+        self.mainEngine.add_management_class(am_name, am_trade_amount, am_ret_rate, am_rate_days, start_date, end_date,
+                                             am_bank_fee, am_bank_days, am_manage_fee_rate, am_manage_days)
 
     def prepareData(self):
         result = MfProject.listAll()

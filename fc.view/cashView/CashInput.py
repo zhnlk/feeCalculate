@@ -114,10 +114,10 @@ class CashInput(BasicFcView):
 
         """向数据库增加数据"""
         print(cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
-        mainEngine.add_cash_daily_data(cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
+        self.mainEngine.add_cash_daily_data(cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
 
-        v = Valuation(date)
-        v.save()
+        # v = Valuation(date)
+        # v.save()
 
         # self.mainEngine.eventEngine.put(EVENT_CASH)
         # self.connect(okButton, SIGNAL("clicked()"), self.slotInformation)

@@ -94,12 +94,10 @@ class PdCateInput(BasicFcView):
         pd_stage_rate = str(self.pd_stage_rate_Edit.text())
 
         """向数据库增加数据"""
-        pdProject = PdProject(pd_project_name,
-                              float(pd_project_rate),
-                              stage_rate,
-                              float(pd_stage_amount),
-                              float(pd_stage_rate))
-        pdProject.save()
+        if stage_rate:
+            self.mainEngine.add_agreement_class(pd_project_name, pd_project_rate, pd_stage_amount, pd_stage_rate)
+        else:
+            self.mainEngine.add_agreement_class(name=pd_project_name, rate=pd_project_rate)
 
 
 if __name__ == "__main__":
