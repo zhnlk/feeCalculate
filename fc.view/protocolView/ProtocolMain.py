@@ -52,7 +52,7 @@ class ProtocolListView(BasicFcView):
     # ----------------------------------------------------------------------
     def showProtocolListDetail(self):
         """显示所有合约数据"""
-        result = mainEngine.get_agreement_detail_by_days()
+        result = self.mainEngine.get_agreement_detail_by_days()
         print(result)
         self.setRowCount(len(result))
         row = 0

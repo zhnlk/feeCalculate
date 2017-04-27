@@ -115,7 +115,7 @@ class MoneyFundDetailView(BasicFcView):
     def showMoneyFundListDetail(self):
         """显示所有合约数据"""
 
-        result = mainEngine.get_fund_detail_by_days(7)
+        result = self.mainEngine.get_fund_detail_by_days(7)
         print(result)
         self.setRowCount(len(result))
         row = 0
@@ -140,12 +140,12 @@ class MoneyFundSummaryView(BasicFcView):
 
         d = OrderedDict()
 
-        d['mf_project_name'] = {'chinese': '货基项目名称', 'cellType': BasicCell}
+        d['asset_name'] = {'chinese': '货基项目名称', 'cellType': BasicCell}
         # 货基项目
-        d['mf_amount'] = {'chinese': '金额', 'cellType': BasicCell}
-        d['mf_revenue'] = {'chinese': '收益', 'cellType': BasicCell}
-        d['mf_subscribe_amount'] = {'chinese': '申购总额', 'cellType': BasicCell}
-        d['mf_redeem_amount'] = {'chinese': '赎回总额', 'cellType': BasicCell}
+        d['total_amount'] = {'chinese': '金额', 'cellType': BasicCell}
+        d['total_ret_amount'] = {'chinese': '收益', 'cellType': BasicCell}
+        d['total_purchase_amount'] = {'chinese': '申购总额', 'cellType': BasicCell}
+        d['total_redeem_amount'] = {'chinese': '赎回总额', 'cellType': BasicCell}
 
         self.setHeaderDict(d)
 
@@ -179,18 +179,13 @@ class MoneyFundSummaryView(BasicFcView):
     def showMoneyFundSummary(self):
         """显示所有合约数据"""
 
-        date = datetime.date(2017, 3, 10)
-
-        result = self.mainEngine.getMoneyFundSummary(date)
+        result = self.mainEngine.get_total_fund_statistic()
         self.setRowCount(len(result))
         row = 0
         for r in result:
             # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
-                if header is 'mf_project_name':
-                    content = MfProjectList.getMfProjectName(r[0])
-                else:
-                    content = r[n]
+                content = r[header]
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
                 print(row, n, cell.text())
@@ -204,10 +199,10 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    # mfm = MoneyFundMain(mainEngine)
-    mflv = MoneyFundDetailView(mainEngine)
+    mfm = MoneyFundMain(mainEngine)
+    # mflv = MoneyFundDetailView(mainEngine)
     # mainfdv = MoneyFundSummaryView(mainEngine)
     # mflv.showMaximized()
     # mainfdv.showMaximized()
-    mflv.showMaximized()
+    mfm.showMaximized()
     sys.exit(app.exec_())
