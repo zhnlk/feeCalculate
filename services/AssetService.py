@@ -546,10 +546,10 @@ def get_single_management_detail(asset_id=''):
 
 
 def get_all_management_detail():
-    ret = dict()
+    ret = list()
     ids = get_all_mamangement_ids()
     for id in ids:
-        ret.update({id: get_single_management_detail(asset_id=id)})
+        ret.append(get_single_management_detail(asset_id=id))
     return ret
 
 
@@ -608,6 +608,18 @@ def cal_daily_ret_and_fee(cal_date=date.today(), asset_id=''):
                 amount=asset_trade_amount * x.rate / x.fee_days,
                 asset_id=asset_id, fee_type=SV.FEE_TYPE_PURCHASE,
                 cal_date=cal_date)
+
+
+def cal_all_mangement_ret_and_fee(cal_date=date.today()):
+    '''
+    计算所有的资管资产的收益和费用
+    :param cal_date:
+    :return:
+    '''
+    management_ids = get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_MANAGEMENT)
+    for management_id in management_ids:
+        cal_management_ret(cal_date=cal_date, asset_id=management_id[0])
+        cal_management_fee(cal_date=cal_date, asset_id=management_id[0])
 
 
 # def get_management_fee_by_id(cal_date=date.today(), asset_id=''):
