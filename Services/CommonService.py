@@ -531,7 +531,7 @@ def get_start_and_expiry_management(cal_date=date.today(), **kwargs):
                                                 AssetClass.start_date == cal_date)).all()
 
 
-@session_deco
+# @session_deco
 def get_total_evaluate_detail_by_date(cal_date=date.today()):
     ret = dict()
     cash_amount = get_all_cash(cal_date=cal_date)
