@@ -60,7 +60,9 @@ class ProtocolListView(BasicFcView):
             # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
                 # name, rate = r.getPdProjectInfo()
-                content = r[header]
+                for col in r.values():
+                    content = col[0][header]
+                # content = r.values()[0][header]
 
                 if isinstance(content, float):
                     content = float('%.4f' % content)

@@ -18,7 +18,7 @@ class MainEngine(object):
     def __init__(self):
         """Constructor"""
         # 记录今日日期
-        self.todayDate = datetime.datetime.today()
+        self.todayDate = datetime.date.today()
 
         # 创建事件引擎
         self.eventEngine = EventEngine()
