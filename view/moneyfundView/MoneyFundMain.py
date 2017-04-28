@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import QAction, QApplication, QMainWindow, QDockWidget
 from BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 from EventType import EVENT_MF
 from MainEngine import MainEngine
-from MoneyFund import MfProjectList
 
 
 class MoneyFundMain(QMainWindow, BasicFcView):

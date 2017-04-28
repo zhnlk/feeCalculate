@@ -10,11 +10,7 @@ from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
 from BasicWidget import BASIC_FONT, BasicFcView
-from Cash import Cash
 from MainEngine import MainEngine
-from MoneyFund import MfProject
-from ProtocolDeposit import ProtocolDeposit, PdProject
-
 
 class MfCateInput(BasicFcView):
     """协存输入"""

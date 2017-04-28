@@ -5,7 +5,6 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QApplication
 
-import Cash
 from BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 from EventEngine import Event
 from EventType import EVENT_CASH
