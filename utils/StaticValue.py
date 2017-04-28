@@ -70,6 +70,8 @@ ASSET_KEY_FUND_TOTAL_PURCHASE_AMOUNT = 'total_purchase_amount'
 ASSET_KEY_FUND_TOTAL_REDEEM_AMOUNT = 'total_redeem_amount'
 ASSET_KEY_FUND_TOTAL_RET_AMOUNT = 'total_ret_amount'
 
+ASSET_KEY_ASSET_ID = 'uuid'
+
 # 收益变化类型
 RET_TYPE_INTEREST = 1
 RET_TYPE_PRINCIPAL = 0
