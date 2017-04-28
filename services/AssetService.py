@@ -15,7 +15,7 @@ from services.CommonService import (
     get_asset_ret_last_total_amount_by_asset_and_type,
     add_asset_fee_with_asset_and_type,
     query_by_id, save, get_management_asset_all_ret, get_management_trade_amount, get_management_trade_fees,
-    get_all_mamangement_ids, get_all_asset_ids_by_type)
+    get_all_mamangement_ids, get_all_asset_ids_by_type, get_expiry_management, get_start_and_expiry_management)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
 from utils.Utils import timer
@@ -620,6 +620,37 @@ def cal_all_mangement_ret_and_fee(cal_date=date.today()):
     for management_id in management_ids:
         cal_management_ret(cal_date=cal_date, asset_id=management_id[0])
         cal_management_fee(cal_date=cal_date, asset_id=management_id[0])
+
+
+def draw_mangement(cal_date=date.today()):
+    mangements = get_expiry_management(cal_date=cal_date)
+    for mangement in mangements:
+        amount = mangement.asset_trade_list[0].amount
+        redeem(amount=amount, cal_date=cal_date, asset=mangement)
+
+
+def get_all_management_ret(asset=AssetClass()):
+    days = (asset.expiry_date - asset.start_date).days
+    asset_rate = asset.asset_ret_rate_list[0]
+    year_days = asset_rate.interest_days
+    rate = asset_rate.ret_rate
+    amount = asset.asset_trade_list[0].amount
+    return amount * days * rate / year_days
+
+
+def draw_manangent_ret(cal_date=date.today()):
+    managements = get_start_and_expiry_management(cal_date=cal_date)
+    for management in managements:
+        if management.ret_cal_method == SV.RET_TYPE_CASH_CUT_INTEREST and management.start_date == cal_date:
+            add_cash_with_type(amount=get_all_management_ret(asset=management), cash_type=SV.CASH_TYPE_CARRY,
+                               asset_id=management.id, cal_date=cal_date)
+            add_asset_ret_with_asset_and_type(amount=get_all_management_ret(asset=management), asset_id=management.id,
+                                              ret_type=SV.RET_TYPE_CASH_CUT_INTEREST, cal_date=cal_date)
+        elif management.ret_cal_method == SV.RET_TYPE_CASH_ONE_TIME and management.expiry_date == cal_date:
+            add_cash_with_type(amount=get_all_management_ret(asset=management), cash_type=SV.CASH_TYPE_CARRY,
+                               asset_id=management.id, cal_date=cal_date)
+            add_asset_ret_with_asset_and_type(amount=get_all_management_ret(asset=management), asset_id=management.id,
+                                              ret_type=SV.RET_TYPE_CASH_ONE_TIME, cal_date=cal_date)
 
 
 # def get_management_fee_by_id(cal_date=date.today(), asset_id=''):

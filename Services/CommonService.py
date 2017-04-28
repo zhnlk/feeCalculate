@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from datetime import date, timedelta
 
-from sqlalchemy import and_, func
+from sqlalchemy import and_, func, or_
 
 from models.AssetClassModel import AssetClass
 from models.AssetFeeModel import AssetFee
@@ -511,6 +511,27 @@ def get_asset_date(days=0, **kwargs):
 
 
 @session_deco
+def get_asset_classes_by_type(asset_type=SV.ASSET_CLASS_AGREEMENT, **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    return session.query(AssetClass).filter(AssetClass.is_active, AssetClass.type == asset_type).all()
+
+
+@session_deco
+def get_expiry_management(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    return session.query(AssetClass).filter(AssetClass.is_active, AssetClass.type == SV.ASSET_CLASS_MANAGEMENT,
+                                            AssetClass.expiry_date == cal_date).all()
+
+
+@session_deco
+def get_start_and_expiry_management(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    return session.query(AssetClass).filter(AssetClass.is_active, AssetClass.type == SV.ASSET_CLASS_MANAGEMENT,
+                                            or_(AssetClass.expiry_date == cal_date,
+                                                AssetClass.start_date == cal_date)).all()
+
+
+@session_deco
 def get_total_evaluate_detail_by_date(cal_date=date.today()):
     ret = dict()
     cash_amount = get_all_cash(cal_date=cal_date)
@@ -540,7 +561,7 @@ def get_total_evaluate_detail(days=0):
 
 
 if __name__ == '__main__':
-    print(get_asset_date(days=2))
+    print(get_asset_classes_by_type(SV.ASSET_CLASS_AGREEMENT))
     # get_all_agreement()
     # print((get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_AGREEMENT)))
     # print(get_all_mamangement_ids())
