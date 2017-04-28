@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from datetime import date, timedelta
 
-from sqlalchemy import and_, func
+from sqlalchemy import and_, func, or_
 
 from models.AssetClassModel import AssetClass
 from models.AssetFeeModel import AssetFee
@@ -376,7 +376,200 @@ def get_management_fees_by_id(cal_date=date.today(), asset_id='', **kwargs):
     return fees
 
 
+def get_all_cash(cal_date=date.today()):
+    purchase_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_PURCHASE_FUND) \
+                      + get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_PURCHASE_AGREEMENT) \
+                      + get_cash_last_total_amount_by_type(cal_date=cal_date,
+                                                           cash_type=SV.CASH_TYPE_PURCHASE_MANAGEMENT)
+
+    redeem_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_REDEEM_AGREEMENT) \
+                    + get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_REDEEM_FUND) \
+                    + get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_REDEEM_MANAGEMENT)
+
+    deposit_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_DEPOSIT)
+    ret_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_RET)
+    carry_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_CARRY)
+    draw_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_DRAW)
+    draw_fee_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_FEE)
+    return purchase_amount + deposit_amount + carry_amount + ret_amount + draw_fee_amount - draw_amount - redeem_amount
+
+
+@session_deco
+def get_all_agreement(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+
+    purchase_obj = session.query(func.sum(AssetTrade.amount).label('total_amount')).filter(AssetTrade.is_active,
+                                                                                           AssetTrade.type == SV.ASSET_TYPE_PURCHASE,
+                                                                                           AssetTrade.date < cal_date + timedelta(
+                                                                                               days=1),
+                                                                                           AssetTrade.asset_class_obj.has(
+                                                                                               AssetClass.type == SV.ASSET_CLASS_AGREEMENT)).one()
+    purchase_amount = purchase_obj.total_amount if purchase_obj.total_amount else 0.0
+
+    redeem_obj = session.query(func.sum(AssetTrade.amount).label('total_amount')).filter(AssetTrade.is_active,
+                                                                                         AssetTrade.type == SV.ASSET_TYPE_REDEEM,
+                                                                                         AssetTrade.date < cal_date + timedelta(
+                                                                                             days=1),
+                                                                                         AssetTrade.asset_class_obj.has(
+                                                                                             AssetClass.type == SV.ASSET_CLASS_AGREEMENT)).one()
+    redeem_amount = redeem_obj.total_amount if redeem_obj.total_amount else 0.0
+
+    # carry_obj = session.query(func.sum(AssetTrade.amount).label('total_amount')).filter(AssetTrade.is_active,
+    #                                                                                     AssetTrade.type == SV.ASSET_TYPE_RET_CARRY,
+    #                                                                                     AssetTrade.date < cal_date + timedelta(
+    #                                                                                         days=1),
+    #                                                                                     AssetTrade.asset_class_obj.has(
+    #                                                                                         AssetClass.type == SV.ASSET_CLASS_AGREEMENT)).one()
+    # carry_amount = carry_obj.total_amount if carry_obj.total_amount else 0.0
+
+    ret_obj = session.query(func.sum(AssetTradeRet.amount).label('total_amount')).filter(AssetTradeRet.is_active,
+                                                                                         AssetTradeRet.date < cal_date + timedelta(
+                                                                                             days=1),
+                                                                                         AssetTradeRet.asset_class_obj.has(
+                                                                                             AssetClass.type == SV.ASSET_CLASS_AGREEMENT)).one()
+    ret_amount = ret_obj.total_amount if redeem_obj.total_amount else 0.0
+    return purchase_amount + ret_amount - redeem_amount
+
+
+@session_deco
+def get_all_fund(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+
+    purchase_obj = session.query(func.sum(AssetTrade.amount).label('total_amount')).filter(AssetTrade.is_active,
+                                                                                           AssetTrade.type == SV.ASSET_TYPE_PURCHASE,
+                                                                                           AssetTrade.date < cal_date + timedelta(
+                                                                                               days=1),
+                                                                                           AssetTrade.asset_class_obj.has(
+                                                                                               AssetClass.type == SV.ASSET_CLASS_FUND)).one()
+    purchase_amount = purchase_obj.total_amount if purchase_obj.total_amount else 0.0
+
+    redeem_obj = session.query(func.sum(AssetTrade.amount).label('total_amount')).filter(AssetTrade.is_active,
+                                                                                         AssetTrade.type == SV.ASSET_TYPE_REDEEM,
+                                                                                         AssetTrade.date < cal_date + timedelta(
+                                                                                             days=1),
+                                                                                         AssetTrade.asset_class_obj.has(
+                                                                                             AssetClass.type == SV.ASSET_CLASS_FUND)).one()
+    redeem_amount = redeem_obj.total_amount if redeem_obj.total_amount else 0.0
+
+    ret_obj = session.query(func.sum(AssetTradeRet.amount).label('total_amount')).filter(AssetTradeRet.is_active,
+                                                                                         AssetTradeRet.date < cal_date + timedelta(
+                                                                                             days=1),
+                                                                                         AssetTradeRet.asset_class_obj.has(
+                                                                                             AssetClass.type == SV.ASSET_CLASS_FUND)).one
+
+    ret_amount = ret_obj.total_amount if redeem_obj.total_amount else 0.0
+    return purchase_amount + ret_amount - redeem_amount
+
+
+@session_deco
+def get_all_management(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+
+    purchase_obj = session.query(func.sum(AssetTrade.amount).label('total_amount')).filter(AssetTrade.is_active,
+                                                                                           AssetTrade.type == SV.ASSET_TYPE_PURCHASE,
+                                                                                           AssetTrade.date < cal_date + timedelta(
+                                                                                               days=1),
+                                                                                           AssetTrade.asset_class_obj.has(
+                                                                                               AssetClass.type == SV.ASSET_CLASS_MANAGEMENT)).one()
+    purchase_amount = purchase_obj.total_amount if purchase_obj.total_amount else 0.0
+
+    redeem_obj = session.query(func.sum(AssetTrade.amount).label('total_amount')).filter(AssetTrade.is_active,
+                                                                                         AssetTrade.type == SV.ASSET_TYPE_REDEEM,
+                                                                                         AssetTrade.date < cal_date + timedelta(
+                                                                                             days=1),
+                                                                                         AssetTrade.asset_class_obj.has(
+                                                                                             AssetClass.type == SV.ASSET_CLASS_MANAGEMENT)).one()
+    redeem_amount = redeem_obj.total_amount if redeem_obj.total_amount else 0.0
+
+    ret_obj = session.query(func.sum(AssetTradeRet.amount).label('total_amount')).filter(AssetTradeRet.is_active,
+                                                                                         AssetTradeRet.date < cal_date + timedelta(
+                                                                                             days=1),
+                                                                                         AssetTradeRet.asset_class_obj.has(
+                                                                                             AssetClass.type == SV.ASSET_CLASS_MANAGEMENT)).one()
+    ret_amount = ret_obj.total_amount if redeem_obj.total_amount else 0.0
+
+    return purchase_amount + ret_amount - redeem_amount
+
+
+@session_deco
+def get_all_ret_daily(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+
+    ret_obj = session.query(func.sum(AssetTradeRet.amount).label('total_amount')).filter(AssetTradeRet.is_active,
+                                                                                         AssetTradeRet.date == cal_date,
+                                                                                         AssetTradeRet.type == SV.RET_TYPE_INTEREST).one()
+
+    return ret_obj.total_amount if ret_obj.total_amount else 0.0
+
+
+@session_deco
+def get_asset_date(days=0, **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    dates = session.query(AssetTrade.date).filter(AssetTrade.is_active).distinct()
+    dates = sorted(map(lambda x: x.date, dates))
+    if days:
+        return dates[-days:]
+    return dates
+
+
+@session_deco
+def get_asset_classes_by_type(asset_type=SV.ASSET_CLASS_AGREEMENT, **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    return session.query(AssetClass).filter(AssetClass.is_active, AssetClass.type == asset_type).all()
+
+
+@session_deco
+def get_expiry_management(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    return session.query(AssetClass).filter(AssetClass.is_active, AssetClass.type == SV.ASSET_CLASS_MANAGEMENT,
+                                            AssetClass.expiry_date == cal_date).all()
+
+
+@session_deco
+def get_start_and_expiry_management(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    return session.query(AssetClass).filter(AssetClass.is_active, AssetClass.type == SV.ASSET_CLASS_MANAGEMENT,
+                                            or_(AssetClass.expiry_date == cal_date,
+                                                AssetClass.start_date == cal_date)).all()
+
+
+# @session_deco
+def get_total_evaluate_detail_by_date(cal_date=date.today()):
+    ret = dict()
+    cash_amount = get_all_cash(cal_date=cal_date)
+    fund_amount = get_all_fund(cal_date=cal_date)
+    agreement_amount = get_all_agreement(cal_date=cal_date)
+    management_amount = get_all_management(cal_date=cal_date)
+    ret_amount = get_all_ret_daily(cal_date=cal_date)
+
+    ret[SV.ASSET_KEY_CAL_DATE] = cal_date
+    ret[SV.ASSET_KEY_ALL_EVALUATE_CASH] = cash_amount
+    ret[SV.ASSET_KEY_ALL_EVALUATE_AGREEMENT] = agreement_amount
+    ret[SV.ASSET_KEY_ALL_EVALUATE_FUND] = fund_amount
+    ret[SV.ASSET_KEY_ALL_EVALUATE_MANAGEMENT] = management_amount
+    ret[SV.ASSET_KEY_ALL_EVALUATE_RET] = ret_amount
+    ret[SV.ASSET_KEY_ALL_VALUE] = cash_amount + fund_amount + management_amount + ret_amount + agreement_amount
+    ret['fee1'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.02 / 3.6
+    ret['fee2'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.03 / 3.6
+    ret['fee3'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.04 / 3.65
+    return ret
+
+
+def get_total_evaluate_detail(days=0):
+    ret = list()
+    for cal_date in get_asset_date(days=days):
+        ret.append(get_total_evaluate_detail_by_date(cal_date=cal_date))
+
+    if not ret:
+        ret.append(get_total_evaluate_detail_by_date(cal_date=date.today()))
+
+    return ret
+
+
 if __name__ == '__main__':
+    print(get_total_evaluate_detail())
+    # print(get_asset_classes_by_type(SV.ASSET_CLASS_AGREEMENT))
+    # get_all_agreement()
     # print((get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_AGREEMENT)))
     # print(get_all_mamangement_ids())
     # print(get_management_asset_all_ret(asset_id='8f62d3fb42ec49459de78934753f57ae'))
@@ -389,7 +582,7 @@ if __name__ == '__main__':
     # save(AssetRetRate(asset_id=agreement.id, ret_rate=0.1, threshold=10000))
     # save(agreement)
 
-    purchase()
+    # purchase()
     # agree = AssetClass(name='联顺泰', code='20007', type=SV.ASSET_CLASS_MANAGEMENT)
     #
     # save(AssetFeeRate(asset_class=agree.id, rate=20, type=SV.FEE_TYPE_PURCHASE, method=SV.FEE_METHOD_RATIO_ONE_TIME))
