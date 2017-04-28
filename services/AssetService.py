@@ -15,7 +15,7 @@ from services.CommonService import (
     get_asset_ret_last_total_amount_by_asset_and_type,
     add_asset_fee_with_asset_and_type,
     query_by_id, save, get_management_asset_all_ret, get_management_trade_amount, get_management_trade_fees,
-    get_all_mamangement_ids, get_all_asset_ids_by_type)
+    get_all_mamangement_ids, get_all_asset_ids_by_type, get_management_fees_by_id)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
 from utils.Utils import timer
@@ -425,7 +425,7 @@ def cal_management_ret(cal_date=None, asset_id=''):
     :param asset_id:资管资产id
     :return:
     '''
-    asset = query_by_id(AssetClass, asset_id).one()
+    asset = query_by_id(AssetClass, asset_id)
     if asset.expiry_date > cal_date:
         rate = get_asset_rate_by_amount(rates=asset.asset_ret_rate_list, amount=0)
         days = rate.interest_days
@@ -435,6 +435,46 @@ def cal_management_ret(cal_date=None, asset_id=''):
 
         add_asset_ret_with_asset_and_type(asset_id=asset_id, amount=ret, ret_type=SV.RET_TYPE_INTEREST,
                                           cal_date=cal_date)
+
+
+def cal_all_management_ret(cal_date=date.today()):
+    '''
+    计算资管系统的收益
+    :param cal_date:计算时间
+    :return:
+    '''
+    management_ids = get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_MANAGEMENT)
+    for management_id in management_ids:
+        cal_management_ret(cal_date=cal_date, asset_id=management_id[0])
+
+
+def cal_management_fee(cal_date=date.today(), asset_id=''):
+    asset = query_by_id(AssetClass, asset_id)
+    if asset.expiry_date > cal_date:
+        asset_fee_rates = asset.asset_fee_rate_list
+
+        asset_trades = asset.asset_trade_list
+
+        total_trade_amount = asset_trades[-1].total_amount if asset_trades else 0.0
+        for asset_fee_rate in asset_fee_rates:
+            add_asset_fee_with_asset_and_type(
+                amount=total_trade_amount * asset_fee_rate.rate / asset_fee_rate.fee_days,
+                asset_id=asset_id,
+                fee_type=asset_fee_rate.type
+            )
+    else:
+        pass
+
+
+def cal_all_manangement_fee(cal_date=date.today()):
+    '''
+    计算所有的资管费用
+    :param cal_date:计算时间
+    :return:
+    '''
+    management_ids = get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_MANAGEMENT)
+    for management_id in management_ids:
+        cal_management_fee(cal_date=cal_date, asset_id=management_id[0])
 
 
 def get_total_management_statistic_by_id(cal_date=date.today(), asset_id=''):
@@ -568,6 +608,14 @@ def cal_daily_ret_and_fee(cal_date=date.today(), asset_id=''):
                 cal_date=cal_date)
 
 
+# def get_management_fee_by_id(cal_date=date.today(), asset_id=''):
+#     asset_fees = get_management_fees_by_id(cal_date=cal_date, asset_id=asset_id)
+#
+#     ret = list()
+#     for asset_fee in asset_fees:
+#         ret.append({ass})
+
+
 ################################################################
 #
 #
@@ -663,7 +711,12 @@ if __name__ == '__main__':
     fund:{'asset_name': '余额宝', 'cal_date': datetime.date(2017, 4, 20), 'cash_to_fund': 13009.0, 'fund_to_cash': 8011.0, 'asset_ret': 3005.0, 'ret_carry_cash': 1005.0, 'ret_not_carry': 2000.0, 'total_amount': 8003.0}
     cash:{'cal_date': datetime.date(2017, 4, 20), 'cash_to_agreement': 20001.0, 'cash_to_fund': 13009.0, 'cash_to_management': 20000.0, 'agreement_to_cash': 10001.0, 'fund_to_cash': 8011.0, 'management_to_cash': 15000.0, 'investor_to_cash': 100000.0, 'cash_to_investor': 0, 'cash_draw_fee': 0, 'cash_return': 0, 'total_amount': 80001.0}
     '''
-    print(get_total_fund_statistic())
+    # add_management_class(name='management', trade_amount=10000, ret_rate=0.1, rate_days=360, start_date=date.today(),
+    #                      end_date=date.today() + timedelta(days=200), bank_fee_rate=0.0003, manage_fee_rate=0.00015)
+
+    cal_management_fee(asset_id='36429917ffd34b02b29f8c49eb25f557')
+    # print(get_all_management_detail())
+    # print(get_total_fund_statistic())
     # print(get_single_management_detail(asset_id='8f62d3fb42ec49459de78934753f57ae'))
     # cal_daily_ret_and_fee(asset_id='7fe9c108cd874c10b167782f798e1d35')
     # cal_agreement_ret(cal_date=date.today(),

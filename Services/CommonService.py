@@ -365,6 +365,17 @@ def get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_AGREEMENT, **kwargs):
     return list(assets)
 
 
+@session_deco
+def get_management_fees_by_id(cal_date=date.today(), asset_id='', **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    fees = session.query(AssetFee).filter(
+        AssetFee.is_active,
+        AssetFee.date < cal_date + timedelta(days=1),
+        AssetFee.asset_class == asset_id
+    )
+    return fees
+
+
 if __name__ == '__main__':
     # print((get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_AGREEMENT)))
     # print(get_all_mamangement_ids())
