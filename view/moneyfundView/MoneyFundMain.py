@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import QAction, QApplication, QMainWindow, QDockWidget
 from BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 from EventType import EVENT_MF
 from MainEngine import MainEngine
-from MoneyFund import MfProjectList
 
 
 class MoneyFundMain(QMainWindow, BasicFcView):
@@ -122,7 +121,9 @@ class MoneyFundDetailView(BasicFcView):
         for r in result:
             # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
-                content = r[header]
+                # content = r[header]
+                for col in r.values():
+                    content = col[0][header]
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
                 print(cell.text())

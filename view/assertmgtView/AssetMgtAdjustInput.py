@@ -16,11 +16,7 @@ from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
 from BasicWidget import BASIC_FONT, BasicFcView
-from Cash import Cash
 from MainEngine import MainEngine
-from MoneyFund import MoneyFund, MfProjectList, MfProject
-from ProtocolDeposit import ProtocolDeposit
-from Valuation import Valuation
 
 
 class AdjustValuationInput(BasicFcView):

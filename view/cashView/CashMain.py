@@ -1,69 +1,76 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
 
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QApplication
 
 from BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
-from EventType import EVENT_PD
+from EventEngine import Event
+from EventType import EVENT_CASH
 from MainEngine import MainEngine
 
 
-class ProtocolListView(BasicFcView):
-    """协存详情"""
+class CashListView(BasicFcView):
+    """现金详情"""
 
-    # ----------------------------------------------------------------------
     def __init__(self, mainEngine, parent=None):
         """Constructor"""
-        super(ProtocolListView, self).__init__(parent=parent)
+        super(CashListView, self).__init__(parent=parent)
 
         self.mainEngine = mainEngine
 
         d = OrderedDict()
-        d['asset_name'] = {'chinese': '协存项目名称', 'cellType': BasicCell}
-        d['rate'] = {'chinese': '协存项目利率', 'cellType': BasicCell}
-
         d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
-
-        # 协存项目
-        d['total_amount'] = {'chinese': '总额', 'cellType': BasicCell}
-        d['asset_ret'] = {'chinese': '协存本金', 'cellType': BasicCell}
-        # d['pd_interest'] = {'chinese': '协存利息', 'cellType': BasicCell}
-        # 协存项目 输入项
-        d['ret_carry_principal'] = {'chinese': '利息转结本金', 'cellType': BasicCell}
+        d['total_amount'] = {'chinese': '现金总额', 'cellType': BasicCell}
+        d['cash_to_management'] = {'chinese': '现金->资管', 'cellType': BasicCell}
+        d['cash_to_fund'] = {'chinese': '现金->货基', 'cellType': BasicCell}
         d['cash_to_agreement'] = {'chinese': '现金->协存', 'cellType': BasicCell}
+        d['cash_to_investor'] = {'chinese': '现金->兑付投资人', 'cellType': BasicCell}
+        d['management_to_cash'] = {'chinese': '资管->现金', 'cellType': BasicCell}
+        d['fund_to_cash'] = {'chinese': '货基->现金', 'cellType': BasicCell}
         d['agreement_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
+        d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': BasicCell}
+        d['cash_return'] = {'chinese': '现金收入', 'cellType': BasicCell}
+        d['cash_draw_fee'] = {'chinese': '提取费用', 'cellType': BasicCell}
+
+        self.setEventType(EVENT_CASH)
 
         self.setHeaderDict(d)
 
-        self.setEventType(EVENT_PD)
+        self.eventType = 'eCash'
 
         self.initUi()
 
     # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
-        self.setWindowTitle('协存明细')
-        self.setMinimumSize(1200, 600)
+        self.setWindowTitle('现金明细')
+        self.setMinimumSize(1300, 600)
+
+        # 将信号连接到refresh函数
+        self.signal.connect(self.refresh)
+        self.mainEngine.eventEngine.register(EVENT_CASH, self.signal.emit)
+        # self.resizeColumnsToContents()
+
         self.setFont(BASIC_FONT)
         self.initTable()
         self.addMenuAction()
 
     # ----------------------------------------------------------------------
-    def showProtocolListDetail(self):
-        """显示所有合约数据"""
-        result = self.mainEngine.get_agreement_detail_by_days()
+    def showCashListDetail(self):
+        """显示现金记录明细"""
+
+        result = self.mainEngine.get_cash_detail_by_days(7)
+
         print(result)
         self.setRowCount(len(result))
         row = 0
         for r in result:
-            # 按照定义的表头，进行数据填充
+            # 按照定义的表头，进行填充数据
             for n, header in enumerate(self.headerList):
-                # name, rate = r.getPdProjectInfo()
                 content = r[header]
-
-                if isinstance(content, float):
-                    content = float('%.4f' % content)
+                print(content)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
                 self.setItem(row, n, cell)
@@ -74,9 +81,9 @@ class ProtocolListView(BasicFcView):
     def refresh(self):
         """刷新"""
         self.menu.close()  # 关闭菜单
-        self.clearContents()
-        self.setRowCount(0)
-        self.showProtocolListDetail()
+        # self.clearContents()
+        # self.setRowCount(0)
+        self.showCashListDetail()
 
     # ----------------------------------------------------------------------
     def addMenuAction(self):
@@ -89,7 +96,8 @@ class ProtocolListView(BasicFcView):
     # ----------------------------------------------------------------------
     def show(self):
         """显示"""
-        super(ProtocolListView, self).show()
+        super(CashListView, self).show()
+
         self.refresh()
 
 
@@ -98,7 +106,7 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    plv = ProtocolListView(mainEngine)
+    clv = CashListView(mainEngine)
 
-    plv.show()
+    clv.show()
     sys.exit(app.exec_())

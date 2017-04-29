@@ -13,11 +13,8 @@ from PyQt5.QtWidgets import QPushButton
 from sqlalchemy.orm import Session
 
 from BasicWidget import BASIC_FONT, BasicFcView
-from Cash import Cash
 from MainEngine import MainEngine
 from utils import StaticValue as SV
-from ProtocolDeposit import ProtocolDeposit, PdProject, PdProjectList
-from Valuation import Valuation
 
 
 class ProtocolInput(BasicFcView):
