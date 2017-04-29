@@ -153,7 +153,7 @@ class MainEngine(object):
         :param asset_type: 资产类型
         :return: 
         """
-        CommonService.get_all_asset_ids_by_type(asset_type)
+        return CommonService.get_all_asset_ids_by_type(asset_type)
 
     def get_cash_detail_by_days(self, days):
         """
@@ -184,8 +184,8 @@ class MainEngine(object):
         :param redeem_amount: 
         :return: 
         """
-        AssetService.add_agreement_daily_data(cal_date, asset_id, ret_carry_asset_amount, purchase_amount,
-                                              redeem_amount)
+        AssetService.add_agreement_daily_data(cal_date, asset_id, float(ret_carry_asset_amount), float(purchase_amount),
+                                              float(redeem_amount))
 
     def add_fund_daily_data(self, cal_date, asset_id, ret_carry_cash_amount, purchase_amount, redeem_amount,
                             ret_amount):
