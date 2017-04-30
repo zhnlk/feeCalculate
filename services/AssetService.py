@@ -527,7 +527,7 @@ def get_single_management_detail(asset_id=''):
     ret.update({SV.ASSET_KEY_MANAGEMENT_AMOUNT: get_management_trade_amount(asset_id=asset_id)})
     asset = query_by_id(obj=AssetClass, obj_id=asset_id)
     ret.update({SV.ASSET_KEY_MANAGEMENT_RET_RATE: asset.asset_ret_rate_list[
-        0]}) if asset.asset_ret_rate_list.count() else ret.update({SV.ASSET_KEY_MANAGEMENT_RET_RATE: 0.0})
+        0]}) if len(asset.asset_ret_rate_list) else ret.update({SV.ASSET_KEY_MANAGEMENT_RET_RATE: 0.0})
 
     fees = get_management_trade_fees(asset_id=asset_id)
     if fees:
@@ -765,7 +765,7 @@ if __name__ == '__main__':
     # add_management_class(name='management', trade_amount=10000, ret_rate=0.1, rate_days=360, start_date=date.today(),
     #                      end_date=date.today() + timedelta(days=200), bank_fee_rate=0.0003, manage_fee_rate=0.00015)
 
-    add_management_class(name='management1')
+    # add_management_class(name='management1')
     print(get_all_management_detail())
     # cal_management_fee(asset_id='36429917ffd34b02b29f8c49eb25f557')
     # print(get_all_management_detail())
