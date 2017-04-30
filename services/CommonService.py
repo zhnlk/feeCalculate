@@ -14,6 +14,7 @@ from models.AssetTradeModel import AssetTrade
 from models.AssetTradeRetModel import AssetTradeRet
 from models.CashModel import Cash
 from models.CommonModel import session_deco
+from services.FeeService import get_daily_fee
 from utils import StaticValue as SV
 
 
@@ -550,6 +551,10 @@ def get_total_evaluate_detail_by_date(cal_date=date.today()):
     ret['fee1'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.02 / 3.6
     ret['fee2'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.03 / 3.6
     ret['fee3'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.04 / 3.65
+
+    ret['fee4'] = ret.get(SV.ASSET_KEY_ALL_EVALUATE_RET) - ret['fee1'] - ret['fee2'] - ret['fee3'] - get_daily_fee(
+        cal_date=cal_date)
+
     return ret
 
 
