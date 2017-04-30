@@ -700,7 +700,7 @@ def add_daily_asset_data(cal_date=date.today(), asset_id='', ret_carry_asset_amo
     redeem(asset=asset, amount=redeem_amount, cal_date=cal_date) if redeem_amount else None
     add_trade_ret(cal_date=cal_date, ret_amount=ret_amount, asset=asset) if ret_amount else None
     asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
-    cal_agreement_ret(cal_date=cal_date, asset=asset) if asset.type == SV.ASSET_CLASS_AGREEMENT else None
+    cal_agreement_ret(cal_date=cal_date, asset_id=asset.id) if asset.type == SV.ASSET_CLASS_AGREEMENT else None
 
 
 # @timer
