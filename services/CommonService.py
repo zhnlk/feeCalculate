@@ -444,11 +444,10 @@ def get_all_fund(cal_date=date.today(), **kwargs):
                                                                                              AssetClass.type == SV.ASSET_CLASS_FUND)).one()
     redeem_amount = redeem_obj.total_amount if redeem_obj.total_amount else 0.0
 
-    ret_obj = session.query(func.sum(AssetTradeRet.amount).label('total_amount')).filter(AssetTradeRet.is_active,
-                                                                                         AssetTradeRet.date < cal_date + timedelta(
-                                                                                             days=1),
-                                                                                         AssetTradeRet.asset_class_obj.has(
-                                                                                             AssetClass.type == SV.ASSET_CLASS_FUND)).one
+    ret_obj = session.query(func.sum(AssetTradeRet.amount).label('total_amount')).filter(
+        AssetTradeRet.is_active,
+        AssetTradeRet.date < cal_date + timedelta(days=1),
+        AssetTradeRet.asset_class_obj.has(AssetClass.type == SV.ASSET_CLASS_FUND)).one()
 
     ret_amount = ret_obj.total_amount if ret_obj.total_amount else 0.0
     return purchase_amount + ret_amount - redeem_amount
@@ -598,5 +597,6 @@ def get_daily_fee(cal_date=date.today()):
 
 
 if __name__ == '__main__':
-    add_fee_with_date(cal_date=date.today(), amount=10000)
+    get_all_fund()
+    # add_fee_with_date(cal_date=date.today(), amount=10000)
     # print(get_total_evaluate_detail())
