@@ -413,15 +413,6 @@ def get_all_agreement(cal_date=date.today(), **kwargs):
                                                                                          AssetTrade.asset_class_obj.has(
                                                                                              AssetClass.type == SV.ASSET_CLASS_AGREEMENT)).one()
     redeem_amount = redeem_obj.total_amount if redeem_obj.total_amount else 0.0
-
-    # carry_obj = session.query(func.sum(AssetTrade.amount).label('total_amount')).filter(AssetTrade.is_active,
-    #                                                                                     AssetTrade.type == SV.ASSET_TYPE_RET_CARRY,
-    #                                                                                     AssetTrade.date < cal_date + timedelta(
-    #                                                                                         days=1),
-    #                                                                                     AssetTrade.asset_class_obj.has(
-    #                                                                                         AssetClass.type == SV.ASSET_CLASS_AGREEMENT)).one()
-    # carry_amount = carry_obj.total_amount if carry_obj.total_amount else 0.0
-
     ret_obj = session.query(func.sum(AssetTradeRet.amount).label('total_amount')).filter(AssetTradeRet.is_active,
                                                                                          AssetTradeRet.date < cal_date + timedelta(
                                                                                              days=1),
@@ -548,6 +539,13 @@ def get_total_evaluate_detail_by_date(cal_date=date.today()):
     ret[SV.ASSET_KEY_ALL_EVALUATE_FUND] = fund_amount
     ret[SV.ASSET_KEY_ALL_EVALUATE_MANAGEMENT] = management_amount
     ret[SV.ASSET_KEY_ALL_EVALUATE_RET] = ret_amount
+
+    ret[SV.ASSET_KEY_ALL_CURRENT_RATE] = (
+                                             ret.get(SV.ASSET_KEY_ALL_EVALUATE_CASH) + ret.get(
+                                                 SV.ASSET_KEY_ALL_EVALUATE_FUND) + ret.get(
+                                                 SV.ASSET_KEY_ALL_EVALUATE_AGREEMENT)
+                                         ) / ret.get(SV.ASSET_KEY_ALL_VALUE) if ret.get(SV.ASSET_KEY_ALL_VALUE) else 0.0
+
     ret[SV.ASSET_KEY_ALL_VALUE] = cash_amount + fund_amount + management_amount + ret_amount + agreement_amount
     ret['fee1'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.02 / 3.6
     ret['fee2'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.03 / 3.6
@@ -562,63 +560,8 @@ def get_total_evaluate_detail(days=0):
 
     if not ret:
         ret.append(get_total_evaluate_detail_by_date(cal_date=date.today()))
-
     return ret
 
 
 if __name__ == '__main__':
     print(get_total_evaluate_detail())
-    # print(get_asset_classes_by_type(SV.ASSET_CLASS_AGREEMENT))
-    # get_all_agreement()
-    # print((get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_AGREEMENT)))
-    # print(get_all_mamangement_ids())
-    # print(get_management_asset_all_ret(asset_id='8f62d3fb42ec49459de78934753f57ae'))
-    # print(get_management_trade_amount(asset_id='8f62d3fb42ec49459de78934753f57ae'))
-    # print(get_management_trade_fees(asset_id='8f62d3fb42ec49459de78934753f57ae'))
-    # save(Cash(amount=100000, type=SV.CASH_TYPE_DEPOSIT))
-    # save(AssetClass(name='余额宝', code='10001', type=SV.ASSET_CLASS_FUND))
-    # agreement = (AssetClass(name='浦发理财一号', code='20007', type=SV.ASSET_CLASS_AGREEMENT))
-    # save(AssetRetRate(asset_id=agreement.id, ret_rate=0.03, threshold=0))
-    # save(AssetRetRate(asset_id=agreement.id, ret_rate=0.1, threshold=10000))
-    # save(agreement)
-
-    # purchase()
-    # agree = AssetClass(name='联顺泰', code='20007', type=SV.ASSET_CLASS_MANAGEMENT)
-    #
-    # save(AssetFeeRate(asset_class=agree.id, rate=20, type=SV.FEE_TYPE_PURCHASE, method=SV.FEE_METHOD_RATIO_ONE_TIME))
-    # save(AssetFeeRate(asset_class=agree.id, rate=0.015, type=SV.FEE_TYPE_REDEEM, method=SV.FEE_METHOD_RATIO_EVERY_DAY))
-    # save(agree)
-
-    # update(AssetClass, query_key='80f6f6baa8a343788c75abf10cf1bae9', update_data={AssetClass.is_active: True})
-
-    # print(get_asset_last_total_amount_by_asset_and_type(cal_date=date.today(),
-    #                                                     asset_id='6a2686b23dae4296868c2288d28b6a7a',
-    #                                                     trade_type=SV.ASSET_TYPE_PURCHASE))
-
-    # add_asset_trade_with_asset_and_type(amount=10000, asset_id='41216cc75f9c455fa4c309a177eef9e7',
-    #                                     trade_type=SV.ASSET_TYPE_PURCHASE)
-    # cal_date = date.today() - timedelta(days=5)
-    # asset = get_asset_by_name(name='浦发理财一号')
-    # # purchase(asset=asset, amount=7000)
-    # redeem(asset=asset, amount=7000)
-
-    # redeem(asset=asset, amount=10000)
-    # redeem(asset=asset, amount=15000, cal_date=cal_date)
-    # print(get_asset_trade_change(asset_type=SV.ASSET_CLASS_FUND, trade_type=SV.ASSET_TYPE_REDEEM))
-    # print(get_cash_trade_change())
-    # print(asset.cash_list)
-    # print(asset.asset_trade_list)
-    # print(asset.asset_trade_list[1].trade_fee_list)
-    #
-    # # pass
-    # # save(Cash(amount=100000, type=0))
-    # # asset_class = AssetClass(name='现金宝', code='10008', type=1, ret_rate=0.038)
-    # # save(AssetFeeRate(asset_class=asset_class.id, rate=5, type=SV.FEE_TYPE_PURCHASE, method=SV.FEE_METHOD_TIMES))
-    # # save(AssetFeeRate(asset_class=asset_class.id, rate=0.015, type=SV.FEE_TYPE_PURCHASE, method=SV.FEE_METHOD_RATIO))
-    # # save(AssetFeeRate(asset_class=asset_class.id, rate=0.015, type=SV.FEE_TYPE_REDEEM, method=SV.FEE_METHOD_RATIO))
-    # # save(AssetFeeRate(asset_class=asset_class.id, rate=0.025, type=SV.FEE_TYPE_REDEEM, method=SV.FEE_METHOD_RATIO))
-    # # save(asset_class)
-    # #
-    # # asset = get_asset_by_name('现金宝')
-    # # purchase(asset=asset, amount=10000)
-    # # redeem(asset=asset, amount=5000)
