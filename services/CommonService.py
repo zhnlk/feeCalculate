@@ -420,7 +420,7 @@ def get_all_agreement(cal_date=date.today(), **kwargs):
                                                                                              days=1),
                                                                                          AssetTradeRet.asset_class_obj.has(
                                                                                              AssetClass.type == SV.ASSET_CLASS_AGREEMENT)).one()
-    ret_amount = ret_obj.total_amount if redeem_obj.total_amount else 0.0
+    ret_amount = ret_obj.total_amount if ret_obj.total_amount else 0.0
     return purchase_amount + ret_amount - redeem_amount
 
 
@@ -450,7 +450,7 @@ def get_all_fund(cal_date=date.today(), **kwargs):
                                                                                          AssetTradeRet.asset_class_obj.has(
                                                                                              AssetClass.type == SV.ASSET_CLASS_FUND)).one
 
-    ret_amount = ret_obj.total_amount if redeem_obj.total_amount else 0.0
+    ret_amount = ret_obj.total_amount if ret_obj.total_amount else 0.0
     return purchase_amount + ret_amount - redeem_amount
 
 
@@ -479,7 +479,7 @@ def get_all_management(cal_date=date.today(), **kwargs):
                                                                                              days=1),
                                                                                          AssetTradeRet.asset_class_obj.has(
                                                                                              AssetClass.type == SV.ASSET_CLASS_MANAGEMENT)).one()
-    ret_amount = ret_obj.total_amount if redeem_obj.total_amount else 0.0
+    ret_amount = ret_obj.total_amount if ret_obj.total_amount else 0.0
 
     return purchase_amount + ret_amount - redeem_amount
 
