@@ -54,23 +54,26 @@ class ProtocolListView(BasicFcView):
         """显示所有合约数据"""
         result = self.mainEngine.get_agreement_detail_by_days()
         print(result)
-        self.setRowCount(len(result))
+        count = 0
+        for d in result:
+            for v in d.values():
+                count = count + len(v)
+        self.setRowCount(count)
         row = 0
+        # 遍历资产类型
         for r in result:
-            # 按照定义的表头，进行数据填充
-            for n, header in enumerate(self.headerList):
-                # name, rate = r.getPdProjectInfo()
-                for col in r.values():
-                    content = col[0][header]
-                # content = r.values()[0][header]
+            # 遍历对应资产的记录
+            for col in r.values():
+                for c in col:
+                    print(c)
+                    # 按照定义的表头，进行数据填充
+                    for n, header in enumerate(self.headerList):
+                        content = c[header]
+                        cell = self.headerDict[header]['cellType'](content)
+                        print(row,n,content)
+                        self.setItem(row, n, cell)
 
-                if isinstance(content, float):
-                    content = float('%.4f' % content)
-                cellType = self.headerDict[header]['cellType']
-                cell = cellType(content)
-                self.setItem(row, n, cell)
-
-            row = row + 1
+                    row = row + 1
 
     # ----------------------------------------------------------------------
     def refresh(self):
