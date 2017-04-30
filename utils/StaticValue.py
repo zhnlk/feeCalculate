@@ -64,6 +64,7 @@ ASSET_KEY_MANAGEMENT_MANAGE_FEE = 'manage_fee'
 ASSET_KEY_MANAGEMENT_AMOUNT = 'management_amount'
 ASSET_KEY_MANAGEMENT_DAILY_RET = 'mamangement_daily_ret'
 ASSET_KEY_MANAGEMENT_RET = 'management_ret'
+ASSET_KEY_MANAGEMENT_RET_RATE = 'ret_rate'
 
 ASSET_KEY_FUND_TOTAL_AMOUNT = 'total_amount'
 ASSET_KEY_FUND_TOTAL_PURCHASE_AMOUNT = 'total_purchase_amount'
