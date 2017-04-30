@@ -1,7 +1,7 @@
 # encoding:utf8
 from __future__ import unicode_literals
 
-from datetime import date
+from datetime import date, timedelta
 
 from models.AssetClassModel import AssetClass
 from models.AssetFeeRateModel import AssetFeeRate
@@ -396,7 +396,7 @@ def add_management_class(
         ret_rate=0.1,
         rate_days=360,
         start_date=date.today(),
-        end_date=date.today(),
+        end_date=date.today() + timedelta(days=360),
         bank_fee_rate=0.0003,
         bank_days=360,
         manage_fee_rate=0.0012,
@@ -520,7 +520,7 @@ def get_single_management_detail(asset_id=''):
     ret.update({SV.ASSET_KEY_START_DATE: asset.start_date})
     ret.update({SV.ASSET_KEY_EXPIRY_DATE: asset.expiry_date})
     ret.update({SV.ASSET_KEY_MANAGEMENT_DUE: (
-        asset.expiry_date - asset.start_date).days}) if asset.expiry_date and asset.start_date else ret.update(
+        asset.expiry_date - asset.start_date).days}) if asset.expiry_date and asset.start_date and asset.expiry_date > asset.start_date else ret.update(
         {SV.ASSET_KEY_MANAGEMENT_DUE: 1})
     ret.update({SV.ASSET_KEY_ASSET_RET: get_management_asset_all_ret(asset_id=asset.id)})
     ret.update({SV.ASSET_KEY_MANAGEMENT_AMOUNT: get_management_trade_amount(asset_id=asset_id)})
@@ -528,12 +528,13 @@ def get_single_management_detail(asset_id=''):
     fees = get_management_trade_fees(asset_id=asset_id)
     if fees:
         ret.update({SV.ASSET_KEY_MANAGEMENT_BANK_FEE: ret.get(SV.ASSET_KEY_MANAGEMENT_AMOUNT) * fees[0].rate * ret.get(
-            SV.ASSET_KEY_MANAGEMENT_DUE) / fees[0].fee_days}) if ret.get(SV.ASSET_KEY_MANAGEMENT_DUE) else ret.update(
+            SV.ASSET_KEY_MANAGEMENT_DUE) / fees[0].fee_days}) if ret.get(SV.ASSET_KEY_MANAGEMENT_DUE) and fees[
+            0].fee_days else ret.update(
             {SV.ASSET_KEY_MANAGEMENT_BANK_FEE: 0})
         ret.update(
             {SV.ASSET_KEY_MANAGEMENT_MANAGE_FEE: ret.get(SV.ASSET_KEY_MANAGEMENT_AMOUNT) * fees[1].rate * ret.get(
                 SV.ASSET_KEY_MANAGEMENT_DUE) / fees[1].fee_days}) if ret.get(
-            SV.ASSET_KEY_MANAGEMENT_DUE) else ret.update(
+            SV.ASSET_KEY_MANAGEMENT_DUE) and fees[1].fee_days else ret.update(
             {SV.ASSET_KEY_MANAGEMENT_MANAGE_FEE: 0})
 
     else:
@@ -541,7 +542,8 @@ def get_single_management_detail(asset_id=''):
     ret.update({SV.ASSET_KEY_MANAGEMENT_DAILY_RET: (ret.get(SV.ASSET_KEY_ASSET_RET) - ret.get(
         SV.ASSET_KEY_MANAGEMENT_BANK_FEE) - ret.get(
         SV.ASSET_KEY_MANAGEMENT_MANAGE_FEE)) / ret.get(
-        SV.ASSET_KEY_MANAGEMENT_DUE)})
+        SV.ASSET_KEY_MANAGEMENT_DUE)}) if ret.get(SV.ASSET_KEY_MANAGEMENT_DUE) else ret.update(
+        {SV.ASSET_KEY_MANAGEMENT_DAILY_RET: 0.0})
     return ret
 
 
@@ -759,7 +761,9 @@ if __name__ == '__main__':
     # add_management_class(name='management', trade_amount=10000, ret_rate=0.1, rate_days=360, start_date=date.today(),
     #                      end_date=date.today() + timedelta(days=200), bank_fee_rate=0.0003, manage_fee_rate=0.00015)
 
-    cal_management_fee(asset_id='36429917ffd34b02b29f8c49eb25f557')
+    add_management_class(name='management1')
+    print(get_all_management_detail())
+    # cal_management_fee(asset_id='36429917ffd34b02b29f8c49eb25f557')
     # print(get_all_management_detail())
     # print(get_total_fund_statistic())
     # print(get_single_management_detail(asset_id='8f62d3fb42ec49459de78934753f57ae'))
