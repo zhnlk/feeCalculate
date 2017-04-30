@@ -527,7 +527,7 @@ def get_single_management_detail(asset_id=''):
     ret.update({SV.ASSET_KEY_MANAGEMENT_AMOUNT: get_management_trade_amount(asset_id=asset_id)})
     asset = query_by_id(obj=AssetClass, obj_id=asset_id)
     ret.update({SV.ASSET_KEY_MANAGEMENT_RET_RATE: asset.asset_ret_rate_list[
-        0]}) if len(asset.asset_ret_rate_list) else ret.update({SV.ASSET_KEY_MANAGEMENT_RET_RATE: 0.0})
+        0].ret_rate}) if len(asset.asset_ret_rate_list) else ret.update({SV.ASSET_KEY_MANAGEMENT_RET_RATE: 0.0})
 
     fees = get_management_trade_fees(asset_id=asset_id)
     if fees:
