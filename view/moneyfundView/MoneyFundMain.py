@@ -126,7 +126,6 @@ class MoneyFundDetailView(BasicFcView):
                     content = col[0][header]
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
-                print(cell.text())
                 self.setItem(row, n, cell)
 
             row = row + 1
@@ -189,7 +188,6 @@ class MoneyFundSummaryView(BasicFcView):
                 content = r[header]
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
-                print(row, n, cell.text())
                 self.setItem(row, n, cell)
 
             row = row + 1

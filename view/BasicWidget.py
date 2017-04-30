@@ -307,7 +307,7 @@ class NumCell(QTableWidgetItem):
     def setContent(self, text):
         """设置内容"""
         try:
-            num = int(text)
+            num = float('%0.2f' % text)
             self.setData(Qt.DisplayRole, num)
         except ValueError:
             self.setText(text)

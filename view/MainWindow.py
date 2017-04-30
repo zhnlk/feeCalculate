@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
 import EventType
-from BasicWidget import BasicCell, BasicFcView, BASIC_FONT
+from BasicWidget import BasicCell, BasicFcView, BASIC_FONT, NumCell
 from MainEngine import MainEngine
 from assertmgtView.AdjustValuationView import AdjustValuationView
 from assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
@@ -500,9 +500,9 @@ class TotalValuationView(BasicFcView):
         d['management'] = {'chinese': '资管', 'cellType': BasicCell}
         # d['liquid_assert_ratio'] = {'chinese': '流动资产比例', 'cellType': BasicCell}
         d['all_ret'] = {'chinese': '当日总收益', 'cellType': BasicCell}
-        d['fee1'] = {'chinese': '费用1', 'cellType': BasicCell}
-        d['fee2'] = {'chinese': '费用2', 'cellType': BasicCell}
-        d['fee3'] = {'chinese': '费用3', 'cellType': BasicCell}
+        d['fee1'] = {'chinese': '费用1', 'cellType': NumCell}
+        d['fee2'] = {'chinese': '费用2', 'cellType': NumCell}
+        d['fee3'] = {'chinese': '费用3', 'cellType': NumCell}
         # d['fee_4'] = {'chinese': '费用4', 'cellType': BasicCell}
         # d['today_product_revenue'] = {'chinese': '当日产品收益', 'cellType': BasicCell}
         # d['fee_accual'] = {'chinese': '费用计提', 'cellType': BasicCell}
@@ -540,7 +540,7 @@ class TotalValuationView(BasicFcView):
     def initData(self):
         """初始化数据"""
         result = self.mainEngine.get_total_evaluate_detail(7)
-
+        # print(result)
         self.setRowCount(len(result))
         row = 0
         for r in result:

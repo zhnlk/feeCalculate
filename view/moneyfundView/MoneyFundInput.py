@@ -116,7 +116,8 @@ class MoneyFundInput(BasicFcView):
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
 
-        self.mainEngine.add_fund_daily_data(date,mf_uuid,mf_carry_forward_revenue,mf_subscribe_from_cash,mf_redeem_to_cash,mf_not_carry_forward_revenue)
+        self.mainEngine.add_fund_daily_data(date, mf_uuid, float(mf_carry_forward_revenue), float(mf_subscribe_from_cash), float(mf_redeem_to_cash),
+                                            float(mf_not_carry_forward_revenue))
 
     def prepareData(self):
 

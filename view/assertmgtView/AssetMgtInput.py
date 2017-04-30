@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import QPushButton
 from BasicWidget import BASIC_FONT, BasicFcView
 from MainEngine import MainEngine
 
+
 class AssetMgtInput(BasicFcView):
     """资管项目输入"""
 
@@ -113,20 +114,22 @@ class AssetMgtInput(BasicFcView):
     # ----------------------------------------------------------------------
     def addData(self):
         """增加数据"""
-        am_name = str(self.am_name_Edit)
-        am_trade_amount = str(self.am_trade_amount_Edit)
-        am_ret_rate = str(self.am_ret_rate_Edit)
-        am_rate_days = str(self.am_rate_days_Edit)
-        am_start_date = str(self.am_start_date_Edit)
-        am_end_date = str(self.am_end_date_Edit)
-        am_bank_fee = str(self.am_bank_fee_rate_Edit)
-        am_bank_days = str(self.am_bank_days_Edit)
-        am_manage_fee_rate = str(self.am_manage_fee_rate_Edit)
-        am_manage_days = str(self.am_manage_days_Edit)
+        am_name = str(self.am_name_Edit.text())
+        am_trade_amount = str(self.am_trade_amount_Edit.text())
+        am_ret_rate = str(self.am_ret_rate_Edit.text())
+        am_rate_days = str(self.am_rate_days_Edit.text())
+        am_start_date = str(self.am_start_date_Edit.text())
+        am_end_date = str(self.am_end_date_Edit.text())
+        am_bank_fee = str(self.am_bank_fee_rate_Edit.text())
+        am_bank_days = str(self.am_bank_days_Edit.text())
+        am_manage_fee_rate = str(self.am_manage_fee_rate_Edit.text())
+        am_manage_days = str(self.am_manage_days_Edit.text())
         """向数据库增加数据"""
 
-        start_date_str = str(self.am_start_date.text()).split('-')
-        end_date_str = str(self.am_end_date.text()).split('-')
+        start_date_str = am_start_date.split('-')
+        end_date_str = am_end_date.split('-')
+
+        print(start_date_str[0], end_date_str[0])
 
         d = datetime.date.today()
         if start_date_str is None or end_date_str is None:
@@ -140,11 +143,12 @@ class AssetMgtInput(BasicFcView):
                                      int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", end_date_str[1])),
                                      int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", end_date_str[2])))
 
-        self.mainEngine.add_management_class(am_name, am_trade_amount, am_ret_rate, am_rate_days, start_date, end_date,
-                                             am_bank_fee, am_bank_days, am_manage_fee_rate, am_manage_days)
+        self.mainEngine.add_management_class(am_name, float(am_trade_amount), float(am_ret_rate), float(am_rate_days), start_date, end_date,
+                                             float(am_bank_fee), float(am_bank_days), float(am_manage_fee_rate), float(am_manage_days))
 
     def prepareData(self):
-        result = MfProject.listAll()
+
+        result = self.mainEngine.get_all_asset_ids_by_type()
         print('prepareData running.....')
         for mf in result:
             print(mf.mf_project_name)

@@ -128,7 +128,7 @@ class MainEngine(object):
         AssetService.add_fund_class(name=name)
 
     def add_management_class(self, name, trade_amount, ret_rate, rate_days, start_date, end_date,
-                             bank_fee_rate, bank_days, manage_fee_rate, manage_days, cal_date):
+                             bank_fee_rate, bank_days, manage_fee_rate, manage_days, cal_date=datetime.date.today()):
         """
         增加资管类别
         :param name: 
@@ -243,7 +243,7 @@ class MainEngine(object):
         """
         return AssetService.get_all_management_detail()
 
-    def get_total_evaluate_detail(self,days):
+    def get_total_evaluate_detail(self,days=7):
         """
         估计明细
         :param days: 
