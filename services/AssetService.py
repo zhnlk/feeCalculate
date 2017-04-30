@@ -523,7 +523,11 @@ def get_single_management_detail(asset_id=''):
         asset.expiry_date - asset.start_date).days}) if asset.expiry_date and asset.start_date and asset.expiry_date > asset.start_date else ret.update(
         {SV.ASSET_KEY_MANAGEMENT_DUE: 1})
     ret.update({SV.ASSET_KEY_ASSET_RET: get_management_asset_all_ret(asset_id=asset.id)})
+    # ret.update({SV.ASSET_KEY_MANAGEMENT_DAILY_RET: ret.get(SV.ASSET_KEY_MANAGEMENT_RET / SV.ASSET_KEY_MANAGEMENT_DUE)})
     ret.update({SV.ASSET_KEY_MANAGEMENT_AMOUNT: get_management_trade_amount(asset_id=asset_id)})
+
+    ret.update({SV.ASSET_KEY_MANAGEMENT_RET_RATE: asset.asset_ret_rate_list[
+        0]}) if asset.asset_ret_rate_list.count() else ret.update({SV.ASSET_KEY_MANAGEMENT_RET_RATE: 0.0})
 
     fees = get_management_trade_fees(asset_id=asset_id)
     if fees:
