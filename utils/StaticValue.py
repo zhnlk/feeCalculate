@@ -3,6 +3,10 @@
 from __future__ import unicode_literals
 
 # 资产类型
+import os
+
+import sys
+
 ASSET_CLASS_AGREEMENT = 2  # 协存
 ASSET_CLASS_FUND = 3  # 货基
 ASSET_CLASS_MANAGEMENT = 4  # 资管
@@ -107,3 +111,24 @@ RET_CARRY_TO_CASH = 0
 RET_CARRY_TO_PRINCIPAL = 1
 
 SESSION_KEY = 'session'
+
+
+EMPTY_STRING = ''
+EMPTY_UNICODE = ''
+EMPTY_INT = 0
+EMPTY_FLOAT = 0.0
+
+####################
+# 程序相关设置
+####################
+ICON_FILENAME = 'zhnlk.ico'
+DB_FILENAME = 'data-beta.db'
+
+def resource_path(relative):
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative)
+    return os.path.join(relative)
+
+path = os.path.dirname(__file__)
+ICON_FILENAME = resource_path(os.path.join(path, ICON_FILENAME))
+SQLALCHEMY_DATABASE_URI = "sqlite:///" + resource_path(os.path.join(path, DB_FILENAME))
