@@ -53,7 +53,7 @@ class ProtocolListView(BasicFcView):
     def showProtocolListDetail(self):
         """显示所有合约数据"""
         result = self.mainEngine.get_agreement_detail_by_days()
-        print(result)
+        # print(result)
         count = 0
         for d in result:
             for v in d.values():
@@ -70,7 +70,7 @@ class ProtocolListView(BasicFcView):
                     for n, header in enumerate(self.headerList):
                         content = c[header]
                         cell = self.headerDict[header]['cellType'](content)
-                        print(row,n,content)
+                        # print(row,n,content)
                         self.setItem(row, n, cell)
 
                     row = row + 1

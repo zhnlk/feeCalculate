@@ -10,8 +10,7 @@ from PyQt5.QtWidgets import QApplication
 from view.BasicWidget import BASIC_FONT
 from controller.MainEngine import MainEngine
 from view.MainWindow import MainWindow
-from fcConstant import ICON_FILENAME
-
+from utils.StaticValue import ICON_FILENAME
 
 def main():
     # 设置windows下的地步任务栏图标

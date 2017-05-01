@@ -115,7 +115,7 @@ class MoneyFundDetailView(BasicFcView):
         """显示所有合约数据"""
 
         result = self.mainEngine.get_fund_detail_by_days(7)
-        print(result)
+        # print(result)
         self.setRowCount(len(result))
         row = 0
         for r in result:
