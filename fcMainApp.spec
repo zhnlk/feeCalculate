@@ -5,9 +5,9 @@ block_cipher = None
 
 
 a = Analysis(['fcMain.py'],
-             pathex=['./fc.controller', './fc.view', './fc.model', '/Users/wangjiangbin/gitlab/feeCalculate'],
+             pathex=['./controller', './models', './services', './utils','./view'],
              binaries=[],
-             datas=[('./data-test.db','~/fc/data-runtime.db')],
+             datas=[('./data-excel.db','./data-runtime.db')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],

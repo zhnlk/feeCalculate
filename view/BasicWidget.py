@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import QMenu
 from PyQt5.QtWidgets import QTableWidget
 from PyQt5.QtWidgets import QTableWidgetItem
 
-from EventEngine import Event
+from controller.EventEngine import Event
 
 
 def loadFont():
@@ -307,7 +307,7 @@ class NumCell(QTableWidgetItem):
     def setContent(self, text):
         """设置内容"""
         try:
-            num = int(text)
+            num = float('%0.2f' % text)
             self.setData(Qt.DisplayRole, num)
         except ValueError:
             self.setText(text)

@@ -5,9 +5,9 @@ from collections import OrderedDict
 
 from PyQt5.QtWidgets import QAction, QMainWindow, QDockWidget, QApplication
 
-from BasicWidget import BASIC_FONT, BasicFcView, BasicCell
-from EventType import EVENT_AM
-from MainEngine import MainEngine
+from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell
+from controller.EventType import EVENT_AM
+from controller.MainEngine import MainEngine
 
 
 class AssetMgtListView(QMainWindow, BasicFcView):
@@ -117,7 +117,6 @@ class AssetDailyInventoryView(BasicFcView):
     def showMoneyFundListDetail(self):
         """显示所有合约数据"""
         result = self.mainEngine.get_total_management_statistic()
-
         print(result)
         self.setRowCount(len(result))
         row = 0
@@ -127,7 +126,7 @@ class AssetDailyInventoryView(BasicFcView):
                 content = r[header]
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
-                print(cell.text())
+                # print(cell.text())
                 self.setItem(row, n, cell)
 
             row = row + 1
@@ -143,20 +142,20 @@ class CommitteeDetailView(BasicFcView):
         d = OrderedDict()
 
         # 货基项目
-        d['no'] = {'chinese': '序号', 'cellType': BasicCell}
-        d['loan'] = {'chinese': '借款人', 'cellType': BasicCell}
-        d['loan_amount'] = {'chinese': '放款金额', 'cellType': BasicCell}
-        d['committee_rate'] = {'chinese': '委贷利率(年化)', 'cellType': BasicCell}
+        # d['no'] = {'chinese': '序号', 'cellType': BasicCell}
+        d['asset_name'] = {'chinese': '借款人', 'cellType': BasicCell}
+        d['management_amount'] = {'chinese': '放款金额', 'cellType': BasicCell}
+        d['ret_rate'] = {'chinese': '委贷利率(年化)', 'cellType': BasicCell}
         d['start_date'] = {'chinese': '起息日', 'cellType': BasicCell}
         d['expiry_date'] = {'chinese': '到期日', 'cellType': BasicCell}
         d['management_due'] = {'chinese': '期限', 'cellType': BasicCell}
-        d['committee_interest'] = {'chinese': '委贷利息', 'cellType': BasicCell}
-        d['committee_bank_fee'] = {'chinese': '委贷银行费用', 'cellType': BasicCell}
-        d['asset_plan_fee'] = {'chinese': '资管计划费用', 'cellType': BasicCell}
+        # d['committee_interest'] = {'chinese': '委贷利息', 'cellType': BasicCell}
+        d['bank_fee'] = {'chinese': '委贷银行费用', 'cellType': BasicCell}
+        d['manage_fee'] = {'chinese': '资管计划费用', 'cellType': BasicCell}
         d['asset_ret'] = {'chinese': '资管计划总收益', 'cellType': BasicCell}
-        d['asset_plan_daily_revenue'] = {'chinese': '资管计划每日收益', 'cellType': BasicCell}
-        d['asset_plan_daily_valuation'] = {'chinese': '正常情况资管计划\n每日收益估值', 'cellType': BasicCell}
-        d['valuation_adjust'] = {'chinese': '估值调整', 'cellType': BasicCell}
+        d['mamangement_daily_ret'] = {'chinese': '资管计划每日收益', 'cellType': BasicCell}
+        # d['asset_plan_daily_valuation'] = {'chinese': '正常情况资管计划\n每日收益估值', 'cellType': BasicCell}
+        # d['valuation_adjust'] = {'chinese': '估值调整', 'cellType': BasicCell}
 
         self.setHeaderDict(d)
 
@@ -166,7 +165,7 @@ class CommitteeDetailView(BasicFcView):
 
     def initUi(self):
         """初始化界面"""
-        self.setWindowTitle('今日货基总额统计')
+        self.setWindowTitle('委贷明细')
         # self.setMinimumSize(1200, 600)
         # self.setFont(BASIC_FONT)
         self.initTable()
@@ -189,18 +188,17 @@ class CommitteeDetailView(BasicFcView):
 
     def showMoneyFundSummary(self):
         """显示所有合约数据"""
-        # result = self.mainEngine.get_all_management_detail()
-        result = [{}]
+        result = self.mainEngine.get_all_management_detail()
+        print(result)
         self.setRowCount(len(result))
         row = 0
         for r in result:
             # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
-                # content = r[header]
-                content = ""
+                content = r[header]
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
-                print(row, n, cell.text())
+                # print(row, n, cell.text())
                 self.setItem(row, n, cell)
 
             row = row + 1
@@ -211,11 +209,11 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    # mfm = AssetMgtListView(mainEngine)
-    mflv = AssetDailyInventoryView(mainEngine)
-    # mainfdv = MoneyFundSummaryView(mainEngine)
+    mfm = AssetMgtListView(mainEngine)
+    # mflv = AssetDailyInventoryView(mainEngine)
+    # mfm = CommitteeDetailView(mainEngine)
     # mflv.showMaximized()
     # mainfdv.showMaximized()
-    mflv.showMaximized()
+    mfm.showMaximized()
     sys.exit(app.exec_())
 

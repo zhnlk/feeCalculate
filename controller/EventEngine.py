@@ -7,7 +7,7 @@ from time import sleep
 from collections import defaultdict
 
 # 自己开发的模块
-from EventType import *
+from controller.EventType import *
 
 
 ########################################################################

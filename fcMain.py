@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import ctypes
 import platform
 import sys
@@ -6,9 +7,9 @@ import sys
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication
 
-from BasicWidget import BASIC_FONT
-from MainEngine import MainEngine
-from MainWindow import MainWindow
+from view.BasicWidget import BASIC_FONT
+from controller.MainEngine import MainEngine
+from view.MainWindow import MainWindow
 from fcConstant import ICON_FILENAME
 
 

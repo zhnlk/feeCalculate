@@ -14,23 +14,22 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
-import EventType
-from BasicWidget import BasicCell, BasicFcView, BASIC_FONT
-from MainEngine import MainEngine
-from assertmgtView.AdjustValuationView import AdjustValuationView
-from assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
-from assertmgtView.AssetMgtInput import AssetMgtInput
-from assertmgtView.AssetMgtMain import AssetMgtListView
-from cashView.CashInput import CashInput
-from cashView.CashMain import CashListView
-from miscView.AboutMain import AboutWidget
-from miscView.ErrorMain import ErrorWidget
-from moneyfundView.MfCateInput import MfCateInput
-from moneyfundView.MoneyFundInput import MoneyFundInput
-from moneyfundView.MoneyFundMain import MoneyFundMain
-from protocolView.PdCateInput import PdCateInput
-from protocolView.ProtocolInput import ProtocolInput
-from protocolView.ProtocolMain import ProtocolListView
+from controller import EventType
+from view.BasicWidget import BasicCell, BasicFcView, BASIC_FONT, NumCell
+from controller.MainEngine import MainEngine
+from view.assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
+from view.assertmgtView.AssetMgtInput import AssetMgtInput
+from view.assertmgtView.AssetMgtMain import AssetMgtListView
+from view.cashView.CashInput import CashInput
+from view.cashView.CashMain import CashListView
+from view.miscView.AboutMain import AboutWidget
+from view.miscView.ErrorMain import ErrorWidget
+from view.moneyfundView.MfCateInput import MfCateInput
+from view.moneyfundView.MoneyFundInput import MoneyFundInput
+from view.moneyfundView.MoneyFundMain import MoneyFundMain
+from view.protocolView.PdCateInput import PdCateInput
+from view.protocolView.ProtocolInput import ProtocolInput
+from view.protocolView.ProtocolMain import ProtocolListView
 
 
 class MainWindow(QMainWindow, BasicFcView):
@@ -500,9 +499,9 @@ class TotalValuationView(BasicFcView):
         d['management'] = {'chinese': '资管', 'cellType': BasicCell}
         # d['liquid_assert_ratio'] = {'chinese': '流动资产比例', 'cellType': BasicCell}
         d['all_ret'] = {'chinese': '当日总收益', 'cellType': BasicCell}
-        d['fee1'] = {'chinese': '费用1', 'cellType': BasicCell}
-        d['fee2'] = {'chinese': '费用2', 'cellType': BasicCell}
-        d['fee3'] = {'chinese': '费用3', 'cellType': BasicCell}
+        d['fee1'] = {'chinese': '费用1', 'cellType': NumCell}
+        d['fee2'] = {'chinese': '费用2', 'cellType': NumCell}
+        d['fee3'] = {'chinese': '费用3', 'cellType': NumCell}
         # d['fee_4'] = {'chinese': '费用4', 'cellType': BasicCell}
         # d['today_product_revenue'] = {'chinese': '当日产品收益', 'cellType': BasicCell}
         # d['fee_accual'] = {'chinese': '费用计提', 'cellType': BasicCell}
@@ -540,7 +539,7 @@ class TotalValuationView(BasicFcView):
     def initData(self):
         """初始化数据"""
         result = self.mainEngine.get_total_evaluate_detail(7)
-
+        # print(result)
         self.setRowCount(len(result))
         row = 0
         for r in result:
