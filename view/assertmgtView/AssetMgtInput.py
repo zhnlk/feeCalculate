@@ -129,7 +129,7 @@ class AssetMgtInput(BasicFcView):
         start_date_str = am_start_date.split('-')
         end_date_str = am_end_date.split('-')
 
-        print(start_date_str[0], end_date_str[0])
+        # print(start_date_str[0], end_date_str[0])
 
         d = datetime.date.today()
         if start_date_str is None or end_date_str is None:
@@ -149,7 +149,7 @@ class AssetMgtInput(BasicFcView):
     def prepareData(self):
 
         result = self.mainEngine.get_all_asset_ids_by_type()
-        print('prepareData running.....')
+        # print('prepareData running.....')
         for mf in result:
             # print(mf.mf_project_name)
             self.mf_ComboBox.addItem(mf.mf_project_name)

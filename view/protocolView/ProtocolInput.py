@@ -114,7 +114,7 @@ class ProtocolInput(BasicFcView):
         print(pd_to_cash)
 
         pd_uuid = self.pd_ComboBox_list[int(pd_project_name_index)]
-        print(pd_uuid + '..............')
+        # print(pd_uuid + '..............')
 
         # pdProject = PdProject.findByUUID(pd_uuid)
 
@@ -132,7 +132,7 @@ class ProtocolInput(BasicFcView):
     def prepareData(self):
 
         result = self.mainEngine.get_all_asset_ids_by_type(SV.ASSET_CLASS_AGREEMENT)
-        print('prepareData running.....')
+        # print('prepareData running.....')
         for mf in result:
             # print(mf)
             self.pd_ComboBox_list.append(mf[0])
