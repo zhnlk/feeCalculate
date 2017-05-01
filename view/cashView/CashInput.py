@@ -9,10 +9,10 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
-from BasicWidget import BASIC_FONT, BasicFcView
-from EventEngine import Event
-from EventType import EVENT_CASH
-from MainEngine import MainEngine
+from view.BasicWidget import BASIC_FONT, BasicFcView
+from controller.EventEngine import Event
+from controller.EventType import EVENT_CASH
+from controller.MainEngine import MainEngine
 
 class CashInput(BasicFcView):
     """现金详情"""

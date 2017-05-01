@@ -14,23 +14,22 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
-import EventType
-from BasicWidget import BasicCell, BasicFcView, BASIC_FONT, NumCell
-from MainEngine import MainEngine
-from assertmgtView.AdjustValuationView import AdjustValuationView
-from assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
-from assertmgtView.AssetMgtInput import AssetMgtInput
-from assertmgtView.AssetMgtMain import AssetMgtListView
-from cashView.CashInput import CashInput
-from cashView.CashMain import CashListView
-from miscView.AboutMain import AboutWidget
-from miscView.ErrorMain import ErrorWidget
-from moneyfundView.MfCateInput import MfCateInput
-from moneyfundView.MoneyFundInput import MoneyFundInput
-from moneyfundView.MoneyFundMain import MoneyFundMain
-from protocolView.PdCateInput import PdCateInput
-from protocolView.ProtocolInput import ProtocolInput
-from protocolView.ProtocolMain import ProtocolListView
+from controller import EventType
+from view.BasicWidget import BasicCell, BasicFcView, BASIC_FONT, NumCell
+from controller.MainEngine import MainEngine
+from view.assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
+from view.assertmgtView.AssetMgtInput import AssetMgtInput
+from view.assertmgtView.AssetMgtMain import AssetMgtListView
+from view.cashView.CashInput import CashInput
+from view.cashView.CashMain import CashListView
+from view.miscView.AboutMain import AboutWidget
+from view.miscView.ErrorMain import ErrorWidget
+from view.moneyfundView.MfCateInput import MfCateInput
+from view.moneyfundView.MoneyFundInput import MoneyFundInput
+from view.moneyfundView.MoneyFundMain import MoneyFundMain
+from view.protocolView.PdCateInput import PdCateInput
+from view.protocolView.ProtocolInput import ProtocolInput
+from view.protocolView.ProtocolMain import ProtocolListView
 
 
 class MainWindow(QMainWindow, BasicFcView):

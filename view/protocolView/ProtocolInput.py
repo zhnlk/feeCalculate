@@ -12,8 +12,8 @@ from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 from sqlalchemy.orm import Session
 
-from BasicWidget import BASIC_FONT, BasicFcView
-from MainEngine import MainEngine
+from view.BasicWidget import BASIC_FONT, BasicFcView
+from controller.MainEngine import MainEngine
 from utils import StaticValue as SV
 
 

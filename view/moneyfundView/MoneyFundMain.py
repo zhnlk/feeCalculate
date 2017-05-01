@@ -5,9 +5,9 @@ from collections import OrderedDict
 
 from PyQt5.QtWidgets import QAction, QApplication, QMainWindow, QDockWidget
 
-from BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
-from EventType import EVENT_MF
-from MainEngine import MainEngine
+from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
+from controller.EventType import EVENT_MF
+from controller.MainEngine import MainEngine
 
 
 class MoneyFundMain(QMainWindow, BasicFcView):

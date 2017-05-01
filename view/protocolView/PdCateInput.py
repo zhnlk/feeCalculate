@@ -9,8 +9,8 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
-from BasicWidget import BASIC_FONT, BasicFcView
-from MainEngine import MainEngine
+from view.BasicWidget import BASIC_FONT, BasicFcView
+from controller.MainEngine import MainEngine
 
 
 class PdCateInput(BasicFcView):

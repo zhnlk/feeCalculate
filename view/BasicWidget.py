@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import QMenu
 from PyQt5.QtWidgets import QTableWidget
 from PyQt5.QtWidgets import QTableWidgetItem
 
-from EventEngine import Event
+from controller.EventEngine import Event
 
 
 def loadFont():
