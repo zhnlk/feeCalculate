@@ -85,25 +85,21 @@ class AdjustValuationInput(BasicFcView):
     # ----------------------------------------------------------------------
     def addData(self):
         """增加数据"""
-        # mf_project_name_index = str(self.mf_ComboBox.currentIndex())
-        #
-        # mf_subscribe_from_cash = str(self.mf_subscribe_from_cash_Edit.text())
-        # mf_redeem_to_cash = str(self.mf_redeem_to_cash_Edit.text())
-        # mf_not_carry_forward_revenue = str(self.mf_not_carry_forward_revenue_Edit.text())
-        # mf_carry_forward_revenue = str(self.mf_carry_forward_revenue_Edit.text())
-        #
-        # mf_uuid = self.mf_ComboBox_list[int(mf_project_name_index)]
+        adjust_date = str(self.adjust_date_Edit.text())
+        adjust_transfer_fee = str(self.adjust_transfer_fee_Edit.text())
+        adjust_check = str(self.adjust_check_Edit.text())
+
         # """向数据库增加数据"""
-        #
-        # date_str = str(self.date_Edit.text()).split('-')
-        # d = datetime.date.today()
-        # if date_str is None:
-        #     date = datetime.date(d.year, d.month, d.day)
-        # else:
-        #     date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[0])),
-        #                          int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
-        #                          int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
-        #
+
+        date_str = adjust_date.split('-')
+        d = datetime.date.today()
+        if date_str is None:
+            date = datetime.date(d.year, d.month, d.day)
+        else:
+            date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[0])),
+                                 int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
+                                 int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
+
         # mfProjectList = MfProjectList(date,mf_subscribe_from_cash,mf_redeem_to_cash,mf_not_carry_forward_revenue,mf_carry_forward_revenue)
         #
         # mfProjectList.save(mf_uuid)

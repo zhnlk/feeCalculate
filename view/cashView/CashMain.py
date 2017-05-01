@@ -70,7 +70,7 @@ class CashListView(BasicFcView):
             # 按照定义的表头，进行填充数据
             for n, header in enumerate(self.headerList):
                 content = r[header]
-                print(content)
+                # print(content)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
                 self.setItem(row, n, cell)

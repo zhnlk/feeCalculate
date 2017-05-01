@@ -117,7 +117,7 @@ class AssetDailyInventoryView(BasicFcView):
     def showMoneyFundListDetail(self):
         """显示所有合约数据"""
         result = self.mainEngine.get_total_management_statistic()
-        print(result)
+        # print(result)
         self.setRowCount(len(result))
         row = 0
         for r in result:
@@ -189,7 +189,7 @@ class CommitteeDetailView(BasicFcView):
     def showMoneyFundSummary(self):
         """显示所有合约数据"""
         result = self.mainEngine.get_all_management_detail()
-        print(result)
+        # print(result)
         self.setRowCount(len(result))
         row = 0
         for r in result:

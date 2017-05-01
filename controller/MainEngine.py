@@ -27,7 +27,8 @@ class MainEngine(object):
         self.eventEngine.stop()
 
     def getMainCostData(self):
-        return self.todayDate, self.todayDate, '今日资金成本'
+        today_asset_cost = CommonService.get_today_fees()['fee4']
+        return self.todayDate, today_asset_cost
 
     def getMainFeeData(self):
         rate, duration = self.getFeeConstrant()
@@ -35,62 +36,6 @@ class MainEngine(object):
 
         # def getMainTotalValuationData(self):
         # return Valuation.listAll()
-
-    # def saveTotalValuationData(self, date):
-    #     v = Valuation.findByDate(date)
-    #     if v:
-    #         return v
-    #
-    #     valuation = Valuation(date)
-    #     # 现金的总额
-    #     cash = Cash.findByDate(date)
-    #     valuation.cash = cash.getTodayTotalCash()
-    #
-    #     # 协存
-    #     pd = ProtocolDeposit.findByDate(date)
-    #     valuation.protocol_deposit = pd.protocol_deposit_amount
-    #
-    #     pd_revenue = pd.protocol_deposit_revenue
-    #
-    #     # 货基
-    #     mf = MoneyFund.findByDate(date)
-    #     valuation.money_fund = mf.money_fund_amount
-    #     mf_revenue = mf.money_fund_revenue
-    #
-    #     # 资管
-    #     valuation.assert_mgt = 0.00
-    #     am_revenue = 0.00
-    #
-    #     # 总资产净值 = 现金 + 协存 + 货基 + 资管
-    #     valuation.total_assert_net_value = valuation.cash \
-    #                                        + valuation.protocol_deposit \
-    #                                        + valuation.money_fund \
-    #                                        + valuation.assert_mgt
-    #
-    #     # 流动资产比例 = (现金 + 协存 + 货基)/总资产净值
-    #     valuation.liquid_assert_ratio = (valuation.cash
-    #                                      + valuation.protocol_deposit
-    #                                      + valuation.money_fund) \
-    #                                     / valuation.total_assert_net_value
-    #     # 当日总收益 = 协存当日总收益 + 货基当日总收益 + 资管当日总收益
-    #     valuation.today_total_revenue = pd_revenue \
-    #                                     + mf_revenue \
-    #                                     + am_revenue
-    #
-    #     rate, duration = self.getFeeConstrant()
-    #
-    #     valuation.fee_1 = valuation.total_assert_net_value * eval(rate[0].replace('%', '/100')) / duration[0]
-    #     valuation.fee_2 = valuation.total_assert_net_value * eval(rate[1].replace('%', '/100')) / duration[1]
-    #     valuation.fee_3 = valuation.total_assert_net_value * eval(rate[2].replace('%', '/100')) / duration[2]
-    #     valuation.fee_4 = valuation.today_total_revenue \
-    #                       - valuation.today_product_revenue \
-    #                       - valuation.fee_1 \
-    #                       - valuation.fee_2 \
-    #                       - valuation.fee_3
-    #
-    #     valuation.save()
-    #
-    #     return valuation
 
     def getFeeConstrant(self):
         rate = ['0.02%', '0.30%', '0.04%']
@@ -246,3 +191,10 @@ class MainEngine(object):
         :return: 
         """
         return CommonService.get_total_evaluate_detail(days)
+
+    def get_today_fees(self):
+        """
+        获取今日费用
+        :return: 
+        """
+        return CommonService.get_today_fees()

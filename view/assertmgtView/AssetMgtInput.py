@@ -151,11 +151,11 @@ class AssetMgtInput(BasicFcView):
         result = self.mainEngine.get_all_asset_ids_by_type()
         print('prepareData running.....')
         for mf in result:
-            print(mf.mf_project_name)
+            # print(mf.mf_project_name)
             self.mf_ComboBox.addItem(mf.mf_project_name)
 
             self.mf_ComboBox_list.append(mf.uuid)
-            print(str(mf.uuid) + ',' + str(mf.mf_project_name))
+            # print(str(mf.uuid) + ',' + str(mf.mf_project_name))
 
 
 if __name__ == "__main__":

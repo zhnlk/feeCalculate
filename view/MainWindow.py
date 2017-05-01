@@ -2,10 +2,11 @@
 from collections import OrderedDict
 
 import datetime
+
+import psutil
 from PyQt5 import QtCore
 from asyncio import Event
 
-import psutil as psutil
 from PyQt5.QtCore import QSettings
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QAction, QApplication
@@ -328,7 +329,6 @@ class DateMainView(BasicFcView):
         super(DateMainView, self).__init__(mainEngine, eventEngine, parant)
         # 设置表头有序字典
         d = OrderedDict()
-        d['date'] = {'chinese': '填表日', 'cellType': BasicCell}
         d['total_assert'] = {'chinese': '计算日', 'cellType': BasicCell}
         d['cash'] = {'chinese': '今日资金成本', 'cellType': BasicCell}
 
@@ -364,17 +364,7 @@ class DateMainView(BasicFcView):
         self.setRowCount(1)
         row = 0
         self.setItem(0, 0, BasicCell(result[0]))
-        self.setItem(0, 1, BasicCell(result[1]))
-        self.setItem(0, 2, BasicCell(result[2]))
-        # for r in result:
-        #     # 按照定义的表头，进行数据填充
-        #     for n, header in enumerate(self.headerList):
-        #         content = r[n]
-        #         cellType = self.headerDict[header]['cellType']
-        #         cell = cellType(content)
-        #         print(cell.text())
-        #         self.setItem(row, n, cell)
-        #     row = row + 1
+        self.setItem(0, 1, NumCell(result[1]))
 
 
 class FeeTotalView(BasicFcView):
@@ -386,10 +376,10 @@ class FeeTotalView(BasicFcView):
         # 设置表头有序字典
         d = OrderedDict()
         d['date'] = {'chinese': '--', 'cellType': BasicCell}
-        d['fee_1'] = {'chinese': '费用1', 'cellType': BasicCell}
-        d['fee_2'] = {'chinese': '费用2', 'cellType': BasicCell}
-        d['fee_3'] = {'chinese': '费用3', 'cellType': BasicCell}
-        d['fee_4'] = {'chinese': '超额费用', 'cellType': BasicCell}
+        d['fee1'] = {'chinese': '费用1', 'cellType': BasicCell}
+        d['fee2'] = {'chinese': '费用2', 'cellType': BasicCell}
+        d['fee3'] = {'chinese': '费用3', 'cellType': BasicCell}
+        d['fee4'] = {'chinese': '超额费用', 'cellType': BasicCell}
 
         self.setHeaderDict(d)
         # 设置数据键
@@ -435,10 +425,17 @@ class FeeTotalView(BasicFcView):
             self.setItem(1, c, BasicCell(d))
             c += 1
         date = datetime.date(2017, 3, 10)
-        todayFee = self.mainEngine.getTodayFee(date)
+        # todayFee = self.mainEngine.getTodayFee(date)
+
+        todayFee = self.mainEngine.get_today_fees()
+        today_fee_list = list()
+        today_fee_list.append(todayFee['fee1'])
+        today_fee_list.append(todayFee['fee2'])
+        today_fee_list.append(todayFee['fee3'])
+        today_fee_list.append(todayFee['fee4'])
         c = 1
-        for tf in todayFee:
-            self.setItem(2, c, BasicCell(tf))
+        for tf in today_fee_list:
+            self.setItem(2, c, NumCell(tf))
             c += 1
 
 
@@ -502,7 +499,7 @@ class TotalValuationView(BasicFcView):
         d['fee1'] = {'chinese': '费用1', 'cellType': NumCell}
         d['fee2'] = {'chinese': '费用2', 'cellType': NumCell}
         d['fee3'] = {'chinese': '费用3', 'cellType': NumCell}
-        # d['fee_4'] = {'chinese': '费用4', 'cellType': BasicCell}
+        d['fee4'] = {'chinese': '费用4', 'cellType': NumCell}
         # d['today_product_revenue'] = {'chinese': '当日产品收益', 'cellType': BasicCell}
         # d['fee_accual'] = {'chinese': '费用计提', 'cellType': BasicCell}
 
@@ -557,8 +554,9 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    mflv = TotalValuationView(mainEngine, mainEngine.eventEngine)
+    mw = MainWindow(mainEngine,mainEngine.eventEngine)
+    # mflv = TotalValuationView(mainEngine, mainEngine.eventEngine)
     # mainfdv = MoneyFundSummaryView(mainEngine)
-    mflv.showMaximized()
+    mw.showMaximized()
     # mainfdv.showMaximized()
     sys.exit(app.exec_())

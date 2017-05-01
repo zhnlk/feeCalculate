@@ -68,7 +68,7 @@ class AdjustValuationView(BasicFcView):
                     content = float('%.2f' % content)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
-                print(cell.text())
+                # print(cell.text())
                 # if self.font:
                 #     cell.setFont(self.font)  # 如果设置了特殊字体，则进行单元格设置
 
