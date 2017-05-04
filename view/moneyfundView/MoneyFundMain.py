@@ -73,12 +73,12 @@ class MoneyFundDetailView(BasicFcView):
 
         d['asset_name'] = {'chinese': '货基项目名称', 'cellType': BasicCell}
         d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
-        d['total_amount'] = {'chinese': '金额', 'cellType': BasicCell}
-        d['asset_ret'] = {'chinese': '收益', 'cellType': BasicCell}
-        d['cash_to_fund'] = {'chinese': '申购(现金)', 'cellType': BasicCell}
-        d['fund_to_cash'] = {'chinese': '赎回(进现金)', 'cellType': BasicCell}
-        d['ret_not_carry'] = {'chinese': '未结转收益', 'cellType': BasicCell}
-        d['ret_carry_cash'] = {'chinese': '结转金额', 'cellType': BasicCell}
+        d['total_amount'] = {'chinese': '金额', 'cellType': NumCell}
+        d['asset_ret'] = {'chinese': '收益', 'cellType': NumCell}
+        d['cash_to_fund'] = {'chinese': '申购(现金)', 'cellType': NumCell}
+        d['fund_to_cash'] = {'chinese': '赎回(进现金)', 'cellType': NumCell}
+        d['ret_not_carry'] = {'chinese': '未结转收益', 'cellType': NumCell}
+        d['ret_carry_cash'] = {'chinese': '结转金额', 'cellType': NumCell}
 
         self.setHeaderDict(d)
 
@@ -142,10 +142,10 @@ class MoneyFundSummaryView(BasicFcView):
 
         d['asset_name'] = {'chinese': '货基项目名称', 'cellType': BasicCell}
         # 货基项目
-        d['total_amount'] = {'chinese': '金额', 'cellType': BasicCell}
-        d['total_ret_amount'] = {'chinese': '收益', 'cellType': BasicCell}
-        d['total_purchase_amount'] = {'chinese': '申购总额', 'cellType': BasicCell}
-        d['total_redeem_amount'] = {'chinese': '赎回总额', 'cellType': BasicCell}
+        d['total_amount'] = {'chinese': '金额', 'cellType': NumCell}
+        d['total_ret_amount'] = {'chinese': '收益', 'cellType': NumCell}
+        d['total_purchase_amount'] = {'chinese': '申购总额', 'cellType': NumCell}
+        d['total_redeem_amount'] = {'chinese': '赎回总额', 'cellType': NumCell}
 
         self.setHeaderDict(d)
 

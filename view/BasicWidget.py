@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------
 import csv
 import json
 import os
@@ -17,8 +16,8 @@ from PyQt5.QtWidgets import QMenu
 from PyQt5.QtWidgets import QTableWidget
 from PyQt5.QtWidgets import QTableWidgetItem
 
+from utils.MoneyFormat import outputmoney
 from controller.EventEngine import Event
-
 
 def loadFont():
     """载入字体设置"""
@@ -307,8 +306,7 @@ class NumCell(QTableWidgetItem):
     def setContent(self, text):
         """设置内容"""
         try:
-            num = float('%0.2f' % text)
-            self.setData(Qt.DisplayRole, num)
+            self.setData(Qt.DisplayRole, outputmoney(text))
         except ValueError:
             self.setText(text)
 
