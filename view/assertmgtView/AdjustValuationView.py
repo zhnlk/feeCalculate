@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QApplication
 
 from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
-from controller.EventType import EVENT_PD
+from controller.EventType import EVENT_PD, EVENT_AM_ADJUST
 from controller.MainEngine import MainEngine
 
 
@@ -33,7 +33,7 @@ class AdjustValuationView(BasicFcView):
 
         self.setHeaderDict(d)
 
-        self.setEventType(EVENT_PD)
+        self.setEventType(EVENT_AM_ADJUST)
 
         self.initUi()
 
@@ -46,6 +46,9 @@ class AdjustValuationView(BasicFcView):
         self.initTable()
         self.verticalHeader().setVisible(True)
         self.addMenuAction()
+
+        self.signal.connect(self.refresh())
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
 
     # ----------------------------------------------------------------------
     def showProtocolListDetail(self):
@@ -108,4 +111,3 @@ if __name__ == '__main__':
 
     plv.show()
     sys.exit(app.exec_())
-

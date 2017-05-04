@@ -3,7 +3,7 @@ import datetime
 import re
 from collections import OrderedDict
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QHBoxLayout
@@ -12,6 +12,8 @@ from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 from sqlalchemy.orm import Session
 
+from EventEngine import Event
+from EventType import EVENT_MAIN_FEE, EVENT_MAIN_VALUATION, EVENT_PD, EVENT_PD_INPUT
 from view.BasicWidget import BASIC_FONT, BasicFcView
 from controller.MainEngine import MainEngine
 from utils import StaticValue as SV
@@ -20,7 +22,6 @@ from utils import StaticValue as SV
 class ProtocolInput(BasicFcView):
     """协存输入"""
 
-    # ----------------------------------------------------------------------
     def __init__(self, mainEngine, eventEngine=None, parent=None):
         """Constructor"""
         super(ProtocolInput, self).__init__(parent=parent)
@@ -28,11 +29,10 @@ class ProtocolInput(BasicFcView):
         self.mainEngine = mainEngine
         self.eventEngine = eventEngine
 
-        # self.setHeaderDict(d)
+        self.setEventType(EVENT_PD_INPUT)
 
         self.initUi()
 
-    # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('输入协存明细')
@@ -43,7 +43,9 @@ class ProtocolInput(BasicFcView):
         self.prepareData()
         # self.addMenuAction()
 
-    # ----------------------------------------------------------------------
+        # self.signal.connect(self.prepareData)
+        # self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
+
     def initInput(self):
         """设置输入框"""
         self.pd_ComboBox_list = list()
@@ -98,7 +100,6 @@ class ProtocolInput(BasicFcView):
 
         self.setLayout(grid)
 
-    # ----------------------------------------------------------------------
     def insertDB(self):
         """增加数据"""
         pd_project_name_index = str(self.pd_ComboBox.currentIndex())
@@ -107,7 +108,6 @@ class ProtocolInput(BasicFcView):
         cash_to_pd = str(self.cash_to_pd_Edit.text())
         # pd_to_investor = str(self.pd_to_investor_Edit.text())
         pd_to_cash = str(self.pd_to_cash_Edit.text())
-        # ----------------------------------------------------------------------
         """向数据库增加数据"""
         print(interest_to_principal)
         print(cash_to_pd)
@@ -129,6 +129,21 @@ class ProtocolInput(BasicFcView):
 
         self.mainEngine.add_agreement_daily_data(date, pd_uuid, interest_to_principal, cash_to_pd, pd_to_cash)
 
+        # 加入数据后，更新列表显示
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_PD))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_FEE))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
+        # self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_ASSERT_DETAIL))
+
+        self.showInfo()
+
+    # 输入成功提示框
+    def showInfo(self):
+        print('slotInformation called...')
+        QMessageBox.information(self, "Information",
+                                self.tr("输入成功!"))
+        self.close()
+
     def prepareData(self):
 
         result = self.mainEngine.get_all_asset_ids_by_type(SV.ASSET_CLASS_AGREEMENT)
@@ -137,6 +152,7 @@ class ProtocolInput(BasicFcView):
             # print(mf)
             self.pd_ComboBox_list.append(mf[0])
             self.pd_ComboBox.addItem(mf[1])
+        print('pd prepare called ....')
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@
 import datetime
 import re
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QHBoxLayout
@@ -15,6 +15,8 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
+from EventEngine import Event
+from EventType import EVENT_AM_ADJUST, EVENT_AM, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION
 from view.BasicWidget import BASIC_FONT, BasicFcView
 from controller.MainEngine import MainEngine
 
@@ -100,15 +102,21 @@ class AdjustValuationInput(BasicFcView):
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
 
-        # mfProjectList = MfProjectList(date,mf_subscribe_from_cash,mf_redeem_to_cash,mf_not_carry_forward_revenue,mf_carry_forward_revenue)
-        #
-        # mfProjectList.save(mf_uuid)
-        #
-        # moneyFund = MoneyFund(date)
-        # moneyFund.update()
-        #
-        # v = Valuation(date)
-        # v.save()
+        # 加入数据后，更新列表显示
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_AM))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_AM_ADJUST))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_FEE))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
+        # self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_ASSERT_DETAIL))
+
+        self.showInfo()
+
+    # 输入成功提示框
+    def showInfo(self):
+        print('slotInformation called...')
+        QMessageBox.information(self, "Information",
+                                self.tr("输入成功!"))
+        self.close()
 
 
 if __name__ == "__main__":

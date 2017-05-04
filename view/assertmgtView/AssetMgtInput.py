@@ -2,7 +2,7 @@
 import datetime
 import re
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QHBoxLayout
@@ -10,6 +10,8 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
+from EventEngine import Event
+from EventType import EVENT_AM, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION, EVENT_AM_INPUT
 from view.BasicWidget import BASIC_FONT, BasicFcView
 from controller.MainEngine import MainEngine
 
@@ -25,7 +27,7 @@ class AssetMgtInput(BasicFcView):
         self.mainEngine = mainEngine
         self.eventEngine = eventEngine
 
-        # self.setHeaderDict(d)
+        self.setEventType(EVENT_AM_INPUT)
 
         self.initUi()
 
@@ -37,8 +39,6 @@ class AssetMgtInput(BasicFcView):
         self.setFont(BASIC_FONT)
         # self.initTable()
         self.initInput()
-        # self.prepareData()
-        # self.addMenuAction()
 
     # ----------------------------------------------------------------------
     def initInput(self):
@@ -145,18 +145,20 @@ class AssetMgtInput(BasicFcView):
 
         self.mainEngine.add_management_class(am_name, float(am_trade_amount), float(am_ret_rate), float(am_rate_days), start_date, end_date,
                                              float(am_bank_fee), float(am_bank_days), float(am_manage_fee_rate), float(am_manage_days))
+        # 加入数据后，更新列表显示
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_AM))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_FEE))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
+        # self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_ASSERT_DETAIL))
 
-    def prepareData(self):
+        self.showInfo()
 
-        result = self.mainEngine.get_all_asset_ids_by_type()
-        # print('prepareData running.....')
-        for mf in result:
-            # print(mf.mf_project_name)
-            self.mf_ComboBox.addItem(mf.mf_project_name)
-
-            self.mf_ComboBox_list.append(mf.uuid)
-            # print(str(mf.uuid) + ',' + str(mf.mf_project_name))
-
+    # 输入成功提示框
+    def showInfo(self):
+        print('slotInformation called...')
+        QMessageBox.information(self, "Information",
+                                self.tr("输入成功!"))
+        self.close()
 
 if __name__ == "__main__":
     import sys
