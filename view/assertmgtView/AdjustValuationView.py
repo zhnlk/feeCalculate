@@ -25,11 +25,11 @@ class AdjustValuationView(BasicFcView):
 
         d = OrderedDict()
         d['pd_project_name'] = {'chinese': '调整日期', 'cellType': BasicCell}
-        d['pd_project_rate'] = {'chinese': '转账费用', 'cellType': BasicCell}
+        d['pd_project_rate'] = {'chinese': '转账费用', 'cellType': NumCell}
 
-        d['date'] = {'chinese': '支票费用', 'cellType': BasicCell}
-        d['total_to_cash'] = {'chinese': '总调整费用', 'cellType': BasicCell}
-        d['pd_pd_to_cash'] = {'chinese': '调整结果', 'cellType': BasicCell}
+        d['date'] = {'chinese': '支票费用', 'cellType': NumCell}
+        d['total_to_cash'] = {'chinese': '总调整费用', 'cellType': NumCell}
+        d['pd_pd_to_cash'] = {'chinese': '调整结果', 'cellType': NumCell}
 
         self.setHeaderDict(d)
 

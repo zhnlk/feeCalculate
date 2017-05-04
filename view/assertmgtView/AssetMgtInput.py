@@ -59,17 +59,17 @@ class AssetMgtInput(BasicFcView):
         am_manage_days_Label = QLabel("全年计息天数")
 
         self.am_name_Edit = QLineEdit("借款方")
-        self.am_trade_amount_Edit = QLineEdit("0.003")
-        self.am_ret_rate_Edit = QLineEdit("0.00")
-        self.am_rate_days_Edit = QLineEdit("0.00")
+        self.am_trade_amount_Edit = QLineEdit("300000")
+        self.am_ret_rate_Edit = QLineEdit("0.009")
+        self.am_rate_days_Edit = QLineEdit("360")
 
         self.am_start_date_Edit = QLineEdit("2017-02-12")
         self.am_end_date_Edit = QLineEdit("2017-05-12")
 
         self.am_bank_fee_rate_Edit = QLineEdit("0.003")
-        self.am_bank_days_Edit = QLineEdit("0.00")
+        self.am_bank_days_Edit = QLineEdit("360")
         self.am_manage_fee_rate_Edit = QLineEdit("0.005")
-        self.am_manage_days_Edit = QLineEdit("0.00")
+        self.am_manage_days_Edit = QLineEdit("360")
 
         okButton = QPushButton("新增借款")
         cancelButton = QPushButton("取消")

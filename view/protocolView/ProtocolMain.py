@@ -26,13 +26,13 @@ class ProtocolListView(BasicFcView):
         d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
 
         # 协存项目
-        d['total_amount'] = {'chinese': '总额', 'cellType': BasicCell}
-        d['asset_ret'] = {'chinese': '协存本金', 'cellType': BasicCell}
+        d['total_amount'] = {'chinese': '总额', 'cellType': NumCell}
+        d['asset_ret'] = {'chinese': '协存本金', 'cellType': NumCell}
         # d['pd_interest'] = {'chinese': '协存利息', 'cellType': BasicCell}
         # 协存项目 输入项
-        d['ret_carry_principal'] = {'chinese': '利息转结本金', 'cellType': BasicCell}
-        d['cash_to_agreement'] = {'chinese': '现金->协存', 'cellType': BasicCell}
-        d['agreement_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
+        d['ret_carry_principal'] = {'chinese': '利息转结本金', 'cellType': NumCell}
+        d['cash_to_agreement'] = {'chinese': '现金->协存', 'cellType': NumCell}
+        d['agreement_to_cash'] = {'chinese': '协存->现金', 'cellType': NumCell}
 
         self.setHeaderDict(d)
 

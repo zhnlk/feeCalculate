@@ -453,12 +453,12 @@ class AssertTotalView(BasicFcView):
         d['total_assert'] = {'chinese': '--', 'cellType': BasicCell}
         d['cash'] = {'chinese': '--', 'cellType': BasicCell}
         d['money_fund'] = {'chinese': '比例', 'cellType': BasicCell}
-        d['assert_mgt'] = {'chinese': '净值/价格', 'cellType': BasicCell}
+        d['assert_mgt'] = {'chinese': '净值/价格', 'cellType': NumCell}
         d['liquid_assert_ratio'] = {'chinese': '份额', 'cellType': BasicCell}
-        d['today_total_revenue'] = {'chinese': '金额', 'cellType': BasicCell}
-        d['fee_1'] = {'chinese': '本金', 'cellType': BasicCell}
-        d['fee_2'] = {'chinese': '累计收益', 'cellType': BasicCell}
-        d['fee_3'] = {'chinese': '今日收益', 'cellType': BasicCell}
+        d['today_total_revenue'] = {'chinese': '金额', 'cellType': NumCell}
+        d['fee_1'] = {'chinese': '本金', 'cellType': NumCell}
+        d['fee_2'] = {'chinese': '累计收益', 'cellType': NumCell}
+        d['fee_3'] = {'chinese': '今日收益', 'cellType': NumCell}
 
         self.setHeaderDict(d)
         # 设置数据键
@@ -489,13 +489,13 @@ class TotalValuationView(BasicFcView):
         # 设置表头有序字典
         d = OrderedDict()
         d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
-        d['all_value'] = {'chinese': '总资产净值', 'cellType': BasicCell}
-        d['cash'] = {'chinese': '现金', 'cellType': BasicCell}
-        d['agreement'] = {'chinese': '协存', 'cellType': BasicCell}
-        d['fund'] = {'chinese': '货币基金', 'cellType': BasicCell}
-        d['management'] = {'chinese': '资管', 'cellType': BasicCell}
+        d['all_value'] = {'chinese': '总资产净值', 'cellType': NumCell}
+        d['cash'] = {'chinese': '现金', 'cellType': NumCell}
+        d['agreement'] = {'chinese': '协存', 'cellType': NumCell}
+        d['fund'] = {'chinese': '货币基金', 'cellType': NumCell}
+        d['management'] = {'chinese': '资管', 'cellType': NumCell}
         # d['liquid_assert_ratio'] = {'chinese': '流动资产比例', 'cellType': BasicCell}
-        d['all_ret'] = {'chinese': '当日总收益', 'cellType': BasicCell}
+        d['all_ret'] = {'chinese': '当日总收益', 'cellType': NumCell}
         d['fee1'] = {'chinese': '费用1', 'cellType': NumCell}
         d['fee2'] = {'chinese': '费用2', 'cellType': NumCell}
         d['fee3'] = {'chinese': '费用3', 'cellType': NumCell}

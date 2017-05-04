@@ -22,17 +22,17 @@ class CashListView(BasicFcView):
 
         d = OrderedDict()
         d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
-        d['total_amount'] = {'chinese': '现金总额', 'cellType': BasicCell}
-        d['cash_to_management'] = {'chinese': '现金->资管', 'cellType': BasicCell}
-        d['cash_to_fund'] = {'chinese': '现金->货基', 'cellType': BasicCell}
-        d['cash_to_agreement'] = {'chinese': '现金->协存', 'cellType': BasicCell}
-        d['cash_to_investor'] = {'chinese': '现金->兑付投资人', 'cellType': BasicCell}
-        d['management_to_cash'] = {'chinese': '资管->现金', 'cellType': BasicCell}
-        d['fund_to_cash'] = {'chinese': '货基->现金', 'cellType': BasicCell}
-        d['agreement_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
-        d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': BasicCell}
-        d['cash_return'] = {'chinese': '现金收入', 'cellType': BasicCell}
-        d['cash_draw_fee'] = {'chinese': '提取费用', 'cellType': BasicCell}
+        d['total_amount'] = {'chinese': '现金总额', 'cellType': NumCell}
+        d['cash_to_management'] = {'chinese': '现金->资管', 'cellType': NumCell}
+        d['cash_to_fund'] = {'chinese': '现金->货基', 'cellType': NumCell}
+        d['cash_to_agreement'] = {'chinese': '现金->协存', 'cellType': NumCell}
+        d['cash_to_investor'] = {'chinese': '现金->兑付投资人', 'cellType': NumCell}
+        d['management_to_cash'] = {'chinese': '资管->现金', 'cellType': NumCell}
+        d['fund_to_cash'] = {'chinese': '货基->现金', 'cellType': NumCell}
+        d['agreement_to_cash'] = {'chinese': '协存->现金', 'cellType': NumCell}
+        d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': NumCell}
+        d['cash_return'] = {'chinese': '现金收入', 'cellType': NumCell}
+        d['cash_draw_fee'] = {'chinese': '提取费用', 'cellType': NumCell}
 
         self.setEventType(EVENT_CASH)
 
