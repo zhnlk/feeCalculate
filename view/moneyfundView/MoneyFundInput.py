@@ -114,9 +114,13 @@ class MoneyFundInput(BasicFcView):
             date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[0])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
-
-        self.mainEngine.add_fund_daily_data(date, mf_uuid, float(mf_carry_forward_revenue), float(mf_subscribe_from_cash), float(mf_redeem_to_cash),
-                                            float(mf_not_carry_forward_revenue))
+        try:
+            self.mainEngine.add_fund_daily_data(date, mf_uuid, float(mf_carry_forward_revenue), float(mf_subscribe_from_cash),
+                                                float(mf_redeem_to_cash),
+                                                float(mf_not_carry_forward_revenue))
+        except ValueError:
+            self.showError()
+            return
 
         # 加入数据后，更新列表显示
         self.mainEngine.eventEngine.put(Event(type_=EVENT_MF))
@@ -126,12 +130,6 @@ class MoneyFundInput(BasicFcView):
 
         self.showInfo()
 
-    # 输入成功提示框
-    def showInfo(self):
-        print('slotInformation called...')
-        QMessageBox.information(self, "Information",
-                                self.tr("输入成功!"))
-        self.close()
 
     def prepareData(self):
 

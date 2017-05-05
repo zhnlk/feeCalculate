@@ -86,21 +86,19 @@ class PdCateInput(BasicFcView):
         pd_stage_rate = str(self.pd_stage_rate_Edit.text())
 
         """向数据库增加数据"""
-        if stage_rate:
-            self.mainEngine.add_agreement_class(pd_project_name, pd_project_rate, pd_stage_amount, pd_stage_rate)
-        else:
-            self.mainEngine.add_agreement_class(name=pd_project_name, rate=pd_project_rate)
+        try:
+            if stage_rate:
+                self.mainEngine.add_agreement_class(pd_project_name, float(pd_project_rate), float(pd_stage_amount), float(pd_stage_rate))
+            else:
+                self.mainEngine.add_agreement_class(name=pd_project_name, rate=float(pd_project_rate))
+        except ValueError:
+            self.showError()
+            return
 
         # 加入数据后，更新下拉框显示
         # self.mainEngine.eventEngine.put(Event(type_=EVENT_PD_INPUT))
         self.showInfo()
 
-    # 输入成功提示框
-    def showInfo(self):
-        print('slotInformation called...')
-        QMessageBox.information(self, "Information",
-                                self.tr("输入成功!"))
-        self.close()
 
 if __name__ == "__main__":
     import sys

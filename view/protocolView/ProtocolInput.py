@@ -126,8 +126,12 @@ class ProtocolInput(BasicFcView):
             date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[0])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
+        try:
+            self.mainEngine.add_agreement_daily_data(date, pd_uuid, float(interest_to_principal), float(cash_to_pd), float(pd_to_cash))
 
-        self.mainEngine.add_agreement_daily_data(date, pd_uuid, interest_to_principal, cash_to_pd, pd_to_cash)
+        except ValueError:
+            self.showError()
+            return
 
         # 加入数据后，更新列表显示
         self.mainEngine.eventEngine.put(Event(type_=EVENT_PD))
@@ -137,12 +141,6 @@ class ProtocolInput(BasicFcView):
 
         self.showInfo()
 
-    # 输入成功提示框
-    def showInfo(self):
-        print('slotInformation called...')
-        QMessageBox.information(self, "Information",
-                                self.tr("输入成功!"))
-        self.close()
 
     def prepareData(self):
 

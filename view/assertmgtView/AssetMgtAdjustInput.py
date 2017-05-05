@@ -111,14 +111,6 @@ class AdjustValuationInput(BasicFcView):
 
         self.showInfo()
 
-    # 输入成功提示框
-    def showInfo(self):
-        print('slotInformation called...')
-        QMessageBox.information(self, "Information",
-                                self.tr("输入成功!"))
-        self.close()
-
-
 if __name__ == "__main__":
     import sys
 

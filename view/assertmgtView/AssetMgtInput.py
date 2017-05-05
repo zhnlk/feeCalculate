@@ -142,9 +142,13 @@ class AssetMgtInput(BasicFcView):
             end_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", end_date_str[0])),
                                      int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", end_date_str[1])),
                                      int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", end_date_str[2])))
-
-        self.mainEngine.add_management_class(am_name, float(am_trade_amount), float(am_ret_rate), float(am_rate_days), start_date, end_date,
+        try:
+            self.mainEngine.add_management_class(am_name, float(am_trade_amount), float(am_ret_rate), float(am_rate_days), start_date, end_date,
                                              float(am_bank_fee), float(am_bank_days), float(am_manage_fee_rate), float(am_manage_days))
+        except ValueError:
+            self.showError()
+            return
+
         # 加入数据后，更新列表显示
         self.mainEngine.eventEngine.put(Event(type_=EVENT_AM))
         self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_FEE))

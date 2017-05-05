@@ -66,18 +66,15 @@ class MfCateInput(BasicFcView):
 
         mf_project_name = str(self.mf_project_name_Edit.text())
         """向数据库增加数据"""
-        self.mainEngine.add_fund_class(mf_project_name)
+        try:
+            self.mainEngine.add_fund_class(mf_project_name)
+        except ValueError:
+            self.showError()
+            return
 
         # 加入数据后，更新列表显示
         # self.mainEngine.eventEngine.put(Event(type_=EVENT_MF_INPUT))
         self.showInfo()
-
-    # 输入成功提示框
-    def showInfo(self):
-        print('slotInformation called...')
-        QMessageBox.information(self, "Information",
-                                self.tr("输入成功!"))
-        self.close()
 
 
 if __name__ == "__main__":

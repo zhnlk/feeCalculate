@@ -9,7 +9,7 @@ from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import QAction
+from PyQt5.QtWidgets import QAction, QMessageBox
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtWidgets import QMenu
@@ -197,6 +197,14 @@ class BasicFcView(QTableWidget):
         # 重新打开排序
         if self.sorting:
             self.setSortingEnabled(True)
+
+    def showInfo(self):
+        print('slotInformation called...')
+        QMessageBox.information(self, "Information", self.tr("输入成功!"))
+        self.close()
+
+    def showError(self):
+        QMessageBox.information(self, 'ValueError', self.tr('输入值有错误'))
 
     def resizeColumns(self):
         """调整各列的大小"""
