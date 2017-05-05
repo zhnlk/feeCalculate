@@ -6,7 +6,6 @@ from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QApplication
 
 from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
-from controller.EventEngine import Event
 from controller.EventType import EVENT_CASH
 from controller.MainEngine import MainEngine
 

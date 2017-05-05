@@ -3,19 +3,14 @@ from collections import OrderedDict
 
 import datetime
 
-import psutil
 from PyQt5 import QtCore
 
 from PyQt5.QtCore import QSettings
-from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QAction, QApplication
 from PyQt5.QtWidgets import QDockWidget
-from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
-from EventEngine import Event
-from EventType import EVENT_TIMER
 from controller import EventType
 from view.BasicWidget import BasicCell, BasicFcView, BASIC_FONT, NumCell
 from controller.MainEngine import MainEngine

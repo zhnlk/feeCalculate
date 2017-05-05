@@ -13,7 +13,6 @@ from controller.MainEngine import MainEngine
 class AssetMgtListView(QMainWindow, BasicFcView):
     """现金详情"""
 
-    # ----------------------------------------------------------------------
     def __init__(self, mainEngine, parent=None):
         """Constructor"""
         super(AssetMgtListView, self).__init__()
@@ -22,7 +21,6 @@ class AssetMgtListView(QMainWindow, BasicFcView):
 
         self.initUi()
 
-    # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('资管明细')
@@ -172,7 +170,6 @@ class CommitteeDetailView(BasicFcView):
         self.setRowCount(0)
         self.showMoneyFundSummary()
 
-        # ----------------------------------------------------------------------
 
     def showMoneyFundSummary(self):
         """显示所有合约数据"""
