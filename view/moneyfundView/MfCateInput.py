@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QHBoxLayout
@@ -9,13 +9,15 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
+from EventEngine import Event
+from EventType import EVENT_MAIN_FEE, EVENT_MF_INPUT
 from view.BasicWidget import BASIC_FONT, BasicFcView
 from controller.MainEngine import MainEngine
+
 
 class MfCateInput(BasicFcView):
     """协存输入"""
 
-    # ----------------------------------------------------------------------
     def __init__(self, mainEngine, eventEngine=None, parent=None):
         """Constructor"""
         super(MfCateInput, self).__init__(parent=parent)
@@ -23,21 +25,15 @@ class MfCateInput(BasicFcView):
         self.mainEngine = mainEngine
         self.eventEngine = eventEngine
 
-        # self.setHeaderDict(d)
-
         self.initUi()
 
-    # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('输入货基项目')
         # self.setMinimumSize(800, 800)
         self.setFont(BASIC_FONT)
-        # self.initTable()
         self.initInput()
-        # self.addMenuAction()
 
-    # ----------------------------------------------------------------------
     def initInput(self):
         """设置输入框"""
 
@@ -65,18 +61,21 @@ class MfCateInput(BasicFcView):
 
         self.setLayout(grid)
 
-    # ----------------------------------------------------------------------
     def addData(self):
         """增加数据"""
 
         mf_project_name = str(self.mf_project_name_Edit.text())
-        self.insertDB(mf_project_name)
-
-    # ----------------------------------------------------------------------
-    def insertDB(self, mf_project_name):
         """向数据库增加数据"""
-        # print(mf_project_name)
-        self.mainEngine.add_fund_class(mf_project_name)
+        try:
+            self.mainEngine.add_fund_class(mf_project_name)
+        except ValueError:
+            self.showError()
+            return
+
+        # 加入数据后，更新列表显示
+        # self.mainEngine.eventEngine.put(Event(type_=EVENT_MF_INPUT))
+        self.showInfo()
+
 
 if __name__ == "__main__":
     import sys

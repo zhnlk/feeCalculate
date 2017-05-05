@@ -20,24 +20,15 @@ class AssetMgtListView(QMainWindow, BasicFcView):
 
         self.mainEngine = mainEngine
 
-        # self.setEventType(EVENT_MF)
-
         self.initUi()
 
     # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('资管明细')
-        # self.setFont(BASIC_FONT)
-        # self.initTable()
-        # self.addMenuAction()
 
         """初始化界面"""
         self.setMinimumSize(1200, 600)
-        # self.setFont(BASIC_FONT)
-        # self.initTable()
-        # self.addMenuAction()
-        # self.show()
         self.initDock()
 
     def initDock(self):
@@ -64,11 +55,9 @@ class AssetMgtListView(QMainWindow, BasicFcView):
         dock.setFeatures(dock.DockWidgetFloatable | dock.DockWidgetMovable)
         self.addDockWidget(widgetArea, dock)
         return widget, dock
-        # ----------------------------------------------------------------------
 
 
 class AssetDailyInventoryView(BasicFcView):
-    # ----------------------------------------------------------------------
     def __init__(self, mainEngine, parent=None):
         """Constructor"""
         super(AssetDailyInventoryView, self).__init__(parent=parent)
@@ -85,7 +74,7 @@ class AssetDailyInventoryView(BasicFcView):
 
         self.setHeaderDict(d)
 
-        # self.setEventType(EVENT_MF)
+        self.setEventType(EVENT_AM)
 
         self.initUi()
 
@@ -97,8 +86,8 @@ class AssetDailyInventoryView(BasicFcView):
         self.initTable()
         self.show()
         # self.addMenuAction()
-
-        # ----------------------------------------------------------------------
+        self.signal.connect(self.refresh)
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
 
     def show(self):
         """显示"""
@@ -111,8 +100,6 @@ class AssetDailyInventoryView(BasicFcView):
         self.clearContents()
         self.setRowCount(0)
         self.showMoneyFundListDetail()
-
-        # ----------------------------------------------------------------------
 
     def showMoneyFundListDetail(self):
         """显示所有合约数据"""
@@ -159,8 +146,7 @@ class CommitteeDetailView(BasicFcView):
 
         self.setHeaderDict(d)
 
-        # self.setEventType(EVENT_MF)
-
+        self.setEventType(EVENT_AM)
         self.initUi()
 
     def initUi(self):
@@ -171,6 +157,8 @@ class CommitteeDetailView(BasicFcView):
         self.initTable()
         self.show()
         # self.addMenuAction()
+        self.signal.connect(self.refresh)
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
 
     def show(self):
         """显示"""
@@ -216,4 +204,3 @@ if __name__ == '__main__':
     # mainfdv.showMaximized()
     mfm.showMaximized()
     sys.exit(app.exec_())
-

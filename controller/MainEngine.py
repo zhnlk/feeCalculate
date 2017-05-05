@@ -8,7 +8,6 @@ from controller.EventEngine import *
 class MainEngine(object):
     """主引擎"""
 
-    # ----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
         # 记录今日日期
@@ -18,11 +17,9 @@ class MainEngine(object):
         self.eventEngine = EventEngine()
         self.eventEngine.start()
 
-    # ----------------------------------------------------------------------
 
     def exit(self):
         """退出程序前调用，保证正常退出"""
-
         # 停止事件引擎
         self.eventEngine.stop()
 
@@ -49,7 +46,6 @@ class MainEngine(object):
         # else:
         # return v.fee_1, v.fee_2, v.fee_3, v.fee_4
 
-    # ----------------------------------------------------------------------
     def add_agreement_class(self, name='', rate=0.03, threshold_amount=0, threshold_rate=0):
         """
         增加协存类别
@@ -126,8 +122,8 @@ class MainEngine(object):
         :param redeem_amount: 
         :return: 
         """
-        AssetService.add_agreement_daily_data(cal_date, asset_id, float(ret_carry_asset_amount), float(purchase_amount),
-                                              float(redeem_amount))
+        AssetService.add_agreement_daily_data(cal_date, asset_id, ret_carry_asset_amount, purchase_amount,
+                                              redeem_amount)
 
     def add_fund_daily_data(self, cal_date, asset_id, ret_carry_cash_amount, purchase_amount, redeem_amount,
                             ret_amount):

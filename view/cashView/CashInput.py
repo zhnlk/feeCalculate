@@ -11,8 +11,9 @@ from PyQt5.QtWidgets import QPushButton
 
 from view.BasicWidget import BASIC_FONT, BasicFcView
 from controller.EventEngine import Event
-from controller.EventType import EVENT_CASH
+from controller.EventType import EVENT_CASH, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION, EVENT_MAIN_ASSERT_DETAIL
 from controller.MainEngine import MainEngine
+
 
 class CashInput(BasicFcView):
     """现金详情"""
@@ -109,22 +110,23 @@ class CashInput(BasicFcView):
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
 
-        """向数据库增加数据"""
-        print(cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
+        # print(cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
         self.mainEngine.add_cash_daily_data(cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
 
-        # v = Valuation(date)
-        # v.save()
+        # 加入数据后，更新列表显示
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_CASH))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_FEE))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
+        # self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_ASSERT_DETAIL))
 
-        # self.mainEngine.eventEngine.put(EVENT_CASH)
-        # self.connect(okButton, SIGNAL("clicked()"), self.slotInformation)
-        self.signal.emit(Event(EVENT_CASH))
+        self.showInfo()
 
     # 输入成功提示框
-    def slotInformation(self):
+    def showInfo(self):
+        print('slotInformation called...')
         QMessageBox.information(self, "Information",
                                 self.tr("输入成功!"))
-        self.label.setText("Information MessageBox")
+        self.close()
 
 
 if __name__ == "__main__":

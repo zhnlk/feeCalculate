@@ -5,7 +5,6 @@ import datetime
 
 import psutil
 from PyQt5 import QtCore
-from asyncio import Event
 
 from PyQt5.QtCore import QSettings
 from PyQt5.QtCore import pyqtSignal
@@ -15,6 +14,8 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
+from EventEngine import Event
+from EventType import EVENT_TIMER
 from controller import EventType
 from view.BasicWidget import BasicCell, BasicFcView, BASIC_FONT, NumCell
 from controller.MainEngine import MainEngine
@@ -35,9 +36,7 @@ from view.protocolView.ProtocolMain import ProtocolListView
 
 class MainWindow(QMainWindow, BasicFcView):
     """主窗口"""
-    signalStatusBar = pyqtSignal(type(Event()))
 
-    # ----------------------------------------------------------------------
     def __init__(self, mainEngine, eventEngine):
         """Constructor"""
         super(MainWindow, self).__init__()
@@ -50,15 +49,12 @@ class MainWindow(QMainWindow, BasicFcView):
         self.initUi()
         self.loadWindowSettings('custom')
 
-    # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('feeCalc')
         self.initCentral()
         self.initTopMenu()
-        self.initStatusBar()
 
-    # ----------------------------------------------------------------------
     def initCentral(self):
         """总估值与费用"""
 
@@ -71,10 +67,8 @@ class MainWindow(QMainWindow, BasicFcView):
 
         # dockMainView.raise_()
 
-    # ----------------------------------------------------------------------
     def initTopMenu(self):
         """初始化菜单"""
-        # 创建菜单
         menubar = self.menuBar()
 
         # 设计为只显示存在的接口
@@ -112,37 +106,6 @@ class MainWindow(QMainWindow, BasicFcView):
         helpMenu = menubar.addMenu('帮助')
         helpMenu.addAction(self.createAction('关于', self.openAbout))
 
-    # ----------------------------------------------------------------------
-    def initStatusBar(self):
-        """初始化状态栏"""
-        self.statusLabel = QLabel()
-        self.statusLabel.setAlignment(QtCore.Qt.AlignLeft)
-
-        self.statusBar().addPermanentWidget(self.statusLabel)
-        self.statusLabel.setText(self.getCpuMemory())
-
-        self.sbCount = 0
-        self.sbTrigger = 10  # 10秒刷新一次
-        self.signalStatusBar.connect(self.updateStatusBar)
-        # self.eventEngine.register(EVENT_TIMER, self.signalStatusBar.emit)
-
-    # ----------------------------------------------------------------------
-    def updateStatusBar(self, event):
-        """在状态栏更新CPU和内存信息"""
-        self.sbCount += 1
-
-        if self.sbCount == self.sbTrigger:
-            self.sbCount = 0
-            self.statusLabel.setText(self.getCpuMemory())
-
-    # ----------------------------------------------------------------------
-    def getCpuMemory(self):
-        """获取CPU和内存状态信息"""
-        cpuPercent = psutil.cpu_percent()
-        memoryPercent = psutil.virtual_memory().percent
-        return u'CPU使用率：%d%%   内存使用率：%d%%' % (cpuPercent, memoryPercent)
-
-    # ----------------------------------------------------------------------
     def openAbout(self):
         """打开关于"""
         try:
@@ -150,8 +113,6 @@ class MainWindow(QMainWindow, BasicFcView):
         except KeyError:
             self.widgetDict['aboutW'] = AboutWidget(self)
             self.widgetDict['aboutW'].show()
-
-    # ----------------------------------------------------------------------
 
     def openCashListDetail(self):
         """打开现金明细"""
@@ -261,7 +222,6 @@ class MainWindow(QMainWindow, BasicFcView):
             self.widgetDict['openOutAssetMgtData'] = ErrorWidget(self)
             self.widgetDict['openOutAssetMgtData'].show()
 
-    # ----------------------------------------------------------------------
     def openOutCashData(self):
         """打开现金导出"""
         try:
@@ -270,9 +230,6 @@ class MainWindow(QMainWindow, BasicFcView):
             self.widgetDict['OutCashData'] = ErrorWidget(self)
             self.widgetDict['OutCashData'].show()
 
-    # ----------------------------------------------------------------------
-
-    # ----------------------------------------------------------------------
     def createAction(self, actionName, function):
         """创建操作功能"""
         action = QAction(actionName, self)
@@ -303,7 +260,6 @@ class MainWindow(QMainWindow, BasicFcView):
         self.addDockWidget(widgetArea, dock)
         return widget, dock
 
-    # ----------------------------------------------------------------------
     def loadWindowSettings(self, settingName):
         """载入窗口设置"""
         settings = QSettings('vn.trader', settingName)
@@ -313,12 +269,10 @@ class MainWindow(QMainWindow, BasicFcView):
         except AttributeError:
             pass
 
-    # ----------------------------------------------------------------------
     def restoreWindow(self):
         """还原默认窗口设置（还原停靠组件位置）"""
         self.loadWindowSettings('default')
         self.showMaximized()
-        ########################################################################
 
 
 class DateMainView(BasicFcView):
@@ -348,15 +302,19 @@ class DateMainView(BasicFcView):
         self.initUI()
 
         # 注册事件监听
-        self.registerEvent()
+        # self.registerEvent()
 
     def initUI(self):
         # 初始化表格
         self.initTable()
         self.refresh()
 
+        self.signal.connect(self.refresh)
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
+
     def refresh(self):
         self.initData()
+        print('DateMainView called...')
 
     def initData(self):
         """初始化数据"""
@@ -397,16 +355,20 @@ class FeeTotalView(BasicFcView):
         self.initUI()
 
         # 注册事件监听
-        self.registerEvent()
+        # self.registerEvent()
 
     def initUI(self):
         # 初始化表格
         self.initTable()
         self.refresh()
 
+        self.signal.connect(self.refresh)
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
+
     def refresh(self):
         self.initData()
-        # pass
+
+        print('FeeTotalView called...')
 
     def initData(self):
         """初始化数据"""
@@ -442,7 +404,6 @@ class FeeTotalView(BasicFcView):
 class AssertTotalView(BasicFcView):
     """主界面"""
 
-    # ----------------------------------------------------------------------
     def __init__(self, mainEngine, eventEngine, parent=None):
         """Constructor"""
         super(AssertTotalView, self).__init__(mainEngine, eventEngine, parent)
@@ -477,7 +438,7 @@ class AssertTotalView(BasicFcView):
         self.initTable()
 
         # 注册事件监听
-        self.registerEvent()
+        # self.registerEvent()
 
 
 class TotalValuationView(BasicFcView):
@@ -514,7 +475,7 @@ class TotalValuationView(BasicFcView):
 
         self.initUI()
 
-        self.registerEvent()
+        # self.registerEvent()
 
     def initUI(self):
         # 初始化表格
@@ -522,9 +483,12 @@ class TotalValuationView(BasicFcView):
         self.refresh()
         self.addPopAction()
 
+        self.signal.connect(self.refresh)
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
+
     def refresh(self):
         self.initData()
-        # pass
+        print('TotalValuationView called...')
 
     def addPopAction(self):
         """增加右键菜单内容"""
@@ -554,7 +518,7 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    mw = MainWindow(mainEngine,mainEngine.eventEngine)
+    mw = MainWindow(mainEngine, mainEngine.eventEngine)
     # mflv = TotalValuationView(mainEngine, mainEngine.eventEngine)
     # mainfdv = MoneyFundSummaryView(mainEngine)
     mw.showMaximized()

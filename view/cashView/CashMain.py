@@ -13,7 +13,6 @@ from controller.MainEngine import MainEngine
 
 class CashListView(BasicFcView):
     """现金详情"""
-
     def __init__(self, mainEngine, parent=None):
         """Constructor"""
         super(CashListView, self).__init__(parent=parent)
@@ -48,14 +47,13 @@ class CashListView(BasicFcView):
         self.setWindowTitle('现金明细')
         self.setMinimumSize(1300, 600)
 
-        # 将信号连接到refresh函数
-        self.signal.connect(self.refresh)
-        self.mainEngine.eventEngine.register(EVENT_CASH, self.signal.emit)
-        # self.resizeColumnsToContents()
-
         self.setFont(BASIC_FONT)
         self.initTable()
         self.addMenuAction()
+
+        # 将信号连接到refresh函数
+        self.signal.connect(self.refresh)
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
 
     # ----------------------------------------------------------------------
     def showCashListDetail(self):
@@ -63,7 +61,7 @@ class CashListView(BasicFcView):
 
         result = self.mainEngine.get_cash_detail_by_days(7)
 
-        print(result)
+        # print(result)
         self.setRowCount(len(result))
         row = 0
         for r in result:
@@ -77,15 +75,13 @@ class CashListView(BasicFcView):
 
             row = row + 1
 
-    # ----------------------------------------------------------------------
     def refresh(self):
         """刷新"""
         self.menu.close()  # 关闭菜单
-        # self.clearContents()
-        # self.setRowCount(0)
+        self.clearContents()
+        self.setRowCount(0)
         self.showCashListDetail()
 
-    # ----------------------------------------------------------------------
     def addMenuAction(self):
         """增加右键菜单内容"""
         refreshAction = QAction('刷新', self)
@@ -93,11 +89,9 @@ class CashListView(BasicFcView):
 
         self.menu.addAction(refreshAction)
 
-    # ----------------------------------------------------------------------
     def show(self):
         """显示"""
         super(CashListView, self).show()
-
         self.refresh()
 
 

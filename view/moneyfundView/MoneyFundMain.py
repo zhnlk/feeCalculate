@@ -13,27 +13,18 @@ from controller.MainEngine import MainEngine
 class MoneyFundMain(QMainWindow, BasicFcView):
     """现金详情"""
 
-    # ----------------------------------------------------------------------
     def __init__(self, mainEngine):
         """Constructor"""
         super(MoneyFundMain, self).__init__()
 
         self.mainEngine = mainEngine
 
-        # self.setEventType(EVENT_MF)
-
         self.initUi()
-
-    # ----------------------------------------------------------------------
 
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('货基')
         self.setMinimumSize(1200, 600)
-        # self.setFont(BASIC_FONT)
-        # self.initTable()
-        # self.addMenuAction()
-        # self.show()
         self.initDock()
 
     def initDock(self):
@@ -42,7 +33,6 @@ class MoneyFundMain(QMainWindow, BasicFcView):
         vidgetView2, dockView2 = self.createDock(MoneyFundSummaryView, '今日货基总额统计', QtCore.Qt.BottomDockWidgetArea)
         # self.tabifyDockWidget(dockView1,dockView2)
 
-    # ----------------------------------------------------------------------
     def addMenuAction(self):
         """增加右键菜单内容"""
         refreshAction = QAction('刷新', self)
@@ -62,7 +52,6 @@ class MoneyFundMain(QMainWindow, BasicFcView):
 
 
 class MoneyFundDetailView(BasicFcView):
-    # ----------------------------------------------------------------------
     def __init__(self, mainEngine, parent=None):
         """Constructor"""
         super(MoneyFundDetailView, self).__init__(parent=parent)
@@ -82,7 +71,7 @@ class MoneyFundDetailView(BasicFcView):
 
         self.setHeaderDict(d)
 
-        # self.setEventType(EVENT_MF)
+        self.setEventType(EVENT_MF)
 
         self.initUi()
 
@@ -92,10 +81,9 @@ class MoneyFundDetailView(BasicFcView):
         # self.setMinimumSize(1200, 600)
         # self.setFont(BASIC_FONT)
         self.initTable()
+        self.signal.connect(self.refresh)
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
         self.show()
-        # self.addMenuAction()
-
-        # ----------------------------------------------------------------------
 
     def show(self):
         """显示"""
@@ -108,8 +96,7 @@ class MoneyFundDetailView(BasicFcView):
         self.clearContents()
         self.setRowCount(0)
         self.showMoneyFundListDetail()
-
-        # ----------------------------------------------------------------------
+        print('mf main called ......')
 
     def showMoneyFundListDetail(self):
         """显示所有合约数据"""
@@ -149,7 +136,7 @@ class MoneyFundSummaryView(BasicFcView):
 
         self.setHeaderDict(d)
 
-        # self.setEventType(EVENT_MF)
+        self.setEventType(EVENT_MF)
 
         self.initUi()
 
@@ -159,6 +146,8 @@ class MoneyFundSummaryView(BasicFcView):
         # self.setMinimumSize(1200, 600)
         # self.setFont(BASIC_FONT)
         self.initTable()
+        self.signal.connect(self.refresh)
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
         self.show()
         # self.addMenuAction()
 
@@ -173,8 +162,7 @@ class MoneyFundSummaryView(BasicFcView):
         self.clearContents()
         self.setRowCount(0)
         self.showMoneyFundSummary()
-
-        # ----------------------------------------------------------------------
+        print('mf main called....')
 
     def showMoneyFundSummary(self):
         """显示所有合约数据"""
