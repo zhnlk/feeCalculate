@@ -517,6 +517,7 @@ def get_single_management_detail(asset_id=''):
     asset = query_by_id(obj=AssetClass, obj_id=asset_id)
     ret = dict()
     ret.update({SV.ASSET_KEY_NAME: asset.name})
+    ret.update({SV.ASSET_KEY_ASSET_ID: asset.id})
     ret.update({SV.ASSET_KEY_START_DATE: asset.start_date})
     ret.update({SV.ASSET_KEY_EXPIRY_DATE: asset.expiry_date})
     ret.update({SV.ASSET_KEY_MANAGEMENT_DUE: (
