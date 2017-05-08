@@ -46,7 +46,7 @@ def get_cash_date(days=0):
         return dates
 
 
-def add_cash_daily_data(cal_data=date.today(), draw_amount=0, draw_fee=0, deposit_amount=0, ret_amount=0):
+def add_cash_daily_data(cal_date=date.today(), draw_amount=0, draw_fee=0, deposit_amount=0, ret_amount=0):
     '''
     添加现在记录
     :param draw_amount:兑付
@@ -55,11 +55,11 @@ def add_cash_daily_data(cal_data=date.today(), draw_amount=0, draw_fee=0, deposi
     :param ret_amount:现金收入
     :return: None
     '''
-    add_cash_with_type(amount=draw_amount, cash_type=SV.CASH_TYPE_DRAW, cal_date=cal_data) if draw_amount else None
-    add_cash_with_type(amount=draw_fee, cash_type=SV.CASH_TYPE_FEE, cal_date=cal_data) if draw_fee else None
+    add_cash_with_type(amount=draw_amount, cash_type=SV.CASH_TYPE_DRAW, cal_date=cal_date) if draw_amount else None
+    add_cash_with_type(amount=draw_fee, cash_type=SV.CASH_TYPE_FEE, cal_date=cal_date) if draw_fee else None
     add_cash_with_type(amount=deposit_amount, cash_type=SV.CASH_TYPE_DEPOSIT,
-                       cal_date=cal_data) if deposit_amount else None
-    add_cash_with_type(amount=ret_amount, cash_type=SV.CASH_TYPE_RET, cal_date=cal_data) if ret_amount else None
+                       cal_date=cal_date) if deposit_amount else None
+    add_cash_with_type(amount=ret_amount, cash_type=SV.CASH_TYPE_RET, cal_date=cal_date) if ret_amount else None
 
 
 def get_cash_daily_detail(cal_date=date.today()):
@@ -100,7 +100,7 @@ def get_cash_detail_by_days(days=0):
 if __name__ == '__main__':
     # print((get_total_amount_before_by_type(cash_type=SV.CASH_TYPE_DEPOSIT)))
     # print(get_last_total_amount_by_type(cash_type=SV.CASH_TYPE_PURCHASE))
-    add_cash_daily_data(cal_data=date.today() - timedelta(days=9), draw_amount=10001, draw_fee=10.01,
+    add_cash_daily_data(cal_date=date.today() - timedelta(days=9), draw_amount=10001, draw_fee=10.01,
                         deposit_amount=1000000,
                         ret_amount=4000)
     # print(get_cash_date())

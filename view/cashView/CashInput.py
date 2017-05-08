@@ -112,7 +112,8 @@ class CashInput(BasicFcView):
 
         # print(cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
         try:
-            self.mainEngine.add_cash_daily_data(float(cash_to_investor), float(extract_fee), float(invest_to_cash), float(cash_revenue))
+            self.mainEngine.add_cash_daily_data(cal_date=date, draw_amount=float(cash_to_investor), draw_fee=float(extract_fee),
+                                                deposit_amount=float(invest_to_cash), ret_amount=float(cash_revenue))
         except ValueError:
             self.showError()
             return

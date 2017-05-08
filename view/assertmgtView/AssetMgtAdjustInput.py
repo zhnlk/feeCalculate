@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
+import AssetService
 from controller.EventEngine import Event
 from controller.EventType import EVENT_AM_ADJUST, EVENT_AM, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION
 from view.BasicWidget import BASIC_FONT, BasicFcView
@@ -101,6 +102,14 @@ class AdjustValuationInput(BasicFcView):
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
 
+        try:
+            if float(adjust_check) is not 0.0:
+                AssetService.add_asset_fee_with_asset_and_type(float(adjust_check), asset_id='', cal_date=date)
+            if float(adjust_transfer_fee) is not 0.0:
+                AssetService.add_asset_fee_with_asset_and_type(float(adjust_transfer_fee), asset_id='', cal_date=date)
+        except ValueError:
+            self.showError()
+
         # 加入数据后，更新列表显示
         self.mainEngine.eventEngine.put(Event(type_=EVENT_AM))
         self.mainEngine.eventEngine.put(Event(type_=EVENT_AM_ADJUST))
@@ -109,6 +118,7 @@ class AdjustValuationInput(BasicFcView):
         # self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_ASSERT_DETAIL))
 
         self.showInfo()
+
 
 if __name__ == "__main__":
     import sys
