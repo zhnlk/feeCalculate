@@ -101,7 +101,7 @@ class MainEngine(object):
         """
         return CashService.get_cash_detail_by_days(days)
 
-    def add_cash_daily_data(self, draw_amount, draw_fee, deposit_amount, ret_amount):
+    def add_cash_daily_data(self, cal_date, draw_amount, draw_fee, deposit_amount, ret_amount):
         """
         增加现金明细记录
         :param draw_amount: 兑付
@@ -110,7 +110,7 @@ class MainEngine(object):
         :param ret_amount:现金收入
         :return None 
         """
-        CashService.add_cash_daily_data(draw_amount, draw_fee, deposit_amount, ret_amount)
+        CashService.add_cash_daily_data(cal_date,draw_amount, draw_fee, deposit_amount, ret_amount)
 
     def add_agreement_daily_data(self, cal_date, asset_id, ret_carry_asset_amount, purchase_amount,
                                  redeem_amount):

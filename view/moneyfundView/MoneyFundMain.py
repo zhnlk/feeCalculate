@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 from PyQt5.QtWidgets import QAction, QApplication, QMainWindow, QDockWidget
 
-from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
+from view.BasicWidget import BasicFcView, BasicCell, NumCell
 from controller.EventType import EVENT_MF
 from controller.MainEngine import MainEngine
 

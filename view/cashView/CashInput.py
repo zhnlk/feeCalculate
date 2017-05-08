@@ -111,7 +111,12 @@ class CashInput(BasicFcView):
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
 
         # print(cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
-        self.mainEngine.add_cash_daily_data(cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
+        try:
+            self.mainEngine.add_cash_daily_data(cal_date=date, draw_amount=float(cash_to_investor), draw_fee=float(extract_fee),
+                                                deposit_amount=float(invest_to_cash), ret_amount=float(cash_revenue))
+        except ValueError:
+            self.showError()
+            return
 
         # 加入数据后，更新列表显示
         self.mainEngine.eventEngine.put(Event(type_=EVENT_CASH))

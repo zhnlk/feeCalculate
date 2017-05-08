@@ -2,15 +2,12 @@
 import datetime
 
 from PyQt5.QtWidgets import QApplication, QMessageBox
-from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QHBoxLayout
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
-from EventEngine import Event
-from EventType import EVENT_MAIN_FEE, EVENT_MF_INPUT
 from view.BasicWidget import BASIC_FONT, BasicFcView
 from controller.MainEngine import MainEngine
 

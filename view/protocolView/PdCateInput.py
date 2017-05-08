@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
-import datetime
 
 from PyQt5.QtWidgets import QApplication, QCheckBox, QMessageBox
-from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QHBoxLayout
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
-from EventEngine import Event
-from EventType import EVENT_PD_INPUT
 from view.BasicWidget import BASIC_FONT, BasicFcView
 from controller.MainEngine import MainEngine
 
