@@ -2,7 +2,7 @@
 import datetime
 import re
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QHBoxLayout
@@ -10,15 +10,16 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
-from BasicWidget import BASIC_FONT, BasicFcView
-from MainEngine import MainEngine
+from controller.EventEngine import Event
+from controller.EventType import EVENT_MF, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION, EVENT_MF_INPUT
+from controller.MainEngine import MainEngine
+from view.BasicWidget import BASIC_FONT, BasicFcView
 from utils import StaticValue as SV
 
 
 class MoneyFundInput(BasicFcView):
     """货基输入"""
 
-    # ----------------------------------------------------------------------
     def __init__(self, mainEngine, eventEngine=None, parent=None):
         """Constructor"""
         super(MoneyFundInput, self).__init__(parent=parent)
@@ -26,22 +27,21 @@ class MoneyFundInput(BasicFcView):
         self.mainEngine = mainEngine
         self.eventEngine = eventEngine
 
-        # self.setHeaderDict(d)
+        self.setEventType(EVENT_MF_INPUT)
 
         self.initUi()
 
-    # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('输入货基明细')
         # self.setMinimumSize(800, 800)
         self.setFont(BASIC_FONT)
-        # self.initTable()
         self.initInput()
         self.prepareData()
-        # self.addMenuAction()
 
-    # ----------------------------------------------------------------------
+        # self.signal.connect(self.prepareData)
+        # self.mainEngine.eventEngine.register(self.eventType,self.signal.emit)
+
     def initInput(self):
         """设置输入框"""
         self.mf_ComboBox_list = list()
@@ -94,7 +94,6 @@ class MoneyFundInput(BasicFcView):
 
         self.setLayout(grid)
 
-    # ----------------------------------------------------------------------
     def addData(self):
         """增加数据"""
         mf_project_name_index = str(self.mf_ComboBox.currentIndex())
@@ -115,16 +114,31 @@ class MoneyFundInput(BasicFcView):
             date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[0])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
+        try:
+            self.mainEngine.add_fund_daily_data(date, mf_uuid, float(mf_carry_forward_revenue), float(mf_subscribe_from_cash),
+                                                float(mf_redeem_to_cash),
+                                                float(mf_not_carry_forward_revenue))
+        except ValueError:
+            self.showError()
+            return
 
-        self.mainEngine.add_fund_daily_data(date,mf_uuid,mf_carry_forward_revenue,mf_subscribe_from_cash,mf_redeem_to_cash,mf_not_carry_forward_revenue)
+        # 加入数据后，更新列表显示
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MF))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_FEE))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
+        # self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_ASSERT_DETAIL))
+
+        self.showInfo()
+
 
     def prepareData(self):
 
         result = self.mainEngine.get_all_asset_ids_by_type(SV.ASSET_CLASS_FUND)
         for mf in result:
-            print(mf)
+            # print(mf)
             self.mf_ComboBox_list.append(mf[0])
             self.mf_ComboBox.addItem(mf[1])
+        print('prepare data called ....')
 
 
 if __name__ == "__main__":

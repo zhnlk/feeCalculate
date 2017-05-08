@@ -1,16 +1,13 @@
 # encoding: UTF-8
 import datetime
 
-import AssetService
-import CashService
-import CommonService
-from EventEngine import *
+from services import AssetService, CashService, CommonService
+from controller.EventEngine import *
 
 
 class MainEngine(object):
     """主引擎"""
 
-    # ----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
         # 记录今日日期
@@ -20,80 +17,22 @@ class MainEngine(object):
         self.eventEngine = EventEngine()
         self.eventEngine.start()
 
-    # ----------------------------------------------------------------------
 
     def exit(self):
         """退出程序前调用，保证正常退出"""
-
         # 停止事件引擎
         self.eventEngine.stop()
 
     def getMainCostData(self):
-
-        return self.todayDate, self.todayDate, '今日资金成本'
+        today_asset_cost = CommonService.get_today_fees()['fee4']
+        return self.todayDate, today_asset_cost
 
     def getMainFeeData(self):
         rate, duration = self.getFeeConstrant()
         return rate, duration
 
-    # def getMainTotalValuationData(self):
+        # def getMainTotalValuationData(self):
         # return Valuation.listAll()
-
-    # def saveTotalValuationData(self, date):
-    #     v = Valuation.findByDate(date)
-    #     if v:
-    #         return v
-    #
-    #     valuation = Valuation(date)
-    #     # 现金的总额
-    #     cash = Cash.findByDate(date)
-    #     valuation.cash = cash.getTodayTotalCash()
-    #
-    #     # 协存
-    #     pd = ProtocolDeposit.findByDate(date)
-    #     valuation.protocol_deposit = pd.protocol_deposit_amount
-    #
-    #     pd_revenue = pd.protocol_deposit_revenue
-    #
-    #     # 货基
-    #     mf = MoneyFund.findByDate(date)
-    #     valuation.money_fund = mf.money_fund_amount
-    #     mf_revenue = mf.money_fund_revenue
-    #
-    #     # 资管
-    #     valuation.assert_mgt = 0.00
-    #     am_revenue = 0.00
-    #
-    #     # 总资产净值 = 现金 + 协存 + 货基 + 资管
-    #     valuation.total_assert_net_value = valuation.cash \
-    #                                        + valuation.protocol_deposit \
-    #                                        + valuation.money_fund \
-    #                                        + valuation.assert_mgt
-    #
-    #     # 流动资产比例 = (现金 + 协存 + 货基)/总资产净值
-    #     valuation.liquid_assert_ratio = (valuation.cash
-    #                                      + valuation.protocol_deposit
-    #                                      + valuation.money_fund) \
-    #                                     / valuation.total_assert_net_value
-    #     # 当日总收益 = 协存当日总收益 + 货基当日总收益 + 资管当日总收益
-    #     valuation.today_total_revenue = pd_revenue \
-    #                                     + mf_revenue \
-    #                                     + am_revenue
-    #
-    #     rate, duration = self.getFeeConstrant()
-    #
-    #     valuation.fee_1 = valuation.total_assert_net_value * eval(rate[0].replace('%', '/100')) / duration[0]
-    #     valuation.fee_2 = valuation.total_assert_net_value * eval(rate[1].replace('%', '/100')) / duration[1]
-    #     valuation.fee_3 = valuation.total_assert_net_value * eval(rate[2].replace('%', '/100')) / duration[2]
-    #     valuation.fee_4 = valuation.today_total_revenue \
-    #                       - valuation.today_product_revenue \
-    #                       - valuation.fee_1 \
-    #                       - valuation.fee_2 \
-    #                       - valuation.fee_3
-    #
-    #     valuation.save()
-    #
-    #     return valuation
 
     def getFeeConstrant(self):
         rate = ['0.02%', '0.30%', '0.04%']
@@ -105,9 +44,8 @@ class MainEngine(object):
         # if v is None:
         return '0', '0', '0', '0'
         # else:
-            # return v.fee_1, v.fee_2, v.fee_3, v.fee_4
+        # return v.fee_1, v.fee_2, v.fee_3, v.fee_4
 
-    # ----------------------------------------------------------------------
     def add_agreement_class(self, name='', rate=0.03, threshold_amount=0, threshold_rate=0):
         """
         增加协存类别
@@ -128,7 +66,7 @@ class MainEngine(object):
         AssetService.add_fund_class(name=name)
 
     def add_management_class(self, name, trade_amount, ret_rate, rate_days, start_date, end_date,
-                             bank_fee_rate, bank_days, manage_fee_rate, manage_days, cal_date):
+                             bank_fee_rate, bank_days, manage_fee_rate, manage_days, cal_date=datetime.date.today()):
         """
         增加资管类别
         :param name: 
@@ -163,7 +101,7 @@ class MainEngine(object):
         """
         return CashService.get_cash_detail_by_days(days)
 
-    def add_cash_daily_data(self, draw_amount, draw_fee, deposit_amount, ret_amount):
+    def add_cash_daily_data(self, cal_date, draw_amount, draw_fee, deposit_amount, ret_amount):
         """
         增加现金明细记录
         :param draw_amount: 兑付
@@ -172,7 +110,7 @@ class MainEngine(object):
         :param ret_amount:现金收入
         :return None 
         """
-        CashService.add_cash_daily_data(draw_amount, draw_fee, deposit_amount, ret_amount)
+        CashService.add_cash_daily_data(cal_date,draw_amount, draw_fee, deposit_amount, ret_amount)
 
     def add_agreement_daily_data(self, cal_date, asset_id, ret_carry_asset_amount, purchase_amount,
                                  redeem_amount):
@@ -184,12 +122,11 @@ class MainEngine(object):
         :param redeem_amount: 
         :return: 
         """
-        AssetService.add_agreement_daily_data(cal_date, asset_id, float(ret_carry_asset_amount), float(purchase_amount),
-                                              float(redeem_amount))
+        AssetService.add_agreement_daily_data(cal_date, asset_id, ret_carry_asset_amount, purchase_amount,
+                                              redeem_amount)
 
     def add_fund_daily_data(self, cal_date, asset_id, ret_carry_cash_amount, purchase_amount, redeem_amount,
                             ret_amount):
-
         '''
         添加货基每日记录
         :param asset_id:计算日期
@@ -243,10 +180,17 @@ class MainEngine(object):
         """
         return AssetService.get_all_management_detail()
 
-    def get_total_evaluate_detail(self,days):
+    def get_total_evaluate_detail(self, days=7):
         """
         估计明细
         :param days: 
         :return: 
         """
         return CommonService.get_total_evaluate_detail(days)
+
+    def get_today_fees(self):
+        """
+        获取今日费用
+        :return: 
+        """
+        return CommonService.get_today_fees()

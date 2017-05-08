@@ -7,16 +7,18 @@
 import datetime
 import re
 
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtWidgets import QComboBox
+from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QHBoxLayout
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
-from BasicWidget import BASIC_FONT, BasicFcView
-from MainEngine import MainEngine
+import AssetService
+from controller.EventEngine import Event
+from controller.EventType import EVENT_AM_ADJUST, EVENT_AM, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION
+from view.BasicWidget import BASIC_FONT, BasicFcView
+from controller.MainEngine import MainEngine
 
 
 class AdjustValuationInput(BasicFcView):
@@ -85,34 +87,37 @@ class AdjustValuationInput(BasicFcView):
     # ----------------------------------------------------------------------
     def addData(self):
         """增加数据"""
-        # mf_project_name_index = str(self.mf_ComboBox.currentIndex())
-        #
-        # mf_subscribe_from_cash = str(self.mf_subscribe_from_cash_Edit.text())
-        # mf_redeem_to_cash = str(self.mf_redeem_to_cash_Edit.text())
-        # mf_not_carry_forward_revenue = str(self.mf_not_carry_forward_revenue_Edit.text())
-        # mf_carry_forward_revenue = str(self.mf_carry_forward_revenue_Edit.text())
-        #
-        # mf_uuid = self.mf_ComboBox_list[int(mf_project_name_index)]
+        adjust_date = str(self.adjust_date_Edit.text())
+        adjust_transfer_fee = str(self.adjust_transfer_fee_Edit.text())
+        adjust_check = str(self.adjust_check_Edit.text())
+
         # """向数据库增加数据"""
-        #
-        # date_str = str(self.date_Edit.text()).split('-')
-        # d = datetime.date.today()
-        # if date_str is None:
-        #     date = datetime.date(d.year, d.month, d.day)
-        # else:
-        #     date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[0])),
-        #                          int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
-        #                          int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
-        #
-        # mfProjectList = MfProjectList(date,mf_subscribe_from_cash,mf_redeem_to_cash,mf_not_carry_forward_revenue,mf_carry_forward_revenue)
-        #
-        # mfProjectList.save(mf_uuid)
-        #
-        # moneyFund = MoneyFund(date)
-        # moneyFund.update()
-        #
-        # v = Valuation(date)
-        # v.save()
+
+        date_str = adjust_date.split('-')
+        d = datetime.date.today()
+        if date_str is None:
+            date = datetime.date(d.year, d.month, d.day)
+        else:
+            date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[0])),
+                                 int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
+                                 int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
+
+        try:
+            if float(adjust_check) is not 0.0:
+                AssetService.add_asset_fee_with_asset_and_type(float(adjust_check), asset_id='', cal_date=date)
+            if float(adjust_transfer_fee) is not 0.0:
+                AssetService.add_asset_fee_with_asset_and_type(float(adjust_transfer_fee), asset_id='', cal_date=date)
+        except ValueError:
+            self.showError()
+
+        # 加入数据后，更新列表显示
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_AM))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_AM_ADJUST))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_FEE))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
+        # self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_ASSERT_DETAIL))
+
+        self.showInfo()
 
 
 if __name__ == "__main__":

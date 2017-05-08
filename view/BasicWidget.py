@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------
 import csv
 import json
 import os
@@ -10,14 +9,15 @@ from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import QAction
+from PyQt5.QtWidgets import QAction, QMessageBox
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtWidgets import QMenu
 from PyQt5.QtWidgets import QTableWidget
 from PyQt5.QtWidgets import QTableWidgetItem
 
-from EventEngine import Event
+from utils.MoneyFormat import outputmoney
+from controller.EventEngine import Event
 
 
 def loadFont():
@@ -52,7 +52,6 @@ class BasicFcView(QTableWidget):
     # 定义信号
     signal = pyqtSignal(type(Event()))
 
-    # ----------------------------------------------------------------------
     def __init__(self, mainEngine=None, eventEngine=None, parent=None):
         """Constructor"""
         super(BasicFcView, self).__init__(parent)
@@ -83,33 +82,27 @@ class BasicFcView(QTableWidget):
         # 初始化右键菜单
         self.initPopMenu()
 
-    # ----------------------------------------------------------------------
     def setHeaderDict(self, headerDict):
         """设置表头有序字典"""
         self.headerDict = headerDict
         self.headerList = headerDict.keys()
 
-    # ----------------------------------------------------------------------
     def setDataKey(self, dataKey):
         """设置数据字典的键"""
         self.dataKey = dataKey
 
-    # ----------------------------------------------------------------------
     def setEventType(self, eventType):
         """设置监控的事件类型"""
         self.eventType = eventType
 
-    # ----------------------------------------------------------------------
     def setFont(self, font):
         """设置字体"""
         self.font = font
 
-    # ----------------------------------------------------------------------
     def setSaveData(self, saveData):
         """设置是否要保存数据到单元格"""
         self.saveData = saveData
 
-    # ----------------------------------------------------------------------
     def initTable(self):
         """初始化表格"""
         # 设置表格的列数
@@ -135,19 +128,16 @@ class BasicFcView(QTableWidget):
         # 设置允许排序
         self.setSortingEnabled(self.sorting)
 
-    # ----------------------------------------------------------------------
-    def registerEvent(self):
-        """注册GUI更新相关的事件监听"""
-        self.signal.connect(self.updateEvent)
-        self.eventEngine.register(self.eventType, self.signal.emit)
+    # def registerEvent(self):
+    #     """注册GUI更新相关的事件监听"""
+    #     self.signal.connect(self.updateEvent)
+    #     self.eventEngine.register(self.eventType, self.signal.emit)
+    #
+    # def updateEvent(self, event):
+    #     """收到事件更新"""
+    #     data = event.value
+    #     self.updateData(data)
 
-    # ----------------------------------------------------------------------
-    def updateEvent(self, event):
-        """收到事件更新"""
-        data = event.value
-        self.updateData(data)
-
-    # ----------------------------------------------------------------------
     def updateData(self, data):
         """将数据更新到表格中"""
         # 如果允许了排序功能，则插入数据前必须关闭，否则插入新的数据会变乱
@@ -208,17 +198,22 @@ class BasicFcView(QTableWidget):
         if self.sorting:
             self.setSortingEnabled(True)
 
-    # ----------------------------------------------------------------------
+    def showInfo(self):
+        print('slotInformation called...')
+        QMessageBox.information(self, "Information", self.tr("输入成功!"))
+        self.close()
+
+    def showError(self):
+        QMessageBox.information(self, 'ValueError', self.tr('输入值有错误'))
+
     def resizeColumns(self):
         """调整各列的大小"""
         self.horizontalHeader().resizeSections(QHeaderView.ResizeToContents)
 
-    # ----------------------------------------------------------------------
     def setSorting(self, sorting):
         """设置是否允许根据表头排序"""
         self.sorting = sorting
 
-    # ----------------------------------------------------------------------
     def saveToCsv(self):
         """保存表格内容到CSV文件"""
         # 先隐藏右键菜单
@@ -252,7 +247,6 @@ class BasicFcView(QTableWidget):
         except IOError as e:
             pass
 
-    # ----------------------------------------------------------------------
     def initPopMenu(self):
         """初始化右键菜单"""
         pass
@@ -263,7 +257,6 @@ class BasicFcView(QTableWidget):
 
         self.menu.addAction(saveAction)
 
-    # ----------------------------------------------------------------------
     def contextMenuEvent(self, event):
         """右键点击事件"""
         self.menu.popup(QCursor.pos())
@@ -273,7 +266,6 @@ class BasicFcView(QTableWidget):
 class BasicCell(QTableWidgetItem):
     """基础的单元格"""
 
-    # ----------------------------------------------------------------------
     def __init__(self, text=None, mainEngine=None):
         """Constructor"""
         super(BasicCell, self).__init__()
@@ -281,7 +273,6 @@ class BasicCell(QTableWidgetItem):
         # if text:
         self.setContent(text)
 
-    # ----------------------------------------------------------------------
     def setContent(self, text):
         """设置内容"""
         if text == '0' or text == '0.0' or text is None:
@@ -295,7 +286,6 @@ class BasicCell(QTableWidgetItem):
 class NumCell(QTableWidgetItem):
     """用来显示数字的单元格"""
 
-    # ----------------------------------------------------------------------
     def __init__(self, text=None, mainEngine=None):
         """Constructor"""
         super(NumCell, self).__init__()
@@ -303,12 +293,10 @@ class NumCell(QTableWidgetItem):
         if text:
             self.setContent(text)
 
-    # ----------------------------------------------------------------------
     def setContent(self, text):
         """设置内容"""
         try:
-            num = int(text)
-            self.setData(Qt.DisplayRole, num)
+            self.setData(Qt.DisplayRole, outputmoney(text))
         except ValueError:
             self.setText(text)
 

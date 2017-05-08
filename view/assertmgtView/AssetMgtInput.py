@@ -2,16 +2,18 @@
 import datetime
 import re
 
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtWidgets import QComboBox
+from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QHBoxLayout
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
-from BasicWidget import BASIC_FONT, BasicFcView
-from MainEngine import MainEngine
+from controller.EventEngine import Event
+from controller.EventType import EVENT_AM, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION, EVENT_AM_INPUT
+from controller.MainEngine import MainEngine
+from view.BasicWidget import BASIC_FONT, BasicFcView
+
 
 class AssetMgtInput(BasicFcView):
     """资管项目输入"""
@@ -24,7 +26,7 @@ class AssetMgtInput(BasicFcView):
         self.mainEngine = mainEngine
         self.eventEngine = eventEngine
 
-        # self.setHeaderDict(d)
+        self.setEventType(EVENT_AM_INPUT)
 
         self.initUi()
 
@@ -36,8 +38,6 @@ class AssetMgtInput(BasicFcView):
         self.setFont(BASIC_FONT)
         # self.initTable()
         self.initInput()
-        # self.prepareData()
-        # self.addMenuAction()
 
     # ----------------------------------------------------------------------
     def initInput(self):
@@ -58,17 +58,17 @@ class AssetMgtInput(BasicFcView):
         am_manage_days_Label = QLabel("全年计息天数")
 
         self.am_name_Edit = QLineEdit("借款方")
-        self.am_trade_amount_Edit = QLineEdit("0.003")
-        self.am_ret_rate_Edit = QLineEdit("0.00")
-        self.am_rate_days_Edit = QLineEdit("0.00")
+        self.am_trade_amount_Edit = QLineEdit("300000")
+        self.am_ret_rate_Edit = QLineEdit("0.009")
+        self.am_rate_days_Edit = QLineEdit("360")
 
         self.am_start_date_Edit = QLineEdit("2017-02-12")
         self.am_end_date_Edit = QLineEdit("2017-05-12")
 
         self.am_bank_fee_rate_Edit = QLineEdit("0.003")
-        self.am_bank_days_Edit = QLineEdit("0.00")
+        self.am_bank_days_Edit = QLineEdit("360")
         self.am_manage_fee_rate_Edit = QLineEdit("0.005")
-        self.am_manage_days_Edit = QLineEdit("0.00")
+        self.am_manage_days_Edit = QLineEdit("360")
 
         okButton = QPushButton("新增借款")
         cancelButton = QPushButton("取消")
@@ -113,20 +113,22 @@ class AssetMgtInput(BasicFcView):
     # ----------------------------------------------------------------------
     def addData(self):
         """增加数据"""
-        am_name = str(self.am_name_Edit)
-        am_trade_amount = str(self.am_trade_amount_Edit)
-        am_ret_rate = str(self.am_ret_rate_Edit)
-        am_rate_days = str(self.am_rate_days_Edit)
-        am_start_date = str(self.am_start_date_Edit)
-        am_end_date = str(self.am_end_date_Edit)
-        am_bank_fee = str(self.am_bank_fee_rate_Edit)
-        am_bank_days = str(self.am_bank_days_Edit)
-        am_manage_fee_rate = str(self.am_manage_fee_rate_Edit)
-        am_manage_days = str(self.am_manage_days_Edit)
+        am_name = str(self.am_name_Edit.text())
+        am_trade_amount = str(self.am_trade_amount_Edit.text())
+        am_ret_rate = str(self.am_ret_rate_Edit.text())
+        am_rate_days = str(self.am_rate_days_Edit.text())
+        am_start_date = str(self.am_start_date_Edit.text())
+        am_end_date = str(self.am_end_date_Edit.text())
+        am_bank_fee = str(self.am_bank_fee_rate_Edit.text())
+        am_bank_days = str(self.am_bank_days_Edit.text())
+        am_manage_fee_rate = str(self.am_manage_fee_rate_Edit.text())
+        am_manage_days = str(self.am_manage_days_Edit.text())
         """向数据库增加数据"""
 
-        start_date_str = str(self.am_start_date.text()).split('-')
-        end_date_str = str(self.am_end_date.text()).split('-')
+        start_date_str = am_start_date.split('-')
+        end_date_str = am_end_date.split('-')
+
+        # print(start_date_str[0], end_date_str[0])
 
         d = datetime.date.today()
         if start_date_str is None or end_date_str is None:
@@ -139,20 +141,27 @@ class AssetMgtInput(BasicFcView):
             end_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", end_date_str[0])),
                                      int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", end_date_str[1])),
                                      int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", end_date_str[2])))
+        try:
+            self.mainEngine.add_management_class(am_name, float(am_trade_amount), float(am_ret_rate), float(am_rate_days), start_date, end_date,
+                                             float(am_bank_fee), float(am_bank_days), float(am_manage_fee_rate), float(am_manage_days))
+        except ValueError:
+            self.showError()
+            return
 
-        self.mainEngine.add_management_class(am_name, am_trade_amount, am_ret_rate, am_rate_days, start_date, end_date,
-                                             am_bank_fee, am_bank_days, am_manage_fee_rate, am_manage_days)
+        # 加入数据后，更新列表显示
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_AM))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_FEE))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
+        # self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_ASSERT_DETAIL))
 
-    def prepareData(self):
-        result = MfProject.listAll()
-        print('prepareData running.....')
-        for mf in result:
-            print(mf.mf_project_name)
-            self.mf_ComboBox.addItem(mf.mf_project_name)
+        self.showInfo()
 
-            self.mf_ComboBox_list.append(mf.uuid)
-            print(str(mf.uuid) + ',' + str(mf.mf_project_name))
-
+    # 输入成功提示框
+    def showInfo(self):
+        print('slotInformation called...')
+        QMessageBox.information(self, "Information",
+                                self.tr("输入成功!"))
+        self.close()
 
 if __name__ == "__main__":
     import sys

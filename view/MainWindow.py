@@ -2,42 +2,36 @@
 from collections import OrderedDict
 
 import datetime
-from PyQt5 import QtCore
-from asyncio import Event
 
-import psutil as psutil
+from PyQt5 import QtCore
+
 from PyQt5.QtCore import QSettings
-from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QAction, QApplication
 from PyQt5.QtWidgets import QDockWidget
-from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
-import EventType
-from BasicWidget import BasicCell, BasicFcView, BASIC_FONT
-from MainEngine import MainEngine
-from assertmgtView.AdjustValuationView import AdjustValuationView
-from assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
-from assertmgtView.AssetMgtInput import AssetMgtInput
-from assertmgtView.AssetMgtMain import AssetMgtListView
-from cashView.CashInput import CashInput
-from cashView.CashMain import CashListView
-from miscView.AboutMain import AboutWidget
-from miscView.ErrorMain import ErrorWidget
-from moneyfundView.MfCateInput import MfCateInput
-from moneyfundView.MoneyFundInput import MoneyFundInput
-from moneyfundView.MoneyFundMain import MoneyFundMain
-from protocolView.PdCateInput import PdCateInput
-from protocolView.ProtocolInput import ProtocolInput
-from protocolView.ProtocolMain import ProtocolListView
+from controller import EventType
+from view.BasicWidget import BasicCell, BasicFcView, BASIC_FONT, NumCell
+from controller.MainEngine import MainEngine
+from view.assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
+from view.assertmgtView.AssetMgtInput import AssetMgtInput
+from view.assertmgtView.AssetMgtMain import AssetMgtListView
+from view.cashView.CashInput import CashInput
+from view.cashView.CashMain import CashListView
+from view.miscView.AboutMain import AboutWidget
+from view.miscView.ErrorMain import ErrorWidget
+from view.moneyfundView.MfCateInput import MfCateInput
+from view.moneyfundView.MoneyFundInput import MoneyFundInput
+from view.moneyfundView.MoneyFundMain import MoneyFundMain
+from view.protocolView.PdCateInput import PdCateInput
+from view.protocolView.ProtocolInput import ProtocolInput
+from view.protocolView.ProtocolMain import ProtocolListView
 
 
 class MainWindow(QMainWindow, BasicFcView):
     """主窗口"""
-    signalStatusBar = pyqtSignal(type(Event()))
 
-    # ----------------------------------------------------------------------
     def __init__(self, mainEngine, eventEngine):
         """Constructor"""
         super(MainWindow, self).__init__()
@@ -50,15 +44,12 @@ class MainWindow(QMainWindow, BasicFcView):
         self.initUi()
         self.loadWindowSettings('custom')
 
-    # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('feeCalc')
         self.initCentral()
         self.initTopMenu()
-        self.initStatusBar()
 
-    # ----------------------------------------------------------------------
     def initCentral(self):
         """总估值与费用"""
 
@@ -71,10 +62,8 @@ class MainWindow(QMainWindow, BasicFcView):
 
         # dockMainView.raise_()
 
-    # ----------------------------------------------------------------------
     def initTopMenu(self):
         """初始化菜单"""
-        # 创建菜单
         menubar = self.menuBar()
 
         # 设计为只显示存在的接口
@@ -112,37 +101,6 @@ class MainWindow(QMainWindow, BasicFcView):
         helpMenu = menubar.addMenu('帮助')
         helpMenu.addAction(self.createAction('关于', self.openAbout))
 
-    # ----------------------------------------------------------------------
-    def initStatusBar(self):
-        """初始化状态栏"""
-        self.statusLabel = QLabel()
-        self.statusLabel.setAlignment(QtCore.Qt.AlignLeft)
-
-        self.statusBar().addPermanentWidget(self.statusLabel)
-        self.statusLabel.setText(self.getCpuMemory())
-
-        self.sbCount = 0
-        self.sbTrigger = 10  # 10秒刷新一次
-        self.signalStatusBar.connect(self.updateStatusBar)
-        # self.eventEngine.register(EVENT_TIMER, self.signalStatusBar.emit)
-
-    # ----------------------------------------------------------------------
-    def updateStatusBar(self, event):
-        """在状态栏更新CPU和内存信息"""
-        self.sbCount += 1
-
-        if self.sbCount == self.sbTrigger:
-            self.sbCount = 0
-            self.statusLabel.setText(self.getCpuMemory())
-
-    # ----------------------------------------------------------------------
-    def getCpuMemory(self):
-        """获取CPU和内存状态信息"""
-        cpuPercent = psutil.cpu_percent()
-        memoryPercent = psutil.virtual_memory().percent
-        return u'CPU使用率：%d%%   内存使用率：%d%%' % (cpuPercent, memoryPercent)
-
-    # ----------------------------------------------------------------------
     def openAbout(self):
         """打开关于"""
         try:
@@ -150,8 +108,6 @@ class MainWindow(QMainWindow, BasicFcView):
         except KeyError:
             self.widgetDict['aboutW'] = AboutWidget(self)
             self.widgetDict['aboutW'].show()
-
-    # ----------------------------------------------------------------------
 
     def openCashListDetail(self):
         """打开现金明细"""
@@ -261,7 +217,6 @@ class MainWindow(QMainWindow, BasicFcView):
             self.widgetDict['openOutAssetMgtData'] = ErrorWidget(self)
             self.widgetDict['openOutAssetMgtData'].show()
 
-    # ----------------------------------------------------------------------
     def openOutCashData(self):
         """打开现金导出"""
         try:
@@ -270,9 +225,6 @@ class MainWindow(QMainWindow, BasicFcView):
             self.widgetDict['OutCashData'] = ErrorWidget(self)
             self.widgetDict['OutCashData'].show()
 
-    # ----------------------------------------------------------------------
-
-    # ----------------------------------------------------------------------
     def createAction(self, actionName, function):
         """创建操作功能"""
         action = QAction(actionName, self)
@@ -303,7 +255,6 @@ class MainWindow(QMainWindow, BasicFcView):
         self.addDockWidget(widgetArea, dock)
         return widget, dock
 
-    # ----------------------------------------------------------------------
     def loadWindowSettings(self, settingName):
         """载入窗口设置"""
         settings = QSettings('vn.trader', settingName)
@@ -313,12 +264,10 @@ class MainWindow(QMainWindow, BasicFcView):
         except AttributeError:
             pass
 
-    # ----------------------------------------------------------------------
     def restoreWindow(self):
         """还原默认窗口设置（还原停靠组件位置）"""
         self.loadWindowSettings('default')
         self.showMaximized()
-        ########################################################################
 
 
 class DateMainView(BasicFcView):
@@ -329,7 +278,6 @@ class DateMainView(BasicFcView):
         super(DateMainView, self).__init__(mainEngine, eventEngine, parant)
         # 设置表头有序字典
         d = OrderedDict()
-        d['date'] = {'chinese': '填表日', 'cellType': BasicCell}
         d['total_assert'] = {'chinese': '计算日', 'cellType': BasicCell}
         d['cash'] = {'chinese': '今日资金成本', 'cellType': BasicCell}
 
@@ -349,15 +297,19 @@ class DateMainView(BasicFcView):
         self.initUI()
 
         # 注册事件监听
-        self.registerEvent()
+        # self.registerEvent()
 
     def initUI(self):
         # 初始化表格
         self.initTable()
         self.refresh()
 
+        self.signal.connect(self.refresh)
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
+
     def refresh(self):
         self.initData()
+        print('DateMainView called...')
 
     def initData(self):
         """初始化数据"""
@@ -365,17 +317,7 @@ class DateMainView(BasicFcView):
         self.setRowCount(1)
         row = 0
         self.setItem(0, 0, BasicCell(result[0]))
-        self.setItem(0, 1, BasicCell(result[1]))
-        self.setItem(0, 2, BasicCell(result[2]))
-        # for r in result:
-        #     # 按照定义的表头，进行数据填充
-        #     for n, header in enumerate(self.headerList):
-        #         content = r[n]
-        #         cellType = self.headerDict[header]['cellType']
-        #         cell = cellType(content)
-        #         print(cell.text())
-        #         self.setItem(row, n, cell)
-        #     row = row + 1
+        self.setItem(0, 1, NumCell(result[1]))
 
 
 class FeeTotalView(BasicFcView):
@@ -387,10 +329,10 @@ class FeeTotalView(BasicFcView):
         # 设置表头有序字典
         d = OrderedDict()
         d['date'] = {'chinese': '--', 'cellType': BasicCell}
-        d['fee_1'] = {'chinese': '费用1', 'cellType': BasicCell}
-        d['fee_2'] = {'chinese': '费用2', 'cellType': BasicCell}
-        d['fee_3'] = {'chinese': '费用3', 'cellType': BasicCell}
-        d['fee_4'] = {'chinese': '超额费用', 'cellType': BasicCell}
+        d['fee1'] = {'chinese': '费用1', 'cellType': BasicCell}
+        d['fee2'] = {'chinese': '费用2', 'cellType': BasicCell}
+        d['fee3'] = {'chinese': '费用3', 'cellType': BasicCell}
+        d['fee4'] = {'chinese': '超额费用', 'cellType': BasicCell}
 
         self.setHeaderDict(d)
         # 设置数据键
@@ -408,16 +350,20 @@ class FeeTotalView(BasicFcView):
         self.initUI()
 
         # 注册事件监听
-        self.registerEvent()
+        # self.registerEvent()
 
     def initUI(self):
         # 初始化表格
         self.initTable()
         self.refresh()
 
+        self.signal.connect(self.refresh)
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
+
     def refresh(self):
         self.initData()
-        # pass
+
+        print('FeeTotalView called...')
 
     def initData(self):
         """初始化数据"""
@@ -436,17 +382,23 @@ class FeeTotalView(BasicFcView):
             self.setItem(1, c, BasicCell(d))
             c += 1
         date = datetime.date(2017, 3, 10)
-        todayFee = self.mainEngine.getTodayFee(date)
+        # todayFee = self.mainEngine.getTodayFee(date)
+
+        todayFee = self.mainEngine.get_today_fees()
+        today_fee_list = list()
+        today_fee_list.append(todayFee['fee1'])
+        today_fee_list.append(todayFee['fee2'])
+        today_fee_list.append(todayFee['fee3'])
+        today_fee_list.append(todayFee['fee4'])
         c = 1
-        for tf in todayFee:
-            self.setItem(2, c, BasicCell(tf))
+        for tf in today_fee_list:
+            self.setItem(2, c, NumCell(tf))
             c += 1
 
 
 class AssertTotalView(BasicFcView):
     """主界面"""
 
-    # ----------------------------------------------------------------------
     def __init__(self, mainEngine, eventEngine, parent=None):
         """Constructor"""
         super(AssertTotalView, self).__init__(mainEngine, eventEngine, parent)
@@ -457,12 +409,12 @@ class AssertTotalView(BasicFcView):
         d['total_assert'] = {'chinese': '--', 'cellType': BasicCell}
         d['cash'] = {'chinese': '--', 'cellType': BasicCell}
         d['money_fund'] = {'chinese': '比例', 'cellType': BasicCell}
-        d['assert_mgt'] = {'chinese': '净值/价格', 'cellType': BasicCell}
+        d['assert_mgt'] = {'chinese': '净值/价格', 'cellType': NumCell}
         d['liquid_assert_ratio'] = {'chinese': '份额', 'cellType': BasicCell}
-        d['today_total_revenue'] = {'chinese': '金额', 'cellType': BasicCell}
-        d['fee_1'] = {'chinese': '本金', 'cellType': BasicCell}
-        d['fee_2'] = {'chinese': '累计收益', 'cellType': BasicCell}
-        d['fee_3'] = {'chinese': '今日收益', 'cellType': BasicCell}
+        d['today_total_revenue'] = {'chinese': '金额', 'cellType': NumCell}
+        d['fee_1'] = {'chinese': '本金', 'cellType': NumCell}
+        d['fee_2'] = {'chinese': '累计收益', 'cellType': NumCell}
+        d['fee_3'] = {'chinese': '今日收益', 'cellType': NumCell}
 
         self.setHeaderDict(d)
         # 设置数据键
@@ -481,7 +433,7 @@ class AssertTotalView(BasicFcView):
         self.initTable()
 
         # 注册事件监听
-        self.registerEvent()
+        # self.registerEvent()
 
 
 class TotalValuationView(BasicFcView):
@@ -493,17 +445,17 @@ class TotalValuationView(BasicFcView):
         # 设置表头有序字典
         d = OrderedDict()
         d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
-        d['all_value'] = {'chinese': '总资产净值', 'cellType': BasicCell}
-        d['cash'] = {'chinese': '现金', 'cellType': BasicCell}
-        d['agreement'] = {'chinese': '协存', 'cellType': BasicCell}
-        d['fund'] = {'chinese': '货币基金', 'cellType': BasicCell}
-        d['management'] = {'chinese': '资管', 'cellType': BasicCell}
+        d['all_value'] = {'chinese': '总资产净值', 'cellType': NumCell}
+        d['cash'] = {'chinese': '现金', 'cellType': NumCell}
+        d['agreement'] = {'chinese': '协存', 'cellType': NumCell}
+        d['fund'] = {'chinese': '货币基金', 'cellType': NumCell}
+        d['management'] = {'chinese': '资管', 'cellType': NumCell}
         # d['liquid_assert_ratio'] = {'chinese': '流动资产比例', 'cellType': BasicCell}
-        d['all_ret'] = {'chinese': '当日总收益', 'cellType': BasicCell}
-        d['fee1'] = {'chinese': '费用1', 'cellType': BasicCell}
-        d['fee2'] = {'chinese': '费用2', 'cellType': BasicCell}
-        d['fee3'] = {'chinese': '费用3', 'cellType': BasicCell}
-        # d['fee_4'] = {'chinese': '费用4', 'cellType': BasicCell}
+        d['all_ret'] = {'chinese': '当日总收益', 'cellType': NumCell}
+        d['fee1'] = {'chinese': '费用1', 'cellType': NumCell}
+        d['fee2'] = {'chinese': '费用2', 'cellType': NumCell}
+        d['fee3'] = {'chinese': '费用3', 'cellType': NumCell}
+        d['fee4'] = {'chinese': '费用4', 'cellType': NumCell}
         # d['today_product_revenue'] = {'chinese': '当日产品收益', 'cellType': BasicCell}
         # d['fee_accual'] = {'chinese': '费用计提', 'cellType': BasicCell}
 
@@ -518,7 +470,7 @@ class TotalValuationView(BasicFcView):
 
         self.initUI()
 
-        self.registerEvent()
+        # self.registerEvent()
 
     def initUI(self):
         # 初始化表格
@@ -526,9 +478,12 @@ class TotalValuationView(BasicFcView):
         self.refresh()
         self.addPopAction()
 
+        self.signal.connect(self.refresh)
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
+
     def refresh(self):
         self.initData()
-        # pass
+        print('TotalValuationView called...')
 
     def addPopAction(self):
         """增加右键菜单内容"""
@@ -540,7 +495,7 @@ class TotalValuationView(BasicFcView):
     def initData(self):
         """初始化数据"""
         result = self.mainEngine.get_total_evaluate_detail(7)
-
+        # print(result)
         self.setRowCount(len(result))
         row = 0
         for r in result:
@@ -558,8 +513,9 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    mflv = TotalValuationView(mainEngine, mainEngine.eventEngine)
+    mw = MainWindow(mainEngine, mainEngine.eventEngine)
+    # mflv = TotalValuationView(mainEngine, mainEngine.eventEngine)
     # mainfdv = MoneyFundSummaryView(mainEngine)
-    mflv.showMaximized()
+    mw.showMaximized()
     # mainfdv.showMaximized()
     sys.exit(app.exec_())

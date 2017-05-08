@@ -4,15 +4,14 @@ from collections import OrderedDict
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QApplication
 
-from BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
-from EventType import EVENT_PD
-from MainEngine import MainEngine
+from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
+from controller.EventType import EVENT_PD
+from controller.MainEngine import MainEngine
 
 
 class ProtocolListView(BasicFcView):
     """协存详情"""
 
-    # ----------------------------------------------------------------------
     def __init__(self, mainEngine, parent=None):
         """Constructor"""
         super(ProtocolListView, self).__init__(parent=parent)
@@ -26,13 +25,13 @@ class ProtocolListView(BasicFcView):
         d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
 
         # 协存项目
-        d['total_amount'] = {'chinese': '总额', 'cellType': BasicCell}
-        d['asset_ret'] = {'chinese': '协存本金', 'cellType': BasicCell}
+        d['total_amount'] = {'chinese': '总额', 'cellType': NumCell}
+        d['asset_ret'] = {'chinese': '协存本金', 'cellType': NumCell}
         # d['pd_interest'] = {'chinese': '协存利息', 'cellType': BasicCell}
         # 协存项目 输入项
-        d['ret_carry_principal'] = {'chinese': '利息转结本金', 'cellType': BasicCell}
-        d['cash_to_agreement'] = {'chinese': '现金->协存', 'cellType': BasicCell}
-        d['agreement_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
+        d['ret_carry_principal'] = {'chinese': '利息转结本金', 'cellType': NumCell}
+        d['cash_to_agreement'] = {'chinese': '现金->协存', 'cellType': NumCell}
+        d['agreement_to_cash'] = {'chinese': '协存->现金', 'cellType': NumCell}
 
         self.setHeaderDict(d)
 
@@ -40,7 +39,6 @@ class ProtocolListView(BasicFcView):
 
         self.initUi()
 
-    # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('协存明细')
@@ -49,38 +47,42 @@ class ProtocolListView(BasicFcView):
         self.initTable()
         self.addMenuAction()
 
-    # ----------------------------------------------------------------------
+        self.signal.connect(self.refresh)
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
+
     def showProtocolListDetail(self):
         """显示所有合约数据"""
         result = self.mainEngine.get_agreement_detail_by_days()
-        print(result)
-        self.setRowCount(len(result))
+        # print(result)
+        count = 0
+        for d in result:
+            for v in d.values():
+                count = count + len(v)
+        self.setRowCount(count)
         row = 0
+        # 遍历资产类型
         for r in result:
-            # 按照定义的表头，进行数据填充
-            for n, header in enumerate(self.headerList):
-                # name, rate = r.getPdProjectInfo()
-                for col in r.values():
-                    content = col[0][header]
-                # content = r.values()[0][header]
+            # 遍历对应资产的记录
+            for col in r.values():
+                for c in col:
+                    # print(c)
+                    # 按照定义的表头，进行数据填充
+                    for n, header in enumerate(self.headerList):
+                        content = c[header]
+                        cell = self.headerDict[header]['cellType'](content)
+                        # print(row,n,content)
+                        self.setItem(row, n, cell)
 
-                if isinstance(content, float):
-                    content = float('%.4f' % content)
-                cellType = self.headerDict[header]['cellType']
-                cell = cellType(content)
-                self.setItem(row, n, cell)
+                    row = row + 1
 
-            row = row + 1
-
-    # ----------------------------------------------------------------------
     def refresh(self):
         """刷新"""
         self.menu.close()  # 关闭菜单
         self.clearContents()
         self.setRowCount(0)
         self.showProtocolListDetail()
+        print('pd refresh called ....')
 
-    # ----------------------------------------------------------------------
     def addMenuAction(self):
         """增加右键菜单内容"""
         refreshAction = QAction('刷新', self)
@@ -88,7 +90,6 @@ class ProtocolListView(BasicFcView):
 
         self.menu.addAction(refreshAction)
 
-    # ----------------------------------------------------------------------
     def show(self):
         """显示"""
         super(ProtocolListView, self).show()

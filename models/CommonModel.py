@@ -10,11 +10,10 @@ from sqlalchemy import create_engine, Date, String, Boolean, Column, Float
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import sessionmaker, relationship
 
-from fcConstant import SQLALCHEMY_DATABASE_URI
 from utils import StaticValue as SV
 
-engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=False)
-# engine = create_engine('mysql+mysqldb://root:Passw0rd@127.0.0.1:3306/fec', echo=False)
+engine = create_engine(SV.SQLALCHEMY_DATABASE_URI, echo=False)
+print(SV.SQLALCHEMY_DATABASE_URI)
 Base = declarative_base()
 Session = sessionmaker(bind=engine, autoflush=True, autocommit=False)
 

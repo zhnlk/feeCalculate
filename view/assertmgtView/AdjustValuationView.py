@@ -8,9 +8,9 @@ from collections import OrderedDict
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QApplication
 
-from BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
-from EventType import EVENT_PD
-from MainEngine import MainEngine
+from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
+from controller.EventType import EVENT_PD, EVENT_AM_ADJUST
+from controller.MainEngine import MainEngine
 
 
 class AdjustValuationView(BasicFcView):
@@ -25,15 +25,15 @@ class AdjustValuationView(BasicFcView):
 
         d = OrderedDict()
         d['pd_project_name'] = {'chinese': '调整日期', 'cellType': BasicCell}
-        d['pd_project_rate'] = {'chinese': '转账费用', 'cellType': BasicCell}
+        d['pd_project_rate'] = {'chinese': '转账费用', 'cellType': NumCell}
 
-        d['date'] = {'chinese': '支票费用', 'cellType': BasicCell}
-        d['total_to_cash'] = {'chinese': '总调整费用', 'cellType': BasicCell}
-        d['pd_pd_to_cash'] = {'chinese': '调整结果', 'cellType': BasicCell}
+        d['date'] = {'chinese': '支票费用', 'cellType': NumCell}
+        d['total_to_cash'] = {'chinese': '总调整费用', 'cellType': NumCell}
+        d['pd_pd_to_cash'] = {'chinese': '调整结果', 'cellType': NumCell}
 
         self.setHeaderDict(d)
 
-        self.setEventType(EVENT_PD)
+        self.setEventType(EVENT_AM_ADJUST)
 
         self.initUi()
 
@@ -46,6 +46,9 @@ class AdjustValuationView(BasicFcView):
         self.initTable()
         self.verticalHeader().setVisible(True)
         self.addMenuAction()
+
+        self.signal.connect(self.refresh())
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
 
     # ----------------------------------------------------------------------
     def showProtocolListDetail(self):
@@ -68,7 +71,7 @@ class AdjustValuationView(BasicFcView):
                     content = float('%.2f' % content)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
-                print(cell.text())
+                # print(cell.text())
                 # if self.font:
                 #     cell.setFont(self.font)  # 如果设置了特殊字体，则进行单元格设置
 
@@ -108,4 +111,3 @@ if __name__ == '__main__':
 
     plv.show()
     sys.exit(app.exec_())
-

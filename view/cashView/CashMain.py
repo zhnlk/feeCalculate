@@ -5,15 +5,13 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QApplication
 
-from BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
-from EventEngine import Event
-from EventType import EVENT_CASH
-from MainEngine import MainEngine
+from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
+from controller.EventType import EVENT_CASH
+from controller.MainEngine import MainEngine
 
 
 class CashListView(BasicFcView):
     """现金详情"""
-
     def __init__(self, mainEngine, parent=None):
         """Constructor"""
         super(CashListView, self).__init__(parent=parent)
@@ -22,17 +20,17 @@ class CashListView(BasicFcView):
 
         d = OrderedDict()
         d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
-        d['total_amount'] = {'chinese': '现金总额', 'cellType': BasicCell}
-        d['cash_to_management'] = {'chinese': '现金->资管', 'cellType': BasicCell}
-        d['cash_to_fund'] = {'chinese': '现金->货基', 'cellType': BasicCell}
-        d['cash_to_agreement'] = {'chinese': '现金->协存', 'cellType': BasicCell}
-        d['cash_to_investor'] = {'chinese': '现金->兑付投资人', 'cellType': BasicCell}
-        d['management_to_cash'] = {'chinese': '资管->现金', 'cellType': BasicCell}
-        d['fund_to_cash'] = {'chinese': '货基->现金', 'cellType': BasicCell}
-        d['agreement_to_cash'] = {'chinese': '协存->现金', 'cellType': BasicCell}
-        d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': BasicCell}
-        d['cash_return'] = {'chinese': '现金收入', 'cellType': BasicCell}
-        d['cash_draw_fee'] = {'chinese': '提取费用', 'cellType': BasicCell}
+        d['total_amount'] = {'chinese': '现金总额', 'cellType': NumCell}
+        d['cash_to_management'] = {'chinese': '现金->资管', 'cellType': NumCell}
+        d['cash_to_fund'] = {'chinese': '现金->货基', 'cellType': NumCell}
+        d['cash_to_agreement'] = {'chinese': '现金->协存', 'cellType': NumCell}
+        d['cash_to_investor'] = {'chinese': '现金->兑付投资人', 'cellType': NumCell}
+        d['management_to_cash'] = {'chinese': '资管->现金', 'cellType': NumCell}
+        d['fund_to_cash'] = {'chinese': '货基->现金', 'cellType': NumCell}
+        d['agreement_to_cash'] = {'chinese': '协存->现金', 'cellType': NumCell}
+        d['investor_to_cash'] = {'chinese': '投资人->现金', 'cellType': NumCell}
+        d['cash_return'] = {'chinese': '现金收入', 'cellType': NumCell}
+        d['cash_draw_fee'] = {'chinese': '提取费用', 'cellType': NumCell}
 
         self.setEventType(EVENT_CASH)
 
@@ -48,14 +46,13 @@ class CashListView(BasicFcView):
         self.setWindowTitle('现金明细')
         self.setMinimumSize(1300, 600)
 
-        # 将信号连接到refresh函数
-        self.signal.connect(self.refresh)
-        self.mainEngine.eventEngine.register(EVENT_CASH, self.signal.emit)
-        # self.resizeColumnsToContents()
-
         self.setFont(BASIC_FONT)
         self.initTable()
         self.addMenuAction()
+
+        # 将信号连接到refresh函数
+        self.signal.connect(self.refresh)
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
 
     # ----------------------------------------------------------------------
     def showCashListDetail(self):
@@ -63,29 +60,27 @@ class CashListView(BasicFcView):
 
         result = self.mainEngine.get_cash_detail_by_days(7)
 
-        print(result)
+        # print(result)
         self.setRowCount(len(result))
         row = 0
         for r in result:
             # 按照定义的表头，进行填充数据
             for n, header in enumerate(self.headerList):
                 content = r[header]
-                print(content)
+                # print(content)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
                 self.setItem(row, n, cell)
 
             row = row + 1
 
-    # ----------------------------------------------------------------------
     def refresh(self):
         """刷新"""
         self.menu.close()  # 关闭菜单
-        # self.clearContents()
-        # self.setRowCount(0)
+        self.clearContents()
+        self.setRowCount(0)
         self.showCashListDetail()
 
-    # ----------------------------------------------------------------------
     def addMenuAction(self):
         """增加右键菜单内容"""
         refreshAction = QAction('刷新', self)
@@ -93,11 +88,9 @@ class CashListView(BasicFcView):
 
         self.menu.addAction(refreshAction)
 
-    # ----------------------------------------------------------------------
     def show(self):
         """显示"""
         super(CashListView, self).show()
-
         self.refresh()
 
 
