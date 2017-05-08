@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
-import AssetService
+from services import AssetService
 from controller.EventEngine import Event
 from controller.EventType import EVENT_AM_ADJUST, EVENT_AM, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION
 from view.BasicWidget import BASIC_FONT, BasicFcView
