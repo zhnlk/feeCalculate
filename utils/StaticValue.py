@@ -84,6 +84,8 @@ ASSET_KEY_ALL_EVALUATE_MANAGEMENT = 'management'
 ASSET_KEY_ALL_EVALUATE_RET = 'all_ret'
 ASSET_KEY_ALL_VALUE = 'all_value'
 ASSET_KEY_ALL_CURRENT_RATE = 'curr_rate'
+ASSET_KEY_FEE_AMOUNT = 'fee_amount'
+ASSET_KEY_FEE_TYPE = 'fee_type'
 
 # 收益变化类型
 RET_TYPE_INTEREST = 1
@@ -112,7 +114,6 @@ RET_CARRY_TO_PRINCIPAL = 1
 
 SESSION_KEY = 'session'
 
-
 EMPTY_STRING = ''
 EMPTY_UNICODE = ''
 EMPTY_INT = 0
@@ -124,10 +125,12 @@ EMPTY_FLOAT = 0.0
 ICON_FILENAME = 'zhnlk.ico'
 DB_FILENAME = 'data-beta.db'
 
+
 def resource_path(relative):
     if hasattr(sys, "_MEIPASS"):
         return os.path.join(sys._MEIPASS, relative)
     return os.path.join(relative)
+
 
 path = os.path.dirname(__file__)
 ICON_FILENAME = resource_path(os.path.join(path, ICON_FILENAME))
