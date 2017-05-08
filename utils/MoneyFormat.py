@@ -24,7 +24,7 @@ def outputdollars(number):
     :return: 
     """
     if len(str(number)) <= 3:
-        return '0' if number == '' else number
+        return '0' if number == '' else str(number)
     else:
         mod = len(str(number)) % 3
         output = '' if mod == 0 else str(number)[0:mod]
@@ -33,7 +33,7 @@ def outputdollars(number):
                 output += str(number)[mod + 3 * i: mod + 3 * i + 3]
             else:
                 output += ',' + str(number)[mod + 3 * i:mod + 3 * i + 3]
-        return output
+        return str(output)
 
 def outputcents(amount):
     """
