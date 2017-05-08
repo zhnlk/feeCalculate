@@ -15,7 +15,8 @@ from services.CommonService import (
     get_asset_ret_last_total_amount_by_asset_and_type,
     add_asset_fee_with_asset_and_type,
     query_by_id, save, get_management_asset_all_ret, get_management_trade_amount, get_management_trade_fees,
-    get_all_mamangement_ids, get_all_asset_ids_by_type, get_expiry_management, get_start_and_expiry_management)
+    get_all_mamangement_ids, get_all_asset_ids_by_type, get_expiry_management, get_start_and_expiry_management,
+    get_management_fees_by_id)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
 from utils.Utils import timer
@@ -660,12 +661,15 @@ def draw_manangent_ret(cal_date=date.today()):
                                               ret_type=SV.RET_TYPE_CASH_ONE_TIME, cal_date=cal_date)
 
 
-# def get_management_fee_by_id(cal_date=date.today(), asset_id=''):
-#     asset_fees = get_management_fees_by_id(cal_date=cal_date, asset_id=asset_id)
-#
-#     ret = list()
-#     for asset_fee in asset_fees:
-#         ret.append({ass})
+def get_management_fee_by_id(cal_date=date.today(), asset_id=''):
+    asset_fees = get_management_fees_by_id(cal_date=cal_date, asset_id=asset_id)
+
+    ret = list()
+    for asset_fee in asset_fees:
+        ret.append({SV.ASSET_KEY_CAL_DATE: asset_fee.date, SV.ASSET_KEY_FEE_AMOUNT: asset_fee.amount,
+                    SV.ASSET_KEY_FEE_TYPE: asset_fee.type, SV.ASSET_KEY_ASSET_ID: asset_fee.asset_class})
+
+    return ret
 
 
 ################################################################

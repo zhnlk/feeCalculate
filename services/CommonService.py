@@ -567,8 +567,10 @@ def get_total_evaluate_detail(days=0):
         ret.append(get_total_evaluate_detail_by_date(cal_date=date.today()))
     return ret
 
+
 def get_today_fees():
     return get_total_evaluate_detail_by_date(cal_date=date.today())
+
 
 @session_deco
 def get_daily_fee_last_total_amount_by_date(cal_date=date.today(), **kwargs):
