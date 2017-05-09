@@ -56,7 +56,7 @@ def add_agreement_class(name=None, rate=0.03, threshold_amount=0, threshold_rate
             threshold=threshold_amount,
             interest_days=360
         )
-    ) if not threshold_amount and not threshold_rate else None
+    ) if threshold_amount and threshold_rate else None
     save(agreement)
 
 
@@ -195,6 +195,14 @@ def get_single_agreement_detail_by_days(days=0, asset_id=None):
                     asset_dates))
 
 
+def get_single_agreement_detail_by_period(asset_id=None, start=date.today(), end=date.today()):
+    ret = list()
+    while start <= end:
+        ret.append(get_asset_agreement_detail(cal_date=start, asset_id=asset_id))
+        start += timedelta(days=1)
+    return ret
+
+
 # @timer
 def get_agreement_detail_by_days(days=0):
     '''
@@ -213,6 +221,12 @@ def get_agreement_detail_by_days(days=0):
         ret.append({agreement_id[0]: agreement_ret})
 
     return ret
+
+
+
+
+
+
 
     # return dict((map(lambda x: (x, get_single_agreement_detail_by_days(days=days, asset_id=x)), agreement_ids)))
 
@@ -359,6 +373,14 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
     ret.update({SV.ASSET_KEY_ASSET_TOTAL: total_purchase - total_redeem + ret.get(SV.ASSET_KEY_ASSET_RET, 0) - ret.get(
         SV.ASSET_KEY_RET_CARRY_CASH, 0)})
 
+    return ret
+
+
+def get_single_fund_detail_by_period(asset_id=None, start=date.today(), end=date.today()):
+    ret = list()
+    while start <= end:
+        ret.append(get_asset_fund_detail(cal_date=start, asset_id=asset_id))
+        start += timedelta(days=1)
     return ret
 
 
@@ -778,7 +800,10 @@ if __name__ == '__main__':
     #                      end_date=date.today() + timedelta(days=200), bank_fee_rate=0.0003, manage_fee_rate=0.00015)
 
     # add_management_class(name='management1')
-    print(get_agreement_detail_by_days())
+
+    print(get_single_agreement_detail_by_period(asset_id='b9537ae533d2487791f10155f814853b',
+                                                start=date.today() - timedelta(days=10)))
+    # print(get_agreement_detail_by_days())
     # cal_management_fee(asset_id='36429917ffd34b02b29f8c49eb25f557')
     # print(get_all_management_detail())
     # print(get_total_fund_statistic())

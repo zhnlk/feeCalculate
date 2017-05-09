@@ -7,7 +7,6 @@ from datetime import date, timedelta
 from models.CashModel import Cash
 from services.CommonService import query, add_cash_with_type, get_cash_last_total_amount_by_type
 from utils import StaticValue as SV
-from utils.Utils import timer
 
 
 def get_key_by_cash_type(cash_type=SV.CASH_TYPE_DEPOSIT):
@@ -94,7 +93,15 @@ def get_cash_daily_detail(cal_date=date.today()):
     return ret
 
 
-@timer
+def get_cash_detail_by_period(start=date.today(), end=date.today()):
+    ret = list()
+    while start <= end:
+        ret.append(get_cash_daily_detail(cal_date=start))
+        start += timedelta(days=1)
+    return ret
+
+
+# @timer
 def get_cash_detail_by_days(days=0):
     '''
     按天数获取现金详情，天数为0时，获取所有详情
@@ -105,14 +112,14 @@ def get_cash_detail_by_days(days=0):
 
 
 if __name__ == '__main__':
-    print((get_cash_last_total_amount_by_type(cash_type=SV.CASH_TYPE_DEPOSIT)))
-    # print(get_last_total_amount_by_type(cash_type=SV.CASH_TYPE_PURCHASE))
-    add_cash_daily_data(cal_date=date.today() - timedelta(days=9), draw_amount=10001, draw_fee=10.01,
-                        deposit_amount=1000000,
-                        ret_amount=4000)
+    # print((get_cash_last_total_amount_by_type(cash_type=SV.CASH_TYPE_DEPOSIT)))
+    # # print(get_last_total_amount_by_type(cash_type=SV.CASH_TYPE_PURCHASE))
+    # add_cash_daily_data(cal_date=date.today() - timedelta(days=9), draw_amount=10001, draw_fee=10.01,
+    #                     deposit_amount=1000000,
+    #                     ret_amount=4000)
     # print(get_cash_date())
 
-
+    print(get_cash_detail_by_period(date.today() - timedelta(days=9)))
     # print(get_cash_detail_by_days(days=3))
     # import time
     #
