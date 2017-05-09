@@ -38,6 +38,7 @@ class MixinBase(Base):
 
     def __init__(self):
         self.id = uuid4().hex
+        self.time = time.time()
 
     @declared_attr.cascading
     def id(cls):
