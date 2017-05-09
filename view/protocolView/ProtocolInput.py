@@ -65,7 +65,7 @@ class ProtocolInput(BasicFcView):
         self.cash_to_pd_Edit = QLineEdit("0.00")
         # self.pd_to_investor_Edit = QLineEdit("0.00")
         self.pd_to_cash_Edit = QLineEdit("0.00")
-        self.date_Edit = QLineEdit("2017-01-01")
+        self.date_Edit = QLineEdit(str(datetime.date.today()))
 
         okButton = QPushButton("确定")
         cancelButton = QPushButton("取消")
@@ -124,9 +124,11 @@ class ProtocolInput(BasicFcView):
             date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[0])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
+        if date > datetime.date.today():
+            self.showError()
+            return
         try:
             self.mainEngine.add_agreement_daily_data(date, pd_uuid, float(interest_to_principal), float(cash_to_pd), float(pd_to_cash))
-
         except ValueError:
             self.showError()
             return
