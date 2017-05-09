@@ -26,8 +26,8 @@ class ProtocolListView(BasicFcView):
 
         # 协存项目
         d['total_amount'] = {'chinese': '总额', 'cellType': NumCell}
-        d['asset_ret'] = {'chinese': '协存本金', 'cellType': NumCell}
-        # d['pd_interest'] = {'chinese': '协存利息', 'cellType': BasicCell}
+        d['total_principal'] = {'chinese': '协存本金', 'cellType': NumCell}
+        d['asset_ret'] = {'chinese': '协存利息', 'cellType': NumCell}
         # 协存项目 输入项
         d['ret_carry_principal'] = {'chinese': '利息转结本金', 'cellType': NumCell}
         d['cash_to_agreement'] = {'chinese': '现金->协存', 'cellType': NumCell}
@@ -53,7 +53,7 @@ class ProtocolListView(BasicFcView):
     def showProtocolListDetail(self):
         """显示所有合约数据"""
         result = self.mainEngine.get_agreement_detail_by_days()
-        # print(result)
+        print(result)
         count = 0
         for d in result:
             for v in d.values():
