@@ -41,8 +41,8 @@ class ProtocolInput(BasicFcView):
         self.prepareData()
         # self.addMenuAction()
 
-        # self.signal.connect(self.prepareData)
-        # self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
+        self.signal.connect(self.prepareData)
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
 
     def initInput(self):
         """设置输入框"""

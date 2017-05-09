@@ -39,8 +39,8 @@ class MoneyFundInput(BasicFcView):
         self.initInput()
         self.prepareData()
 
-        # self.signal.connect(self.prepareData)
-        # self.mainEngine.eventEngine.register(self.eventType,self.signal.emit)
+        self.signal.connect(self.prepareData)
+        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
 
     def initInput(self):
         """设置输入框"""
@@ -133,7 +133,6 @@ class MoneyFundInput(BasicFcView):
         # self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_ASSERT_DETAIL))
 
         self.showInfo()
-
 
     def prepareData(self):
 

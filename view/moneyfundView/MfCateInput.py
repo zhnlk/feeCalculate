@@ -8,6 +8,8 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
+from controller.EventEngine import Event
+from controller.EventType import EVENT_MF_INPUT
 from view.BasicWidget import BASIC_FONT, BasicFcView
 from controller.MainEngine import MainEngine
 
@@ -70,7 +72,7 @@ class MfCateInput(BasicFcView):
             return
 
         # 加入数据后，更新列表显示
-        # self.mainEngine.eventEngine.put(Event(type_=EVENT_MF_INPUT))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MF_INPUT))
         self.showInfo()
 
 
