@@ -203,7 +203,7 @@ class CommitteeDetailView(BasicFcView):
             # self.itemDoubleClicked(self.item(r, n)).connect(self.showValuationView(self.eventDict[r])).emit()
             # self.cellDoubleClicked(r, n).connect(self.showValuationView(self.eventDict[r]))
             print('set view item double clicked called', r, n, self.eventDict[r])
-            self.itemDoubleClicked(self.item(r, n + 1)).connect(self.showValuationInput(self.eventDict[r])).emit()
+            # self.itemDoubleClicked(self.item(r, n + 1)).connect(self.showValuationInput(self.eventDict[r])).emit()
             # self.cellDoubleClicked(r, n + 1).connect(self.showValuationInput(self.eventDict[r]))
             print('set input item double clicked called', r, n+1, self.eventDict[r])
 
