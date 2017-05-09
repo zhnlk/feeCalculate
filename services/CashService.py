@@ -79,11 +79,18 @@ def get_cash_daily_detail(cal_date=date.today()):
     ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_DRAW))
     ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_FEE))
     ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_RET))
-    ret.update({SV.CASH_KEY_CASH_TOTAL: ret[SV.CASH_KEY_REDEEM_AGREEMENT] + ret[SV.CASH_KEY_REDEEM_FUND] + ret[
-        SV.CASH_KEY_REDEEM_MANAGEMENT] + ret[SV.CASH_KEY_INVESTOR_DEPOSIT] + ret[SV.CASH_KEY_RET] - ret[
-                                            SV.CASH_KEY_PURCHASE_AGREEMENT] - ret[SV.CASH_KEY_PURCHASE_FUND] - ret[
-                                            SV.CASH_KEY_PURCHASE_AGREEMENT] - ret[SV.CASH_KEY_INVESTOR_DRAW] - ret[
-                                            SV.CASH_KEY_INVESTOR_DRAW] - ret[SV.CASH_KEY_DRAW_FEE]})
+    ret.update(
+        {
+            SV.CASH_KEY_CASH_TOTAL: ret.get(SV.CASH_KEY_REDEEM_AGREEMENT, 0) + ret.get(SV.CASH_KEY_REDEEM_FUND,
+                                                                                       0) + ret.get(
+                SV.CASH_KEY_REDEEM_MANAGEMENT, 0) + ret.get(SV.CASH_KEY_INVESTOR_DEPOSIT, 0) + ret.get(SV.CASH_KEY_RET,
+                                                                                                       0) -
+                                    ret.get(
+                                        SV.CASH_KEY_PURCHASE_AGREEMENT, 0) - ret.get(SV.CASH_KEY_PURCHASE_FUND, 0) -
+                                    ret.get(
+                                        SV.CASH_KEY_PURCHASE_AGREEMENT, 0) - ret.get(SV.CASH_KEY_INVESTOR_DRAW, 0) -
+                                    ret.get(
+                                        SV.CASH_KEY_INVESTOR_DRAW, 0) - ret.get(SV.CASH_KEY_DRAW_FEE, 0)})
     return ret
 
 
