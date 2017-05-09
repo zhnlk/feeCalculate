@@ -552,9 +552,9 @@ def get_total_evaluate_detail_by_date(cal_date=date.today()):
                                          ) / ret.get(SV.ASSET_KEY_ALL_VALUE) if ret.get(SV.ASSET_KEY_ALL_VALUE) else 0.0
 
     ret[SV.ASSET_KEY_ALL_VALUE] = cash_amount + fund_amount + management_amount + ret_amount + agreement_amount
-    ret['fee1'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.02 / 3.6
-    ret['fee2'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.03 / 3.6
-    ret['fee3'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.04 / 3.65
+    ret['fee1'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.02 / 36000
+    ret['fee2'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.03 / 36000
+    ret['fee3'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.04 / 36500
 
     ret['fee4'] = ret.get(SV.ASSET_KEY_ALL_EVALUATE_RET) - ret['fee1'] - ret['fee2'] - ret['fee3'] - get_daily_fee(
         cal_date=cal_date)
