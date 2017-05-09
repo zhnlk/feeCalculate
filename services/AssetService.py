@@ -19,7 +19,6 @@ from services.CommonService import (
     get_management_fees_by_id)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
-from utils.Utils import timer
 
 
 ################################################################
@@ -150,38 +149,43 @@ def get_asset_agreement_detail(cal_date=date.today(), asset_id=None):
     '''
     ret = dict()
     asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
-    ret.update({SV.ASSET_KEY_NAME: asset.name})
     ret[SV.ASSET_KEY_RATE] = list(map(lambda x: x.ret_rate, asset.asset_ret_rate_list))[
         0] if len(asset.asset_ret_rate_list) > 0 else 0.0
     ret.update(get_asset_base_detail(cal_date=cal_date, asset=asset))
-    ret[SV.ASSET_KEY_RET_CARRY_PRINCIPAL] = get_asset_ret_last_total_amount_by_asset_and_type(
+
+    total_carry = get_asset_ret_last_total_amount_by_asset_and_type(
         asset_id=asset_id,
         cal_date=cal_date,
         ret_type=SV.RET_TYPE_PRINCIPAL
     )
-    # ret[SV.ASSET_KEY_ASSET_RET] = get_asset_ret_last_total_amount_by_asset_and_type(
-    #     asset_id=asset_id,
-    #     cal_date=cal_date,
-    #     ret_type=SV.RET_TYPE_INTEREST
-    # )
-    # ret.update({SV.ASSET_KEY_RET_CARRY_PRINCIPAL: get_asset_ret_last_total_amount_by_asset_and_type(
-    #     asset_id=asset.id,
-    #     cal_date=cal_date,
-    #     ret_type=SV.RET_TYPE_PRINCIPAL
-    # )})
-    ret.update({SV.ASSET_KEY_ASSET_RET: get_asset_ret_last_total_amount_by_asset_and_type(
+    yes_total_carry = get_asset_ret_last_total_amount_by_asset_and_type(
+        asset_id=asset_id,
+        cal_date=cal_date - timedelta(days=1),
+        ret_type=SV.RET_TYPE_PRINCIPAL
+    )
+
+    ret[SV.ASSET_KEY_RET_CARRY_PRINCIPAL] = total_carry - yes_total_carry
+
+    total_ret = get_asset_ret_last_total_amount_by_asset_and_type(
         asset_id=asset.id,
         cal_date=cal_date,
         ret_type=SV.RET_TYPE_INTEREST
-    ) - ret.get(SV.ASSET_KEY_RET_CARRY_PRINCIPAL, 0)})
-    ret.update(
-        {SV.ASSET_KEY_ASSET_TOTAL: ret.get(SV.ASSET_KEY_PURCHASE_AGREEMENT, 0) + ret.get(
-            SV.ASSET_KEY_RET_CARRY_PRINCIPAL, 0) +
-                                   ret.get(SV.ASSET_KEY_ASSET_RET, 0) - ret.get(SV.ASSET_KEY_REDEEM_AGREEMENT, 0)})
-    ret.update(
-        {SV.ASSET_KEY_PRINCIPAL: ret.get(SV.ASSET_KEY_PURCHASE_AGREEMENT, 0) + ret.get(SV.ASSET_KEY_RET_CARRY_PRINCIPAL,
-                                                                                       0) - ret.get(
-            SV.ASSET_KEY_REDEEM_AGREEMENT)})
+    )
+    print(total_ret)
+
+    yes_total_ret = get_asset_ret_last_total_amount_by_asset_and_type(
+        asset_id=asset.id,
+        cal_date=cal_date - timedelta(days=1),
+        ret_type=SV.RET_TYPE_INTEREST
+    )
+
+    ret.update({SV.ASSET_KEY_ASSET_RET: total_ret - yes_total_ret - ret.get(SV.ASSET_KEY_RET_CARRY_PRINCIPAL, 0)})
+    ret.update({
+        SV.ASSET_KEY_ASSET_TOTAL: ret.get(SV.ASSET_KEY_PURCHASE_AGREEMENT + '_total', 0) + total_ret - ret.get(
+            SV.ASSET_KEY_REDEEM_AGREEMENT + '_total', 0)})
+    ret.update({
+        SV.ASSET_KEY_PRINCIPAL: ret.get(SV.ASSET_KEY_PURCHASE_AGREEMENT + '_total', 0) + total_carry - ret.get(
+            SV.ASSET_KEY_REDEEM_AGREEMENT + '_total')})
 
     return ret
 
@@ -762,15 +766,28 @@ def get_key_by_asset_type_and_asset_class(asset_type=SV.CASH_TYPE_DEPOSIT, asset
 
 
 def get_asset_trades_sum_dic_by_type(cal_date=date.today(), asset=AssetClass(), trade_type=SV.ASSET_TYPE_PURCHASE):
+    total_amount = get_asset_last_total_amount_by_asset_and_type(
+        cal_date=cal_date,
+        asset_id=asset.id,
+        trade_type=trade_type
+    )
+
+    yes_total_amount = get_asset_last_total_amount_by_asset_and_type(
+        cal_date=cal_date - timedelta(days=1),
+        asset_id=asset.id,
+        trade_type=trade_type
+    )
+
     return {
         get_key_by_asset_type_and_asset_class(
             asset_type=trade_type,
             asset_class=asset.type
-        ): get_asset_last_total_amount_by_asset_and_type(
-            cal_date=cal_date,
-            asset_id=asset.id,
-            trade_type=trade_type
-        )
+        ): total_amount - yes_total_amount,
+        get_key_by_asset_type_and_asset_class(
+            asset_type=trade_type,
+            asset_class=asset.type
+        ) + '_total': total_amount
+
     }
 
 
@@ -782,7 +799,7 @@ def get_asset_base_detail(cal_date=date.today(), asset=AssetClass()):
     return ret
 
 
-@timer
+# @timer
 def get_asset_date(days=0, asset_id=None):
     asset_dates = sorted(set(map(lambda x: x.date, query(AssetTrade).filter(AssetTrade.asset_class == asset_id))))
     if days:
@@ -800,7 +817,7 @@ if __name__ == '__main__':
     #                      end_date=date.today() + timedelta(days=200), bank_fee_rate=0.0003, manage_fee_rate=0.00015)
 
     # add_management_class(name='management1')
-    print(get_fund_detail_by_days())
+    print(get_agreement_detail_by_days())
     # print(get_single_agreement_detail_by_period(asset_id='b9537ae533d2487791f10155f814853b',
     #                                             start=date.today() - timedelta(days=10)))
     # print(get_agreement_detail_by_days())
