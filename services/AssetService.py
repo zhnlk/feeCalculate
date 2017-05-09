@@ -800,9 +800,9 @@ if __name__ == '__main__':
     #                      end_date=date.today() + timedelta(days=200), bank_fee_rate=0.0003, manage_fee_rate=0.00015)
 
     # add_management_class(name='management1')
-
-    print(get_single_agreement_detail_by_period(asset_id='b9537ae533d2487791f10155f814853b',
-                                                start=date.today() - timedelta(days=10)))
+    print(get_fund_detail_by_days())
+    # print(get_single_agreement_detail_by_period(asset_id='b9537ae533d2487791f10155f814853b',
+    #                                             start=date.today() - timedelta(days=10)))
     # print(get_agreement_detail_by_days())
     # cal_management_fee(asset_id='36429917ffd34b02b29f8c49eb25f557')
     # print(get_all_management_detail())

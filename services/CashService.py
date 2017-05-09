@@ -31,7 +31,8 @@ def get_cash_with_type(cal_date=date.today(), cash_type=SV.CASH_TYPE_DEPOSIT):
             get_cash_last_total_amount_by_type(
                 cal_date=cal_date,
                 cash_type=cash_type
-            )
+            ) - get_cash_last_total_amount_by_type(cal_date=cal_date - timedelta(days=1),
+                                                   cash_type=cash_type)
 
     }
 
@@ -80,16 +81,42 @@ def get_cash_daily_detail(cal_date=date.today()):
     ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_RET))
     ret.update(
         {
-            SV.CASH_KEY_CASH_TOTAL: ret.get(SV.CASH_KEY_REDEEM_AGREEMENT, 0) + ret.get(SV.CASH_KEY_REDEEM_FUND,
-                                                                                       0) + ret.get(
-                SV.CASH_KEY_REDEEM_MANAGEMENT, 0) + ret.get(SV.CASH_KEY_INVESTOR_DEPOSIT, 0) + ret.get(SV.CASH_KEY_RET,
-                                                                                                       0) -
-                                    ret.get(
-                                        SV.CASH_KEY_PURCHASE_AGREEMENT, 0) - ret.get(SV.CASH_KEY_PURCHASE_FUND, 0) -
-                                    ret.get(
-                                        SV.CASH_KEY_PURCHASE_AGREEMENT, 0) - ret.get(SV.CASH_KEY_INVESTOR_DRAW, 0) -
-                                    ret.get(
-                                        SV.CASH_KEY_INVESTOR_DRAW, 0) - ret.get(SV.CASH_KEY_DRAW_FEE, 0)})
+            SV.CASH_KEY_CASH_TOTAL: get_cash_last_total_amount_by_type(cal_date=cal_date,
+                                                                       cash_type=SV.CASH_TYPE_DEPOSIT)
+                                    + get_cash_last_total_amount_by_type(cal_date=cal_date,
+                                                                         cash_type=SV.CASH_TYPE_REDEEM_AGREEMENT)
+                                    + get_cash_last_total_amount_by_type(cal_date=cal_date,
+                                                                         cash_type=SV.CASH_TYPE_REDEEM_FUND)
+                                    + get_cash_last_total_amount_by_type(cal_date=cal_date,
+                                                                         cash_type=SV.CASH_TYPE_REDEEM_MANAGEMENT)
+                                    - get_cash_last_total_amount_by_type(cal_date=cal_date,
+                                                                         cash_type=SV.CASH_TYPE_PURCHASE_AGREEMENT)
+                                    - get_cash_last_total_amount_by_type(cal_date=cal_date,
+                                                                         cash_type=SV.CASH_TYPE_PURCHASE_FUND)
+                                    - get_cash_last_total_amount_by_type(cal_date=cal_date,
+                                                                         cash_type=SV.CASH_TYPE_PURCHASE_MANAGEMENT)
+                                    - get_cash_last_total_amount_by_type(cal_date=cal_date,
+                                                                         cash_type=SV.CASH_TYPE_DRAW)
+                                    - get_cash_last_total_amount_by_type(cal_date=cal_date,
+                                                                         cash_type=SV.CASH_TYPE_FEE)
+                                    + get_cash_last_total_amount_by_type(cal_date=cal_date,
+                                                                         cash_type=SV.CASH_TYPE_RET)
+                                    + get_cash_last_total_amount_by_type(cal_date=cal_date,
+                                                                         cash_type=SV.CASH_TYPE_CARRY)
+
+        }
+    )
+    # {
+    #     SV.CASH_KEY_CASH_TOTAL: ret.get(SV.CASH_KEY_REDEEM_AGREEMENT, 0) + ret.get(SV.CASH_KEY_REDEEM_FUND,
+    #                                                                                0) + ret.get(
+    #         SV.CASH_KEY_REDEEM_MANAGEMENT, 0) + ret.get(SV.CASH_KEY_INVESTOR_DEPOSIT, 0) + ret.get(SV.CASH_KEY_RET,
+    #                                                                                                0) -
+    #                             ret.get(
+    #                                 SV.CASH_KEY_PURCHASE_AGREEMENT, 0) - ret.get(SV.CASH_KEY_PURCHASE_FUND, 0) -
+    #                             ret.get(
+    #                                 SV.CASH_KEY_PURCHASE_AGREEMENT, 0) - ret.get(SV.CASH_KEY_INVESTOR_DRAW, 0) -
+    #                             ret.get(
+    #                                 SV.CASH_KEY_INVESTOR_DRAW, 0) - ret.get(SV.CASH_KEY_DRAW_FEE, 0)})
     return ret
 
 
