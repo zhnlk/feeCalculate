@@ -7,6 +7,8 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
+from controller.EventEngine import Event
+from controller.EventType import EVENT_PD_INPUT
 from view.BasicWidget import BASIC_FONT, BasicFcView
 from controller.MainEngine import MainEngine
 
@@ -92,7 +94,7 @@ class PdCateInput(BasicFcView):
             return
 
         # 加入数据后，更新下拉框显示
-        # self.mainEngine.eventEngine.put(Event(type_=EVENT_PD_INPUT))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_PD_INPUT))
         self.showInfo()
 
 
