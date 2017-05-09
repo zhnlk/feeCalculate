@@ -145,11 +145,10 @@ class ProtocolInput(BasicFcView):
     def prepareData(self):
 
         result = self.mainEngine.get_all_asset_ids_by_type(SV.ASSET_CLASS_AGREEMENT)
-        # print('prepareData running.....')
-        for mf in result:
-            # print(mf)
-            self.pd_ComboBox_list.append(mf[0])
-            self.pd_ComboBox.addItem(mf[1])
+        for mf in result :
+            if not self.pd_ComboBox_list.__contains__(mf[0]):
+                self.pd_ComboBox_list.append(mf[0])
+                self.pd_ComboBox.addItem(mf[1])
         print('pd prepare called ....')
 
 

@@ -138,9 +138,9 @@ class MoneyFundInput(BasicFcView):
 
         result = self.mainEngine.get_all_asset_ids_by_type(SV.ASSET_CLASS_FUND)
         for mf in result:
-            # print(mf)
-            self.mf_ComboBox_list.append(mf[0])
-            self.mf_ComboBox.addItem(mf[1])
+            if not self.mf_ComboBox_list.__contains__(mf[0]):
+                self.mf_ComboBox_list.append(mf[0])
+                self.mf_ComboBox.addItem(mf[1])
         print('prepare data called ....')
 
 
