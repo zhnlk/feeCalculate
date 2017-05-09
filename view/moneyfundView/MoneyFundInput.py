@@ -62,7 +62,7 @@ class MoneyFundInput(BasicFcView):
         self.mf_not_carry_forward_revenue_Edit = QLineEdit("0.00")
         self.mf_carry_forward_revenue_Edit = QLineEdit("0.00")
 
-        self.date_Edit = QLineEdit("2017-01-01")
+        self.date_Edit = QLineEdit(str(datetime.date.today()))
 
         okButton = QPushButton("确定")
         cancelButton = QPushButton("取消")
@@ -114,6 +114,10 @@ class MoneyFundInput(BasicFcView):
             date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[0])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
+        if date > datetime.date.today():
+            self.showError()
+            return
+
         try:
             self.mainEngine.add_fund_daily_data(date, mf_uuid, float(mf_carry_forward_revenue), float(mf_subscribe_from_cash),
                                                 float(mf_redeem_to_cash),
