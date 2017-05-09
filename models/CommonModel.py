@@ -1,13 +1,12 @@
 # encoding:utf8
 from __future__ import unicode_literals
 
-import calendar
-from datetime import date, datetime
+import time
+from datetime import date
 from functools import wraps
 from uuid import uuid4
-import time
 
-from sqlalchemy import create_engine, Date, String, Boolean, Column, Float, Integer, DECIMAL
+from sqlalchemy import create_engine, Date, String, Boolean, Column, Float, DECIMAL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import sessionmaker, relationship
 
@@ -15,7 +14,7 @@ from utils import StaticValue as SV
 
 engine = create_engine(SV.SQLALCHEMY_DATABASE_URI, echo=False)
 # engine = create_engine('mysql+mysqldb://%s:%s@%s:%s/%s' % ('root', 'Passw0rd', '127.0.0.1','3306', 'fec'), echo=False)
-# print(SV.SQLALCHEMY_DATABASE_URI)
+
 Base = declarative_base()
 Session = sessionmaker(bind=engine, autoflush=True, autocommit=False)
 
