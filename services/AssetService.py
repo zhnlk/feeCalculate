@@ -121,7 +121,6 @@ def cal_agreement_ret(cal_date=date.today(), asset_id=None):
     asset = query_by_id(obj=AssetClass, obj_id=asset_id)
     rates = asset.asset_ret_rate_list
     rate = get_asset_rate_by_amount(rates=rates, amount=total_amount)
-    print(rate)
     add_asset_ret_with_asset_and_type(
         amount=total_amount * rate.ret_rate / 360,
         asset_id=asset.id,
@@ -152,25 +151,24 @@ def get_asset_agreement_detail(cal_date=date.today(), asset_id=None):
     ret = dict()
     asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
     ret.update({SV.ASSET_KEY_NAME: asset.name})
-    # ret.update({SV.ASSET_KEY_ASSET_ID: asset.id})
     ret[SV.ASSET_KEY_RATE] = list(map(lambda x: x.ret_rate, asset.asset_ret_rate_list))[
         0] if len(asset.asset_ret_rate_list) > 0 else 0.0
     ret.update(get_asset_base_detail(cal_date=cal_date, asset=asset))
     ret[SV.ASSET_KEY_RET_CARRY_PRINCIPAL] = get_asset_ret_last_total_amount_by_asset_and_type(
         asset_id=asset_id,
         cal_date=cal_date,
-        ret_type=SV.RET_CARRY_TO_PRINCIPAL
-    )
-    ret[SV.ASSET_KEY_ASSET_RET] = get_asset_ret_last_total_amount_by_asset_and_type(
-        asset_id=asset_id,
-        cal_date=cal_date,
-        ret_type=SV.RET_TYPE_INTEREST
-    )
-    ret.update({SV.ASSET_KEY_RET_CARRY_PRINCIPAL: get_asset_ret_last_total_amount_by_asset_and_type(
-        asset_id=asset.id,
-        cal_date=cal_date,
         ret_type=SV.RET_TYPE_PRINCIPAL
-    )})
+    )
+    # ret[SV.ASSET_KEY_ASSET_RET] = get_asset_ret_last_total_amount_by_asset_and_type(
+    #     asset_id=asset_id,
+    #     cal_date=cal_date,
+    #     ret_type=SV.RET_TYPE_INTEREST
+    # )
+    # ret.update({SV.ASSET_KEY_RET_CARRY_PRINCIPAL: get_asset_ret_last_total_amount_by_asset_and_type(
+    #     asset_id=asset.id,
+    #     cal_date=cal_date,
+    #     ret_type=SV.RET_TYPE_PRINCIPAL
+    # )})
     ret.update({SV.ASSET_KEY_ASSET_RET: get_asset_ret_last_total_amount_by_asset_and_type(
         asset_id=asset.id,
         cal_date=cal_date,
@@ -178,6 +176,10 @@ def get_asset_agreement_detail(cal_date=date.today(), asset_id=None):
     ) - ret[SV.ASSET_KEY_RET_CARRY_PRINCIPAL]})
     ret.update({SV.ASSET_KEY_ASSET_TOTAL: ret[SV.ASSET_KEY_PURCHASE_AGREEMENT] + ret[SV.ASSET_KEY_RET_CARRY_PRINCIPAL] +
                                           ret[SV.ASSET_KEY_ASSET_RET] - ret.get(SV.ASSET_KEY_REDEEM_AGREEMENT, 0)})
+    ret.update(
+        {SV.ASSET_KEY_PRINCIPAL: ret.get(SV.ASSET_KEY_PURCHASE_AGREEMENT, 0) + ret.get(SV.ASSET_KEY_RET_CARRY_PRINCIPAL,
+                                                                                       0) - ret.get(
+            SV.ASSET_KEY_REDEEM_AGREEMENT)})
 
     return ret
 
@@ -686,7 +688,7 @@ def get_management_fee_by_id(cal_date=date.today(), asset_id=None):
 def get_asset_rate_by_amount(rates=AssetClass().asset_ret_rate_list, amount=10000):
     rate = AssetRetRate(ret_rate=0.0)
     if len(rates) == 1:
-        return rate
+        return rates[0]
     elif len(rates) >= 1:
         rate = list(filter(lambda x: x.threshold <= amount, rates))[-1]
     return rate
@@ -773,7 +775,7 @@ if __name__ == '__main__':
     #                      end_date=date.today() + timedelta(days=200), bank_fee_rate=0.0003, manage_fee_rate=0.00015)
 
     # add_management_class(name='management1')
-    print(get_all_management_detail())
+    print(get_agreement_detail_by_days())
     # cal_management_fee(asset_id='36429917ffd34b02b29f8c49eb25f557')
     # print(get_all_management_detail())
     # print(get_total_fund_statistic())

@@ -58,6 +58,7 @@ ASSET_KEY_ASSET_TOTAL = CASH_KEY_CASH_TOTAL
 ASSET_KEY_ASSET_RET = 'asset_ret'
 ASSET_KEY_RATE = 'rate'
 ASSET_KEY_RET_CARRY_PRINCIPAL = 'ret_carry_principal'
+ASSET_KEY_PRINCIPAL = 'total_principal'
 ASSET_KEY_RET_CARRY_CASH = 'ret_carry_cash'
 ASSET_KEY_RET_NOT_CARRY = 'ret_not_carry'
 ASSET_KEY_START_DATE = 'start_date'
