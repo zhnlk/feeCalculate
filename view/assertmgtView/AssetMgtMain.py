@@ -5,6 +5,8 @@ from collections import OrderedDict
 
 from PyQt5.QtWidgets import QAction, QMainWindow, QDockWidget, QApplication
 
+from assertmgtView.AdjustValuationView import AdjustValuationView
+from assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
 from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 from controller.EventType import EVENT_AM
 from controller.MainEngine import MainEngine
@@ -123,6 +125,8 @@ class CommitteeDetailView(BasicFcView):
         super(CommitteeDetailView, self).__init__(parent=parent)
 
         self.mainEngine = mainEngine
+        self.eventDict = {}  # 事件辅助字典
+        self.widgetDict = {}  # 用来保存子窗口的字典
 
         d = OrderedDict()
 
@@ -140,7 +144,8 @@ class CommitteeDetailView(BasicFcView):
         d['asset_ret'] = {'chinese': '资管计划总收益', 'cellType': NumCell}
         d['mamangement_daily_ret'] = {'chinese': '资管计划每日收益', 'cellType': NumCell}
         # d['asset_plan_daily_valuation'] = {'chinese': '正常情况资管计划\n每日收益估值', 'cellType': BasicCell}
-        # d['valuation_adjust'] = {'chinese': '估值调整', 'cellType': BasicCell}
+        d['uuid_view'] = {'chinese': '调整查看', 'cellType': BasicCell}
+        d['uuid_input'] = {'chinese': '估值调整', 'cellType': BasicCell}
 
         self.setHeaderDict(d)
 
@@ -170,23 +175,67 @@ class CommitteeDetailView(BasicFcView):
         self.setRowCount(0)
         self.showMoneyFundSummary()
 
-
     def showMoneyFundSummary(self):
         """显示所有合约数据"""
         result = self.mainEngine.get_all_management_detail()
-        # print(result)
+        print(result)
         self.setRowCount(len(result))
         row = 0
         for r in result:
             # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
-                content = r[header]
+                if header is 'uuid_view':
+                    content = '查看'
+                elif header is 'uuid_input':
+                    content = '调整'
+                else:
+                    content = r[header]
+                self.eventDict[row] = r['uuid']
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
-                # print(row, n, cell.text())
                 self.setItem(row, n, cell)
-
             row = row + 1
+
+        self.setDoubleClickEvent(9)
+
+    def setDoubleClickEvent(self, n):
+        for r in self.eventDict.keys():
+            # self.itemDoubleClicked(self.item(r, n)).connect(self.showValuationView(self.eventDict[r])).emit()
+            # self.cellDoubleClicked(r, n).connect(self.showValuationView(self.eventDict[r]))
+            print('set view item double clicked called', r, n, self.eventDict[r])
+            self.itemDoubleClicked(self.item(r, n + 1)).connect(self.showValuationInput(self.eventDict[r])).emit()
+            # self.cellDoubleClicked(r, n + 1).connect(self.showValuationInput(self.eventDict[r]))
+            print('set input item double clicked called', r, n+1, self.eventDict[r])
+
+    def showValuationInput(self, uuid):
+        """打开估值调整的子窗口"""
+
+        try:
+            self.widgetDict['adjustValuationInput'].show()
+        except KeyError:
+            self.widgetDict['adjustValuationInput'] = AdjustValuationInput(self.mainEngine, uuid=uuid)
+            self.widgetDict['adjustValuationInput'].show()
+
+    def showValuationView(self, uuid):
+        """打开估值调整的显示子窗口"""
+        try:
+            self.widgetDict['adjustValuationView'].show()
+        except KeyError:
+            self.widgetDict['adjustValuationView'] = AdjustValuationView(self.mainEngine, uuid=uuid)
+            self.widgetDict['adjustValuationView'].show()
+
+    def closeEvent(self, event):
+        """资管主界面的关闭事件"""
+        # reply = QMessageBox.question(self, '退出', '确认退出?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        # if reply == QMessageBox.Yes:
+        for widget in self.widgetDict.values():
+            widget.close()
+
+        # self.mainEngine.exit()
+        event.accept()
+        # else:
+        #     event.ignore()
 
 
 if __name__ == '__main__':
@@ -194,9 +243,9 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    mfm = AssetMgtListView(mainEngine)
+    # mfm = AssetMgtListView(mainEngine)
     # mflv = AssetDailyInventoryView(mainEngine)
-    # mfm = CommitteeDetailView(mainEngine)
+    mfm = CommitteeDetailView(mainEngine)
     # mflv.showMaximized()
     # mainfdv.showMaximized()
     mfm.showMaximized()

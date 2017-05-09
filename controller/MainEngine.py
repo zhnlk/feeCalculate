@@ -17,7 +17,6 @@ class MainEngine(object):
         self.eventEngine = EventEngine()
         self.eventEngine.start()
 
-
     def exit(self):
         """退出程序前调用，保证正常退出"""
         # 停止事件引擎
@@ -110,7 +109,7 @@ class MainEngine(object):
         :param ret_amount:现金收入
         :return None 
         """
-        CashService.add_cash_daily_data(cal_date,draw_amount, draw_fee, deposit_amount, ret_amount)
+        CashService.add_cash_daily_data(cal_date, draw_amount, draw_fee, deposit_amount, ret_amount)
 
     def add_agreement_daily_data(self, cal_date, asset_id, ret_carry_asset_amount, purchase_amount,
                                  redeem_amount):
@@ -194,3 +193,11 @@ class MainEngine(object):
         :return: 
         """
         return CommonService.get_today_fees()
+
+    def get_management_fee_by_id(self, uuid):
+        """
+        获取费用调整明细
+        :param uuid: 
+        :return: 
+        """
+        return AssetService.get_management_fee_by_id(cal_date=datetime.date.today(), asset_id=uuid)

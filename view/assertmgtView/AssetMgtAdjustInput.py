@@ -16,21 +16,23 @@ from PyQt5.QtWidgets import QPushButton
 
 from services import AssetService
 from controller.EventEngine import Event
-from controller.EventType import EVENT_AM_ADJUST, EVENT_AM, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION
+from controller.EventType import EVENT_AM, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION, EVENT_ADJUST_VIEW
 from view.BasicWidget import BASIC_FONT, BasicFcView
 from controller.MainEngine import MainEngine
+from utils import StaticValue as SV
 
 
 class AdjustValuationInput(BasicFcView):
-    """资管项目输入"""
+    """委贷明细调整输入"""
 
     # ----------------------------------------------------------------------
-    def __init__(self, mainEngine, eventEngine=None, parent=None):
+    def __init__(self, mainEngine, uuid, eventEngine=None, parent=None):
         """Constructor"""
         super(AdjustValuationInput, self).__init__(parent=parent)
 
         self.mainEngine = mainEngine
         self.eventEngine = eventEngine
+        self.uuid = uuid
 
         # self.setHeaderDict(d)
 
@@ -104,15 +106,15 @@ class AdjustValuationInput(BasicFcView):
 
         try:
             if float(adjust_check) is not 0.0:
-                AssetService.add_asset_fee_with_asset_and_type(float(adjust_check), asset_id='', cal_date=date)
+                AssetService.add_asset_fee_with_asset_and_type(float(adjust_check), asset_id=self.uuid, cal_date=date,fee_type=SV.FEE_TYPE_ADJUST_CHECK)
             if float(adjust_transfer_fee) is not 0.0:
-                AssetService.add_asset_fee_with_asset_and_type(float(adjust_transfer_fee), asset_id='', cal_date=date)
+                AssetService.add_asset_fee_with_asset_and_type(float(adjust_transfer_fee), asset_id=self.uuid, cal_date=date,fee_type=SV.FEE_TYPE_ADJUST_BANK)
         except ValueError:
             self.showError()
 
         # 加入数据后，更新列表显示
         self.mainEngine.eventEngine.put(Event(type_=EVENT_AM))
-        self.mainEngine.eventEngine.put(Event(type_=EVENT_AM_ADJUST))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_ADJUST_VIEW))
         self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_FEE))
         self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
         # self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_ASSERT_DETAIL))
@@ -125,6 +127,6 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    cashInput = AdjustValuationInput(mainEngine, mainEngine.eventEngine)
+    cashInput = AdjustValuationInput(mainEngine, uuid='9cb0b9dd10414b548352f01439f076b5')
     cashInput.show()
     sys.exit(app.exec_())

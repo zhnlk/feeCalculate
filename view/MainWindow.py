@@ -93,7 +93,7 @@ class MainWindow(QMainWindow, BasicFcView):
         # 资管
         assertMgtMenu = menubar.addMenu('资管明细')
         assertMgtMenu.addAction(self.createAction('显示明细', self.openAssetMgtListDetail))
-        assertMgtMenu.addAction(self.createAction('资管估值调整', self.oepnAdjustValuation))
+        # assertMgtMenu.addAction(self.createAction('资管估值调整', self.oepnAdjustValuation))
         assertMgtMenu.addAction(self.createAction('增加资管类别', self.openAddAssetMgtCate))
         assertMgtMenu.addAction(self.createAction('导出记录', self.openOutAssetMgtData))
         sysMenu.addSeparator()
@@ -141,13 +141,13 @@ class MainWindow(QMainWindow, BasicFcView):
             self.widgetDict['openAssetMgtListDetail'] = AssetMgtListView(self.mainEngine)
             self.widgetDict['openAssetMgtListDetail'].show()
 
-    def oepnAdjustValuation(self):
-        """资管估值调整"""
-        try:
-            self.widgetDict['oepnAdjustValuationInput'].show()
-        except KeyError:
-            self.widgetDict['oepnAdjustValuationInput'] = AdjustValuationInput(self.mainEngine)
-            self.widgetDict['oepnAdjustValuationInput'].show()
+    # def oepnAdjustValuation(self):
+    #     """资管估值调整"""
+    #     try:
+    #         self.widgetDict['oepnAdjustValuationInput'].show()
+    #     except KeyError:
+    #         self.widgetDict['oepnAdjustValuationInput'] = AdjustValuationInput(self.mainEngine)
+    #         self.widgetDict['oepnAdjustValuationInput'].show()
 
     def openAddAssetMgtCate(self):
         """增加资管类别"""
