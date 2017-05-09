@@ -41,6 +41,7 @@ def get_cash_total_amount_by_type(cal_date=date.today(), cash_type=SV.CASH_TYPE_
 @session_deco
 def get_cash_last_total_amount_by_type(cal_date=date.today(), cash_type=SV.CASH_TYPE_PURCHASE, **kwargs):
     session = kwargs.get(SV.SESSION_KEY, None)
+    # try:
     ret = session.query(Cash, func.max(Cash.time).label('max_time')).filter(
         Cash.is_active,
         Cash.date < cal_date + timedelta(days=1),
@@ -50,20 +51,21 @@ def get_cash_last_total_amount_by_type(cal_date=date.today(), cash_type=SV.CASH_
     return ret.Cash.total_amount if ret.Cash else 0.0
 
 
-def add_cash_with_type(amount=0, cash_type=SV.CASH_TYPE_DEPOSIT, asset_id='', cal_date=date.today()):
+def add_cash_with_type(amount=0, cash_type=SV.CASH_TYPE_DEPOSIT, asset_id=None, cal_date=date.today()):
     save(
         Cash(
             amount=amount, type=cash_type,
             cal_date=cal_date,
             total_amount=get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=cash_type) + amount,
-            asset_class=asset_id)
+            asset_class=asset_id
+        )
     )
 
 
 #### AssetTrade
 
 @session_deco
-def get_asset_total_amount_by_asset_and_type(cal_date=date.today(), asset_id='', trade_type=SV.ASSET_TYPE_PURCHASE,
+def get_asset_total_amount_by_asset_and_type(cal_date=date.today(), asset_id=None, trade_type=SV.ASSET_TYPE_PURCHASE,
                                              **kwargs):
     session = kwargs.get(SV.SESSION_KEY, None)
     ret = session.query(func.sum(AssetTrade.amount).label('total_amount')).filter(
@@ -76,7 +78,8 @@ def get_asset_total_amount_by_asset_and_type(cal_date=date.today(), asset_id='',
 
 
 @session_deco
-def get_asset_last_total_amount_by_asset_and_type(cal_date=date.today(), asset_id='', trade_type=SV.ASSET_TYPE_PURCHASE,
+def get_asset_last_total_amount_by_asset_and_type(cal_date=date.today(), asset_id=None,
+                                                  trade_type=SV.ASSET_TYPE_PURCHASE,
                                                   **kwargs):
     session = kwargs.get(SV.SESSION_KEY, None)
     ret = session.query(AssetTrade, func.max(AssetTrade.time).label('max_time')).filter(
@@ -88,7 +91,7 @@ def get_asset_last_total_amount_by_asset_and_type(cal_date=date.today(), asset_i
     return ret.AssetTrade.total_amount if ret.AssetTrade else 0.0
 
 
-def add_asset_trade_with_asset_and_type(amount=0.0, trade_type=SV.ASSET_TYPE_PURCHASE, asset_id='',
+def add_asset_trade_with_asset_and_type(amount=0.0, trade_type=SV.ASSET_TYPE_PURCHASE, asset_id=None,
                                         cal_date=date.today()):
     save(AssetTrade(asset_class=asset_id, amount=amount, type=trade_type,
                     total_amount=get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
@@ -98,7 +101,7 @@ def add_asset_trade_with_asset_and_type(amount=0.0, trade_type=SV.ASSET_TYPE_PUR
 
 #### AssetTradeRet
 @session_deco
-def get_asset_ret_last_total_amount_by_asset_and_type(cal_date=date.today(), asset_id='', ret_type=SV.RET_TYPE_CASH,
+def get_asset_ret_last_total_amount_by_asset_and_type(cal_date=date.today(), asset_id=None, ret_type=SV.RET_TYPE_CASH,
                                                       **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
     ret = session.query(AssetTradeRet, func.max(AssetTradeRet.time).label('max_time')).filter(
@@ -111,7 +114,7 @@ def get_asset_ret_last_total_amount_by_asset_and_type(cal_date=date.today(), ass
 
 
 @session_deco
-def get_asset_ret_total_amount_by_asset_and_type(cal_date=date.today(), asset_id='', ret_type=SV.RET_TYPE_CASH,
+def get_asset_ret_total_amount_by_asset_and_type(cal_date=date.today(), asset_id=None, ret_type=SV.RET_TYPE_CASH,
                                                  **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
     ret = session.query(func.sum(AssetTradeRet.amount).label('total_amount')).filter(
@@ -123,7 +126,7 @@ def get_asset_ret_total_amount_by_asset_and_type(cal_date=date.today(), asset_id
     return ret.total_amount if ret.total_amount else 0.0
 
 
-def add_asset_ret_with_asset_and_type(amount=0.0, asset_id='', ret_type=SV.RET_TYPE_CASH, cal_date=date.today()):
+def add_asset_ret_with_asset_and_type(amount=0.0, asset_id=None, ret_type=SV.RET_TYPE_CASH, cal_date=date.today()):
     save(
         AssetTradeRet(
             asset_class=asset_id,
@@ -142,7 +145,8 @@ def add_asset_ret_with_asset_and_type(amount=0.0, asset_id='', ret_type=SV.RET_T
 
 
 @session_deco
-def get_asset_fee_last_total_amount_by_asset_and_type(cal_date=date.today(), asset_id='', fee_type=SV.FEE_TYPE_PURCHASE,
+def get_asset_fee_last_total_amount_by_asset_and_type(cal_date=date.today(), asset_id=None,
+                                                      fee_type=SV.FEE_TYPE_PURCHASE,
                                                       **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
     ret = session.query(AssetFee, func.max(AssetFee.time).label('max_time')).filter(
@@ -156,7 +160,7 @@ def get_asset_fee_last_total_amount_by_asset_and_type(cal_date=date.today(), ass
 
 
 @session_deco
-def get_asset_fee_total_amount_by_asset_and_type(cal_date=date.today(), asset_id='', fee_type=SV.FEE_TYPE_PURCHASE,
+def get_asset_fee_total_amount_by_asset_and_type(cal_date=date.today(), asset_id=None, fee_type=SV.FEE_TYPE_PURCHASE,
                                                  **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
     ret = session.query(func.sum(AssetFee.amount).label('total_amount')).filter(
@@ -168,7 +172,7 @@ def get_asset_fee_total_amount_by_asset_and_type(cal_date=date.today(), asset_id
     return ret.total_amount if ret.total_amount else 0.0
 
 
-def add_asset_fee_with_asset_and_type(amount=0, asset_id='', fee_type=SV.FEE_TYPE_PURCHASE, cal_date=date.today()):
+def add_asset_fee_with_asset_and_type(amount=0, asset_id=None, fee_type=SV.FEE_TYPE_PURCHASE, cal_date=date.today()):
     save(
         AssetFee(
             asset_class=asset_id,
@@ -193,20 +197,20 @@ def add_asset_fee_with_asset_and_type(amount=0, asset_id='', fee_type=SV.FEE_TYP
 
 # 通过资产id和交易类型获取现金记录
 @session_deco
-def get_cash_by_asset_and_type(asset_id='', trade_type=SV.CASH_TYPE_PURCHASE, **kwargs):
+def get_cash_by_asset_and_type(asset_id=None, trade_type=SV.CASH_TYPE_PURCHASE, **kwargs):
     return kwargs[SV.SESSION_KEY].query(Cash).filter(Cash.asset_class == asset_id, Cash.type == trade_type)
 
 
 # 通过资产id和交易类型获取交易记录
 @session_deco
-def get_trade_by_asset_and_type(asset_id='', trade_type=SV.ASSET_TYPE_PURCHASE, **kwargs):
+def get_trade_by_asset_and_type(asset_id=None, trade_type=SV.ASSET_TYPE_PURCHASE, **kwargs):
     return kwargs[SV.SESSION_KEY].query(AssetTrade).filter(AssetTrade.asset_class == asset_id,
                                                            AssetTrade.type == trade_type)
 
 
 # 获取交易费用
 @session_deco
-def get_trade_fee_by_asset_and_type(asset_trade_id='', fee_type=SV.FEE_TYPE_PURCHASE, **kwargs):
+def get_trade_fee_by_asset_and_type(asset_trade_id=None, fee_type=SV.FEE_TYPE_PURCHASE, **kwargs):
     return kwargs[SV.SESSION_KEY].query(AssetFee).filter(AssetFee.asset_trade == asset_trade_id,
                                                          AssetFee.type == fee_type)
 
@@ -219,7 +223,7 @@ def save(obj=None, **kwargs):
 
 # 删除记录
 @session_deco
-def delete(obj=None, key='', **kwargs):
+def delete(obj=None, key=None, **kwargs):
     session = kwargs[SV.SESSION_KEY]
     del_obj = session.query(obj).filter(obj.id == key)
     del_obj.update({obj.is_active: False})
@@ -233,14 +237,14 @@ def query(obj=None, **kwargs):
 
 
 @session_deco
-def query_by_id(obj=AssetClass(), obj_id='', **kwargs):
+def query_by_id(obj=AssetClass(), obj_id=None, **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
     return session.query(obj).filter(obj.is_active, obj.id == obj_id).one()
 
 
 # 更新记录
 @session_deco
-def update(obj=None, query_key='', update_data={}, **kwargs):
+def update(obj=None, query_key=None, update_data={}, **kwargs):
     session = kwargs[SV.SESSION_KEY]
     session.query(obj).filter(obj.id == query_key).update(update_data)
 
@@ -255,7 +259,7 @@ def add_asset_class(asset=AssetClass(), asset_fees=[], **kwargs):
 
 
 @session_deco
-def get_obj_by_id(obj=None, obj_id='', **kwargs):
+def get_obj_by_id(obj=None, obj_id=None, **kwargs):
     ret = kwargs[SV.SESSION_KEY].query(obj).filter(obj.id == obj_id)
     if ret:
         ret = ret.one()
@@ -263,7 +267,7 @@ def get_obj_by_id(obj=None, obj_id='', **kwargs):
 
 
 @session_deco
-def get_asset_by_name(name='', **kwargs):
+def get_asset_by_name(name=None, **kwargs):
     ret = kwargs[SV.SESSION_KEY].query(AssetClass).filter(AssetClass.name == name)
     if ret:
         ret = ret.one()
@@ -293,7 +297,7 @@ def redeem(asset=AssetClass(), amount=0.0, cal_date=date.today()):
 
 
 @session_deco
-def get_management_asset_all_ret(asset_id='', cal_date=date.today(), **kwargs):
+def get_management_asset_all_ret(asset_id=None, cal_date=date.today(), **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
     asset = session.query(AssetClass).filter(AssetClass.is_active, AssetClass.id == asset_id).one()
     asset_ret = session.query(AssetRetRate).filter(AssetRetRate.is_active, AssetRetRate.asset_class == asset_id)
@@ -336,7 +340,7 @@ def get_cash_trade_change(cal_date=date.today(), asset_type=SV.ASSET_CLASS_FUND,
 
 
 @session_deco
-def get_management_trade_amount(asset_id='', **kwargs):
+def get_management_trade_amount(asset_id=None, **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
     managements = session.query(AssetTrade).filter(AssetTrade.is_active, AssetTrade.asset_class == asset_id)
 
@@ -344,7 +348,7 @@ def get_management_trade_amount(asset_id='', **kwargs):
 
 
 @session_deco
-def get_management_trade_fees(asset_id='', **kwargs):
+def get_management_trade_fees(asset_id=None, **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
     total_amount = get_management_trade_amount(asset_id=asset_id)
     fees = session.query(AssetFeeRate).filter(AssetFeeRate.is_active, AssetFeeRate.asset_class == asset_id)
@@ -368,7 +372,7 @@ def get_all_asset_ids_by_type(asset_type=SV.ASSET_CLASS_AGREEMENT, **kwargs):
 
 
 @session_deco
-def get_management_fees_by_id(cal_date=date.today(), asset_id='', **kwargs):
+def get_management_fees_by_id(cal_date=date.today(), asset_id=None, **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
     fees = session.query(AssetFee).filter(
         AssetFee.is_active,
@@ -601,6 +605,8 @@ def get_daily_fee(cal_date=date.today()):
 
 
 if __name__ == '__main__':
-    get_all_fund()
+    print(get_all_cash())
+    # get_all_fund()
+    # get_today_fees()
     # add_fee_with_date(cal_date=date.today(), amount=10000)
     # print(get_total_evaluate_detail())

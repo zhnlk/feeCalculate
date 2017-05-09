@@ -5,15 +5,17 @@ import calendar
 from datetime import date, datetime
 from functools import wraps
 from uuid import uuid4
+import time
 
-from sqlalchemy import create_engine, Date, String, Boolean, Column, Float
+from sqlalchemy import create_engine, Date, String, Boolean, Column, Float, Integer, DECIMAL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import sessionmaker, relationship
 
 from utils import StaticValue as SV
 
 engine = create_engine(SV.SQLALCHEMY_DATABASE_URI, echo=False)
-print(SV.SQLALCHEMY_DATABASE_URI)
+# engine = create_engine('mysql+mysqldb://%s:%s@%s:%s/%s' % ('root', 'Passw0rd', '127.0.0.1','3306', 'fec'), echo=False)
+# print(SV.SQLALCHEMY_DATABASE_URI)
 Base = declarative_base()
 Session = sessionmaker(bind=engine, autoflush=True, autocommit=False)
 
@@ -42,7 +44,7 @@ class MixinBase(Base):
     def id(cls):
         return Column(String(50), primary_key=True, default=uuid4().hex)
 
-    time = Column(Float, default=calendar.timegm(datetime.now().timetuple()))
+    time = Column(DECIMAL(precision=20), default=100000 * time.time())
     date = Column(Date, default=date.today)
     is_active = Column(Boolean, default=True)
 

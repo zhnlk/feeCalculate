@@ -13,7 +13,7 @@ class Cash(MixinTotalBase):
     amount = Column(Float, default=0.0)
     type = Column(Integer, default=1)
     asset_class = Column(String(50), ForeignKey('TB_ASSETCLASS.id'), index=True, nullable=True)
-    asset_class_obj = relationship('AssetClass', lazy='joined', cascade='all')
+    asset_class_obj = relationship('AssetClass', cascade='all')
 
     def __init__(self, asset_class='', type=1, amount=0.0, total_amount=0.0, cal_date=date.today()):
         MixinBase.__init__(self)

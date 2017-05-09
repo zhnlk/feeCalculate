@@ -63,12 +63,12 @@ class TestAgreement(TestBase):
         save(asset_ret_rate)
         save(asset)
 
-        ret_rate = get_asset_rate_by_amount(rates=asset.asset_ret_rate_list, amount=100)
-        self.assertEqual(ret_rate, 0.03)
-        ret_rate = get_asset_rate_by_amount(rates=asset.asset_ret_rate_list, amount=10000)
-        self.assertEqual(ret_rate, 0.08)
-        ret_rate = get_asset_rate_by_amount(rates=asset.asset_ret_rate_list, amount=20000)
-        self.assertEqual(ret_rate, 0.1)
+        rate = get_asset_rate_by_amount(rates=asset.asset_ret_rate_list, amount=100)
+        self.assertEqual(rate.ret_rate, 0.03)
+        rate = get_asset_rate_by_amount(rates=asset.asset_ret_rate_list, amount=10000)
+        self.assertEqual(rate.ret_rate, 0.08)
+        rate = get_asset_rate_by_amount(rates=asset.asset_ret_rate_list, amount=20000)
+        self.assertEqual(rate.ret_rate, 0.1)
 
     def test_asset_ret_carry_to_cash(self):
         asset = query(AssetClass).filter(AssetClass.is_active, AssetClass.type == SV.ASSET_CLASS_FUND).one()
@@ -133,8 +133,6 @@ class TestAgreement(TestBase):
         self.assertEqual(cash.total_amount, 1003)
         self.assertEqual(cash.date, date.today())
         self.assertEqual(cash.type, SV.ASSET_CLASS_AGREEMENT)
-
-
 
 
 if __name__ == '__main__':

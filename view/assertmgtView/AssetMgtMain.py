@@ -5,8 +5,8 @@ from collections import OrderedDict
 
 from PyQt5.QtWidgets import QAction, QMainWindow, QDockWidget, QApplication
 
-from assertmgtView.AdjustValuationView import AdjustValuationView
-from assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
+from view.assertmgtView.AdjustValuationView import AdjustValuationView
+from view.assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
 from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 from controller.EventType import EVENT_AM
 from controller.MainEngine import MainEngine

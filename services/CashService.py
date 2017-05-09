@@ -98,7 +98,7 @@ def get_cash_detail_by_days(days=0):
 
 
 if __name__ == '__main__':
-    # print((get_total_amount_before_by_type(cash_type=SV.CASH_TYPE_DEPOSIT)))
+    print((get_cash_last_total_amount_by_type(cash_type=SV.CASH_TYPE_DEPOSIT)))
     # print(get_last_total_amount_by_type(cash_type=SV.CASH_TYPE_PURCHASE))
     add_cash_daily_data(cal_date=date.today() - timedelta(days=9), draw_amount=10001, draw_fee=10.01,
                         deposit_amount=1000000,
@@ -106,7 +106,7 @@ if __name__ == '__main__':
     # print(get_cash_date())
 
 
-    print(get_cash_detail_by_days(days=3))
+    # print(get_cash_detail_by_days(days=3))
     # import time
     #
     # print(get_last_total_amount_by_type(cal_date=date.today() - timedelta(days=0), cash_type=SV.CASH_TYPE_DEPOSIT))

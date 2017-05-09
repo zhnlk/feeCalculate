@@ -31,7 +31,7 @@ from utils.Utils import timer
 #
 ################################################################
 
-def add_agreement_class(name='', rate=0.03, threshold_amount=0, threshold_rate=0):
+def add_agreement_class(name=None, rate=0.03, threshold_amount=0, threshold_rate=0):
     '''
     添加协存类别
     :param name:名称
@@ -78,7 +78,7 @@ def asset_ret_carry_to_principal(cal_date=date.today(), asset=AssetClass(), amou
         pass
 
 
-def add_agreement_daily_data(cal_date=date.today(), asset_id='', ret_carry_asset_amount=0, purchase_amount=0,
+def add_agreement_daily_data(cal_date=date.today(), asset_id=None, ret_carry_asset_amount=0, purchase_amount=0,
                              redeem_amount=0):
     '''
     添加协存每日记录
@@ -93,7 +93,7 @@ def add_agreement_daily_data(cal_date=date.today(), asset_id='', ret_carry_asset
                          purchase_amount=purchase_amount, redeem_amount=redeem_amount)
 
 
-def cal_agreement_ret(cal_date=date.today(), asset_id=''):
+def cal_agreement_ret(cal_date=date.today(), asset_id=None):
     '''
     计算协存的利息
     :param cal_date:计算日期
@@ -121,6 +121,7 @@ def cal_agreement_ret(cal_date=date.today(), asset_id=''):
     asset = query_by_id(obj=AssetClass, obj_id=asset_id)
     rates = asset.asset_ret_rate_list
     rate = get_asset_rate_by_amount(rates=rates, amount=total_amount)
+    print(rate)
     add_asset_ret_with_asset_and_type(
         amount=total_amount * rate.ret_rate / 360,
         asset_id=asset.id,
@@ -141,7 +142,7 @@ def cal_all_agreement_ret(cal_date=date.today()):
 
 
 # @timer
-def get_asset_agreement_detail(cal_date=date.today(), asset_id=''):
+def get_asset_agreement_detail(cal_date=date.today(), asset_id=None):
     '''
     获取协存详情
     :param cal_date:计算日期
@@ -182,7 +183,7 @@ def get_asset_agreement_detail(cal_date=date.today(), asset_id=''):
 
 
 # @timer
-def get_single_agreement_detail_by_days(days=0, asset_id=''):
+def get_single_agreement_detail_by_days(days=0, asset_id=None):
     asset_dates = get_asset_date(days=days, asset_id=asset_id)
     if not asset_dates:
         asset_dates = [date.today()]
@@ -224,7 +225,7 @@ def get_agreement_detail_by_days(days=0):
 ################################################################
 
 
-def add_fund_class(name='XX FUND', code=''):
+def add_fund_class(name='XX FUND', code=None):
     '''
     添加货基类别
     :param name:
@@ -260,7 +261,8 @@ def asset_ret_carry_to_cash(cal_date=date.today(), asset=AssetClass(), amount=0)
         pass
 
 
-def add_fund_daily_data(cal_date=date.today(), asset_id='', ret_carry_cash_amount=0, purchase_amount=0, redeem_amount=0,
+def add_fund_daily_data(cal_date=date.today(), asset_id=None, ret_carry_cash_amount=0, purchase_amount=0,
+                        redeem_amount=0,
                         ret_amount=0):
     '''
     添加货基每日记录
@@ -276,7 +278,7 @@ def add_fund_daily_data(cal_date=date.today(), asset_id='', ret_carry_cash_amoun
                          purchase_amount=purchase_amount, redeem_amount=redeem_amount, ret_amount=ret_amount)
 
 
-def get_total_fund_statistic_by_id(cal_date=date.today(), asset_id=''):
+def get_total_fund_statistic_by_id(cal_date=date.today(), asset_id=None):
     total_purchase_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
                                                                           trade_type=SV.ASSET_TYPE_PURCHASE)
     total_redeem_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
@@ -307,7 +309,7 @@ def get_total_fund_statistic(cal_date=date.today()):
     return ret
 
 
-def get_asset_fund_detail(cal_date=date.today(), asset_id=''):
+def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
     '''
     获取货基详情
     :param cal_date:计算日期
@@ -355,7 +357,7 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=''):
     return ret
 
 
-def get_single_fund_detail_by_days(days=0, asset_id=''):
+def get_single_fund_detail_by_days(days=0, asset_id=None):
     asset_dates = get_asset_date(days=days, asset_id=asset_id)
     if not asset_dates:
         asset_dates = [date.today()]
@@ -392,7 +394,7 @@ def get_fund_detail_by_days(days=0):
 ################################################################
 
 def add_management_class(
-        name='',
+        name=None,
         trade_amount=1000000,
         ret_rate=0.1,
         rate_days=360,
@@ -421,7 +423,7 @@ def add_management_class(
     save(asset_fee_rate_manage)
 
 
-def cal_management_ret(cal_date=None, asset_id=''):
+def cal_management_ret(cal_date=None, asset_id=None):
     '''
     计算资管的利息
     :param cal_date:计算日期
@@ -451,7 +453,7 @@ def cal_all_management_ret(cal_date=date.today()):
         cal_management_ret(cal_date=cal_date, asset_id=management_id[0])
 
 
-def cal_management_fee(cal_date=date.today(), asset_id=''):
+def cal_management_fee(cal_date=date.today(), asset_id=None):
     asset = query_by_id(AssetClass, asset_id)
     if asset.expiry_date > cal_date:
         asset_fee_rates = asset.asset_fee_rate_list
@@ -480,7 +482,7 @@ def cal_all_manangement_fee(cal_date=date.today()):
         cal_management_fee(cal_date=cal_date, asset_id=management_id[0])
 
 
-def get_total_management_statistic_by_id(cal_date=date.today(), asset_id=''):
+def get_total_management_statistic_by_id(cal_date=date.today(), asset_id=None):
     total_purchase_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
                                                                           trade_type=SV.ASSET_TYPE_PURCHASE)
     total_redeem_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
@@ -514,7 +516,7 @@ def get_total_management_statistic(cal_date=date.today()):
     return ret
 
 
-def get_single_management_detail(asset_id=''):
+def get_single_management_detail(asset_id=None):
     asset = query_by_id(obj=AssetClass, obj_id=asset_id)
     ret = dict()
     ret.update({SV.ASSET_KEY_NAME: asset.name})
@@ -561,7 +563,7 @@ def get_all_management_detail():
     return ret
 
 
-def cal_adjust_fee(cal_date=date.today(), fee_amount=200, asset_id=''):
+def cal_adjust_fee(cal_date=date.today(), fee_amount=200, asset_id=None):
     '''
     添加调整费用
     :param cal_date:计算日期
@@ -573,7 +575,7 @@ def cal_adjust_fee(cal_date=date.today(), fee_amount=200, asset_id=''):
                                       amount=fee_amount)
 
 
-def management_carry_ret_to_cash(cal_date=date.today(), asset_id=''):
+def management_carry_ret_to_cash(cal_date=date.today(), asset_id=None):
     asset = query_by_id(obj=AssetClass, obj_id=asset_id)
     if asset.ret_cal_method == SV.RET_TYPE_CASH_CUT_INTEREST:
         if asset.start_date == cal_date:
@@ -592,7 +594,7 @@ def management_carry_ret_to_cash(cal_date=date.today(), asset_id=''):
             )
 
 
-def cal_daily_ret_and_fee(cal_date=date.today(), asset_id=''):
+def cal_daily_ret_and_fee(cal_date=date.today(), asset_id=None):
     '''
     计算资管的收益和费用
     :param cal_date:计算日期
@@ -661,7 +663,7 @@ def draw_manangent_ret(cal_date=date.today()):
                                               ret_type=SV.RET_TYPE_CASH_ONE_TIME, cal_date=cal_date)
 
 
-def get_management_fee_by_id(cal_date=date.today(), asset_id=''):
+def get_management_fee_by_id(cal_date=date.today(), asset_id=None):
     asset_fees = get_management_fees_by_id(cal_date=cal_date, asset_id=asset_id)
 
     ret = list()
@@ -682,7 +684,7 @@ def get_management_fee_by_id(cal_date=date.today(), asset_id=''):
 ################################################################
 
 def get_asset_rate_by_amount(rates=AssetClass().asset_ret_rate_list, amount=10000):
-    rate = 0.0
+    rate = AssetRetRate(ret_rate=0.0)
     if len(rates) == 1:
         return rate
     elif len(rates) >= 1:
@@ -699,7 +701,7 @@ def add_trade_ret(cal_date=date.today(), ret_amount=0, asset=AssetClass()):
     )
 
 
-def add_daily_asset_data(cal_date=date.today(), asset_id='', ret_carry_asset_amount=0, ret_carry_cash_amount=0,
+def add_daily_asset_data(cal_date=date.today(), asset_id=None, ret_carry_asset_amount=0, ret_carry_cash_amount=0,
                          purchase_amount=0,
                          redeem_amount=0, ret_amount=0):
     asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
@@ -754,7 +756,7 @@ def get_asset_base_detail(cal_date=date.today(), asset=AssetClass()):
 
 
 @timer
-def get_asset_date(days=0, asset_id=''):
+def get_asset_date(days=0, asset_id=None):
     asset_dates = sorted(set(map(lambda x: x.date, query(AssetTrade).filter(AssetTrade.asset_class == asset_id))))
     if days:
         return asset_dates[-days:]

@@ -27,9 +27,8 @@ class TestBase(TestCase):
         agree = AssetClass(name='联顺泰', code='20007', type=SV.ASSET_CLASS_MANAGEMENT,
                            ret_cal_method=SV.RET_TYPE_CASH_CUT_INTEREST, start_date=date.today(),
                            expiry_date=date.today() + timedelta(days=360))
-
+        save(agree)
         save(AssetFeeRate(asset_class=agree.id, rate=20, type=SV.FEE_TYPE_PURCHASE,
                           method=SV.FEE_METHOD_RATIO_EVERY_DAY))
         save(AssetFeeRate(asset_class=agree.id, rate=0.015, type=SV.FEE_TYPE_REDEEM,
                           method=SV.FEE_METHOD_RATIO_ONE_TIME))
-        save(agree)

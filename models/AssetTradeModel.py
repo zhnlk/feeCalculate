@@ -14,8 +14,7 @@ class AssetTrade(MixinTotalBase):
     amount = Column(Float, default=0.0)
     type = Column(Integer, default=1)
 
-    asset_class_obj = relationship('AssetClass', lazy='joined', cascade='all')
-
+    asset_class_obj = relationship('AssetClass', cascade='all')
 
     def __init__(self, asset_class='', amount=0.0, type=1, total_amount=0, cal_date=date.today()):
         MixinTotalBase.__init__(self)

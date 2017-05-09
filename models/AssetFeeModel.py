@@ -14,7 +14,7 @@ class AssetFee(MixinTotalBase):
     asset_class = Column(String(50), ForeignKey('TB_ASSETCLASS.id'), index=True, nullable=True)
     type = Column(Integer, default=0)
     method = Column(Integer, default=0)
-    asset_class_obj = relationship('AssetClass', lazy='joined', cascade='all')
+    asset_class_obj = relationship('AssetClass', cascade='all')
 
     def __init__(self, amount=0, asset_class='', type=1, total_amount=0.0, method=1, cal_date=date.today()):
         MixinBase.__init__(self)
