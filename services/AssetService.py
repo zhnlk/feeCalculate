@@ -173,9 +173,11 @@ def get_asset_agreement_detail(cal_date=date.today(), asset_id=None):
         asset_id=asset.id,
         cal_date=cal_date,
         ret_type=SV.RET_TYPE_INTEREST
-    ) - ret[SV.ASSET_KEY_RET_CARRY_PRINCIPAL]})
-    ret.update({SV.ASSET_KEY_ASSET_TOTAL: ret[SV.ASSET_KEY_PURCHASE_AGREEMENT] + ret[SV.ASSET_KEY_RET_CARRY_PRINCIPAL] +
-                                          ret[SV.ASSET_KEY_ASSET_RET] - ret.get(SV.ASSET_KEY_REDEEM_AGREEMENT, 0)})
+    ) - ret.get(SV.ASSET_KEY_RET_CARRY_PRINCIPAL, 0)})
+    ret.update(
+        {SV.ASSET_KEY_ASSET_TOTAL: ret.get(SV.ASSET_KEY_PURCHASE_AGREEMENT, 0) + ret.get(
+            SV.ASSET_KEY_RET_CARRY_PRINCIPAL, 0) +
+                                   ret.get(SV.ASSET_KEY_ASSET_RET, 0) - ret.get(SV.ASSET_KEY_REDEEM_AGREEMENT, 0)})
     ret.update(
         {SV.ASSET_KEY_PRINCIPAL: ret.get(SV.ASSET_KEY_PURCHASE_AGREEMENT, 0) + ret.get(SV.ASSET_KEY_RET_CARRY_PRINCIPAL,
                                                                                        0) - ret.get(
@@ -342,7 +344,7 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
 
     ret.update({
         SV.ASSET_KEY_RET_NOT_CARRY:
-            ret[SV.ASSET_KEY_ASSET_RET] - ret[SV.ASSET_KEY_RET_CARRY_CASH]})
+            ret.get(SV.ASSET_KEY_ASSET_RET, 0) - ret.get(SV.ASSET_KEY_RET_CARRY_CASH, 0)})
     total_purchase = get_asset_last_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
@@ -354,7 +356,8 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
         trade_type=SV.ASSET_TYPE_REDEEM
     )
 
-    ret.update({SV.ASSET_KEY_ASSET_TOTAL: total_purchase - total_redeem + ret[SV.ASSET_KEY_ASSET_RET]})
+    ret.update({SV.ASSET_KEY_ASSET_TOTAL: total_purchase - total_redeem + ret.get(SV.ASSET_KEY_ASSET_RET, 0) - ret.get(
+        SV.ASSET_KEY_RET_CARRY_CASH, 0)})
 
     return ret
 
