@@ -379,7 +379,7 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
 
     ret.update({SV.ASSET_KEY_RET_CARRY_CASH: total_ret_carry - yes_total_ret_carry})
 
-    ret.update({SV.ASSET_KEY_RET_NOT_CARRY: total_ret - total_ret_carry})  # 未结转收益
+    ret.update({SV.ASSET_KEY_RET_NOT_CARRY: total_ret - yes_total_ret_carry})  # 未结转收益
     total_purchase = get_asset_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
