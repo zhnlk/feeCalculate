@@ -503,6 +503,7 @@ def get_all_management(cal_date=date.today(), **kwargs):
     ret_obj = session.query(func.sum(AssetTradeRet.amount).label('total_amount')).filter(
         AssetTradeRet.is_active,
         AssetTradeRet.date < cal_date + timedelta(days=1),
+        AssetTradeRet.type == SV.RET_TYPE_INTEREST,
         AssetTradeRet.asset_class_obj.has(
             AssetClass.type == SV.ASSET_CLASS_MANAGEMENT)).one()
     ret_amount = ret_obj.total_amount if ret_obj.total_amount else 0.0
@@ -515,9 +516,17 @@ def get_all_management(cal_date=date.today(), **kwargs):
         )
     ).one()
 
+    car_ret_obj = session.query(func.sum(AssetTradeRet.amount).label('total_amount')).filter(
+        AssetTradeRet.is_active,
+        AssetTradeRet.date < cal_date + timedelta(days=1),
+        AssetTradeRet.type == SV.RET_TYPE_CASH,
+        AssetTradeRet.asset_class_obj.has(
+            AssetClass.type == SV.ASSET_CLASS_MANAGEMENT)).one()
+    car_ret_amount = ret_obj.total_amount if car_ret_obj.total_amount else 0.0
+
     fee_amount = fee_obj.total_amount if fee_obj.total_amount else 0.0
 
-    return purchase_amount + ret_amount - redeem_amount - fee_amount
+    return purchase_amount + ret_amount - redeem_amount - fee_amount - car_ret_amount
 
 
 @session_deco

@@ -15,8 +15,8 @@ from services.CommonService import (
     get_asset_ret_last_total_amount_by_asset_and_type,
     add_asset_fee_with_asset_and_type,
     query_by_id, save, get_management_asset_all_ret, get_management_trade_amount, get_management_trade_fees,
-    get_all_mamangement_ids, get_all_asset_ids_by_type, get_expiry_management, get_start_and_expiry_management,
-    get_management_fees_by_id, is_date_has_ret, is_date_has_fee)
+    get_all_mamangement_ids, get_all_asset_ids_by_type, get_expiry_management, get_management_fees_by_id,
+    is_date_has_ret, is_date_has_fee)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
 
@@ -40,6 +40,7 @@ def add_agreement_class(name=None, rate=0.03, threshold_amount=0, threshold_rate
     :return:
     '''
     agreement = AssetClass(name=name, type=SV.ASSET_CLASS_AGREEMENT, code='1001')
+    save(agreement)
     save(
         AssetRetRate(
             asset_id=agreement.id,
@@ -56,7 +57,6 @@ def add_agreement_class(name=None, rate=0.03, threshold_amount=0, threshold_rate
             interest_days=360
         )
     ) if threshold_amount and threshold_rate else None
-    save(agreement)
 
 
 def asset_ret_carry_to_principal(cal_date=date.today(), asset=AssetClass(), amount=0):
@@ -148,9 +148,10 @@ def get_asset_agreement_detail(cal_date=date.today(), asset_id=None):
     :return:协存详情字典
     '''
     ret = dict()
-    asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
-    ret[SV.ASSET_KEY_RATE] = list(map(lambda x: x.ret_rate, asset.asset_ret_rate_list))[
-        0] if len(asset.asset_ret_rate_list) > 0 else 0.0
+    # asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
+    # # ret[SV.ASSET_KEY_RATE] = list(map(lambda x: x.ret_rate, asset.asset_ret_rate_list))[
+    # #     0] if len(asset.asset_ret_rate_list) > 0 else 0.0
+    asset = query_by_id(obj=AssetClass, obj_id=asset_id)
     ret.update(get_asset_base_detail(cal_date=cal_date, asset=asset))
 
     total_carry = get_asset_ret_last_total_amount_by_asset_and_type(
@@ -171,7 +172,6 @@ def get_asset_agreement_detail(cal_date=date.today(), asset_id=None):
         cal_date=cal_date,
         ret_type=SV.RET_TYPE_INTEREST
     )
-    print(total_ret)
 
     yes_total_ret = get_asset_ret_last_total_amount_by_asset_and_type(
         asset_id=asset.id,
@@ -186,7 +186,9 @@ def get_asset_agreement_detail(cal_date=date.today(), asset_id=None):
     ret.update({
         SV.ASSET_KEY_PRINCIPAL: ret.get(SV.ASSET_KEY_PURCHASE_AGREEMENT + '_total', 0) + total_carry - ret.get(
             SV.ASSET_KEY_REDEEM_AGREEMENT + '_total')})
-
+    rates = query_by_id(obj=AssetClass, obj_id=asset_id).asset_ret_rate_list
+    ret_rate = get_asset_rate_by_amount(rates=rates, amount=ret.get(SV.ASSET_KEY_PRINCIPAL))
+    ret.update({SV.ASSET_KEY_RATE: ret_rate.ret_rate})
     return ret
 
 
@@ -452,7 +454,11 @@ def add_management_class(
     save(asset_rate)
     save(asset_fee_rate_bank)
     save(asset_fee_rate_manage)
+
     cal_asset_all_mangement_ret_and_fee(start_date=start_date, end_date=end_date, asset_id=asset.id)
+
+    draw_management_ret_by_asset(asset_id=asset_id, ret_method=asset.ret_cal_method)
+    draw_management_by_asset(asset_id=asset_id)
 
 
 def cal_management_ret(cal_date=None, asset_id=None):
@@ -676,6 +682,32 @@ def cal_all_mangement_ret_and_fee(cal_date=date.today()):
         cal_management_fee(cal_date=cal_date, asset_id=management_id[0])
 
 
+def draw_management_by_asset(asset_id=None):
+    asset = query_by_id(obj=AssetClass, obj_id=asset_id)
+    amount = asset.asset_trade_list[0].amount if asset.asset_trade_list else 0.0
+    redeem(asset=asset, amount=amount, cal_date=asset.expiry_date)
+
+
+def draw_management_ret_by_asset(asset_id=None, ret_method=SV.RET_TYPE_CASH_CUT_INTEREST):
+    asset = query_by_id(obj=AssetClass, obj_id=asset_id)
+    total_ret = get_all_management_ret(asset=asset)
+    if ret_method == SV.RET_TYPE_CASH_CUT_INTEREST:
+        asset_ret_carry_to_cash(cal_date=asset.start_date, asset=asset, amount=total_ret)
+    else:
+        asset_ret_carry_to_cash(cal_date=asset.expiry_date, asset=asset, amount=total_ret)
+
+    add_cash_with_type(cal_date=asset.expiry_date, cash_type=SV.CASH_TYPE_CARRY, amount=-get_all_mangement_fee(asset))
+    add_asset_fee_with_asset_and_type(cal_date=asset.expiry_date, asset_id=asset.id, fee_type=SV.FEE_TYPE_ADJUST_BANK,
+                                      amount=-get_all_mangement_fee(asset))
+
+
+def carry_management_fee_by_asset(asset_id=None):
+    asset = query_by_id(obj=AssetClass, asset_id=asset_id)
+    total_fee_amount = get_all_mangement_fee(asset=asset)
+    add_cash_with_type(amount=total_fee_amount, cal_date=asset.expiry_date, cash_type=SV.CASH_TYPE_FEE)
+    add_asset_fee_with_asset_and_type(amount=total_fee_amount, cal_date=asset.expiry_date, fee_type=SV.FEE_TYPE_REDEEM)
+
+
 def draw_mangement(cal_date=date.today()):
     mangements = get_expiry_management(cal_date=cal_date)
     for mangement in mangements:
@@ -687,24 +719,34 @@ def get_all_management_ret(asset=AssetClass()):
     days = (asset.expiry_date - asset.start_date).days
     asset_rate = asset.asset_ret_rate_list[0]
     year_days = asset_rate.interest_days
-    rate = asset_rate.ret_rate
-    amount = asset.asset_trade_list[0].amount
+    rate = asset_rate.ret_rate if asset_rate else 0.0
+    amount = asset.asset_trade_list[0].amount if asset.asset_trade_list else 0.0
     return amount * days * rate / year_days
 
 
-def draw_manangent_ret(cal_date=date.today()):
-    managements = get_start_and_expiry_management(cal_date=cal_date)
-    for management in managements:
-        if management.ret_cal_method == SV.RET_TYPE_CASH_CUT_INTEREST and management.start_date == cal_date:
-            add_cash_with_type(amount=get_all_management_ret(asset=management), cash_type=SV.CASH_TYPE_CARRY,
-                               asset_id=management.id, cal_date=cal_date)
-            add_asset_ret_with_asset_and_type(amount=get_all_management_ret(asset=management), asset_id=management.id,
-                                              ret_type=SV.RET_TYPE_CASH_CUT_INTEREST, cal_date=cal_date)
-        elif management.ret_cal_method == SV.RET_TYPE_CASH_ONE_TIME and management.expiry_date == cal_date:
-            add_cash_with_type(amount=get_all_management_ret(asset=management), cash_type=SV.CASH_TYPE_CARRY,
-                               asset_id=management.id, cal_date=cal_date)
-            add_asset_ret_with_asset_and_type(amount=get_all_management_ret(asset=management), asset_id=management.id,
-                                              ret_type=SV.RET_TYPE_CASH_ONE_TIME, cal_date=cal_date)
+def get_all_mangement_fee(asset=AssetClass()):
+    total_fee_amount = 0
+    days = (asset.expiry_date - asset.start_date).days
+    amount = asset.asset_trade_list[0].amount if asset.asset_trade_list else 0.0
+    asset_fee_rates = asset.asset_fee_rate_list
+    for asset_fee_rate in asset_fee_rates:
+        total_fee_amount += amount * days * asset_fee_rate.rate / asset_fee_rate.fee_days if asset_fee_rate.fee_days else 0.0
+    return total_fee_amount
+
+
+# def draw_manangent_ret(cal_date=date.today()):
+#     managements = get_start_and_expiry_management(cal_date=cal_date)
+#     for management in managements:
+#         if management.ret_cal_method == SV.RET_TYPE_CASH_CUT_INTEREST and management.start_date == cal_date:
+#             add_cash_with_type(amount=get_all_management_ret(asset=management), cash_type=SV.CASH_TYPE_CARRY,
+#                                asset_id=management.id, cal_date=cal_date)
+#             add_asset_ret_with_asset_and_type(amount=get_all_management_ret(asset=management), asset_id=management.id,
+#                                               ret_type=SV.RET_TYPE_CASH_CUT_INTEREST, cal_date=cal_date)
+#         elif management.ret_cal_method == SV.RET_TYPE_CASH_ONE_TIME and management.expiry_date == cal_date:
+#             add_cash_with_type(amount=get_all_management_ret(asset=management), cash_type=SV.CASH_TYPE_CARRY,
+#                                asset_id=management.id, cal_date=cal_date)
+#             add_asset_ret_with_asset_and_type(amount=get_all_management_ret(asset=management), asset_id=management.id,
+#                                               ret_type=SV.RET_TYPE_CASH_ONE_TIME, cal_date=cal_date)
 
 
 def get_management_fee_by_id(cal_date=date.today(), asset_id=None):
@@ -729,9 +771,10 @@ def get_management_fee_by_id(cal_date=date.today(), asset_id=None):
 
 def get_asset_rate_by_amount(rates=AssetClass().asset_ret_rate_list, amount=10000):
     rate = AssetRetRate(ret_rate=0.0)
-    if len(rates) == 1:
-        return rates[0]
-    elif len(rates) >= 1:
+    # if len(rates) == 1:
+    #     rate = rates[0]
+    # elif len(rates) > 1:
+    if len(rates) >= 1:
         rate = list(filter(lambda x: x.threshold <= amount, rates))[-1]
     return rate
 
