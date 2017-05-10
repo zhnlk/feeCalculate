@@ -157,6 +157,16 @@ class MainEngine(object):
         #          'agreement_to_cash': 10001.0, 'ret_carry_principal': 1001.0, 'asset_ret': -1001.0, 'total_amount': 10000.0}]
         return AssetService.get_agreement_detail_by_days(days)
 
+    def get_single_agreement_detail_by_period(self, asset_id=None, start=datetime.date.today(), end=datetime.date.today()):
+        """
+        获取过滤后的协存明细记录
+        :param asset_id: 
+        :param start: 
+        :param end: 
+        :return: 
+        """
+        return AssetService.get_single_agreement_detail_by_period(asset_id=asset_id, start=start, end=end)
+
     def get_fund_detail_by_days(self, days=0):
         """
         获取货基明细记录
