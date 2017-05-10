@@ -464,6 +464,7 @@ def cal_management_ret(cal_date=None, asset_id=None):
     '''
     asset = query_by_id(AssetClass, asset_id)
     if asset.expiry_date > cal_date and asset.start_date <= cal_date and not is_date_has_ret(asset_id=asset_id,
+                                                                                             ret_type=SV.RET_TYPE_INTEREST,
                                                                                              cal_date=cal_date):
         rate = get_asset_rate_by_amount(rates=asset.asset_ret_rate_list, amount=0)
         days = rate.interest_days
@@ -837,7 +838,7 @@ if __name__ == '__main__':
     # cal_management_fee(asset_id='36429917ffd34b02b29f8c49eb25f557')
     # print(get_all_management_detail())
     # print(get_total_fund_statistic())
-    print(get_single_management_detail(asset_id='c20d796695ee44eaa4f2f5755bba2767'))
+    print(get_fund_detail_by_days())
     # cal_daily_ret_and_fee(asset_id='7fe9c108cd874c10b167782f798e1d35')
     # cal_agreement_ret(cal_date=date.today(),
     #                   asset=query_by_id(obj=AssetClass, obj_id='7fe9c108cd874c10b167782f798e1d35'))

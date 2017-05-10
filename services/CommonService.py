@@ -126,20 +126,23 @@ def get_asset_ret_total_amount_by_asset_and_type(cal_date=date.today(), asset_id
 
 
 @session_deco
-def del_ret_by_asset_and_date(asset_id=None, cal_date=date.today(), **kwargs):
+def del_ret_by_asset_and_date(asset_id=None, cal_date=date.today(), ret_type=SV.RET_TYPE_CASH_CUT_INTEREST, **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
     session.query(AssetTradeRet).filter(
         AssetTradeRet.is_active,
         AssetTradeRet.asset_class == asset_id,
-        AssetTradeRet.date == cal_date).update(
+        AssetTradeRet.date == cal_date,
+        AssetTradeRet.type == ret_type,
+        AssetTradeRet.asset_class_obj.has(AssetClass.type == SV.ASSET_CLASS_AGREEMENT)
+    ).update(
         {AssetTradeRet.is_active: False},
         synchronize_session='fetch'
     )
 
 
 def add_asset_ret_with_asset_and_type(amount=0.0, asset_id=None, ret_type=SV.RET_TYPE_CASH, cal_date=date.today()):
-    if is_date_has_ret(asset_id=asset_id, cal_date=cal_date):
-        del_ret_by_asset_and_date(asset_id=asset_id, cal_date=cal_date)
+    if is_date_has_ret(asset_id=asset_id, cal_date=cal_date, ret_type=ret_type):
+        del_ret_by_asset_and_date(asset_id=asset_id, cal_date=cal_date, ret_type=ret_type)
     last_total_amount = get_asset_ret_last_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
@@ -630,10 +633,14 @@ def get_daily_fee(cal_date=date.today()):
 
 
 @session_deco
-def is_date_has_ret(cal_date=date.today(), asset_id=None, **kwargs):
+def is_date_has_ret(cal_date=date.today(), ret_type=SV.RET_TYPE_INTEREST, asset_id=None, **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
-    ret = session.query(AssetTradeRet).filter(AssetTradeRet.is_active, AssetTradeRet.asset_class == asset_id,
-                                              AssetTradeRet.date == cal_date)
+    ret = session.query(AssetTradeRet).filter(
+        AssetTradeRet.is_active,
+        AssetTradeRet.asset_class == asset_id,
+        AssetTradeRet.date == cal_date,
+        AssetTradeRet.type == ret_type
+    )
     return bool(ret.count())
 
 
