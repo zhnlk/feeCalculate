@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from datetime import date, timedelta
 
 from models.CashModel import Cash
-from services.CommonService import query, add_cash_with_type, get_cash_last_total_amount_by_type
+from services.CommonService import query, add_cash_with_type, get_cash_total_amount_by_type
 from utils import StaticValue as SV
 
 
@@ -28,11 +28,11 @@ def get_key_by_cash_type(cash_type=SV.CASH_TYPE_DEPOSIT):
 def get_cash_with_type(cal_date=date.today(), cash_type=SV.CASH_TYPE_DEPOSIT):
     return {
         get_key_by_cash_type(cash_type=cash_type):
-            get_cash_last_total_amount_by_type(
+            get_cash_total_amount_by_type(
                 cal_date=cal_date,
                 cash_type=cash_type
-            ) - get_cash_last_total_amount_by_type(cal_date=cal_date - timedelta(days=1),
-                                                   cash_type=cash_type)
+            ) - get_cash_total_amount_by_type(cal_date=cal_date - timedelta(days=1),
+                                              cash_type=cash_type)
 
     }
 
@@ -81,28 +81,28 @@ def get_cash_daily_detail(cal_date=date.today()):
     ret.update(get_cash_with_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_RET))
     ret.update(
         {
-            SV.CASH_KEY_CASH_TOTAL: get_cash_last_total_amount_by_type(cal_date=cal_date,
-                                                                       cash_type=SV.CASH_TYPE_DEPOSIT)
-                                    + get_cash_last_total_amount_by_type(cal_date=cal_date,
-                                                                         cash_type=SV.CASH_TYPE_REDEEM_AGREEMENT)
-                                    + get_cash_last_total_amount_by_type(cal_date=cal_date,
-                                                                         cash_type=SV.CASH_TYPE_REDEEM_FUND)
-                                    + get_cash_last_total_amount_by_type(cal_date=cal_date,
-                                                                         cash_type=SV.CASH_TYPE_REDEEM_MANAGEMENT)
-                                    - get_cash_last_total_amount_by_type(cal_date=cal_date,
-                                                                         cash_type=SV.CASH_TYPE_PURCHASE_AGREEMENT)
-                                    - get_cash_last_total_amount_by_type(cal_date=cal_date,
-                                                                         cash_type=SV.CASH_TYPE_PURCHASE_FUND)
-                                    - get_cash_last_total_amount_by_type(cal_date=cal_date,
-                                                                         cash_type=SV.CASH_TYPE_PURCHASE_MANAGEMENT)
-                                    - get_cash_last_total_amount_by_type(cal_date=cal_date,
-                                                                         cash_type=SV.CASH_TYPE_DRAW)
-                                    - get_cash_last_total_amount_by_type(cal_date=cal_date,
-                                                                         cash_type=SV.CASH_TYPE_FEE)
-                                    + get_cash_last_total_amount_by_type(cal_date=cal_date,
-                                                                         cash_type=SV.CASH_TYPE_RET)
-                                    + get_cash_last_total_amount_by_type(cal_date=cal_date,
-                                                                         cash_type=SV.CASH_TYPE_CARRY)
+            SV.CASH_KEY_CASH_TOTAL: get_cash_total_amount_by_type(cal_date=cal_date,
+                                                                  cash_type=SV.CASH_TYPE_DEPOSIT)
+                                    + get_cash_total_amount_by_type(cal_date=cal_date,
+                                                                    cash_type=SV.CASH_TYPE_REDEEM_AGREEMENT)
+                                    + get_cash_total_amount_by_type(cal_date=cal_date,
+                                                                    cash_type=SV.CASH_TYPE_REDEEM_FUND)
+                                    + get_cash_total_amount_by_type(cal_date=cal_date,
+                                                                    cash_type=SV.CASH_TYPE_REDEEM_MANAGEMENT)
+                                    - get_cash_total_amount_by_type(cal_date=cal_date,
+                                                                    cash_type=SV.CASH_TYPE_PURCHASE_AGREEMENT)
+                                    - get_cash_total_amount_by_type(cal_date=cal_date,
+                                                                    cash_type=SV.CASH_TYPE_PURCHASE_FUND)
+                                    - get_cash_total_amount_by_type(cal_date=cal_date,
+                                                                    cash_type=SV.CASH_TYPE_PURCHASE_MANAGEMENT)
+                                    - get_cash_total_amount_by_type(cal_date=cal_date,
+                                                                    cash_type=SV.CASH_TYPE_DRAW)
+                                    - get_cash_total_amount_by_type(cal_date=cal_date,
+                                                                    cash_type=SV.CASH_TYPE_FEE)
+                                    + get_cash_total_amount_by_type(cal_date=cal_date,
+                                                                    cash_type=SV.CASH_TYPE_RET)
+                                    + get_cash_total_amount_by_type(cal_date=cal_date,
+                                                                    cash_type=SV.CASH_TYPE_CARRY)
 
         }
     )

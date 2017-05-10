@@ -401,20 +401,20 @@ def get_management_fees_by_id(cal_date=date.today(), asset_id=None, **kwargs):
 
 
 def get_all_cash(cal_date=date.today()):
-    purchase_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_PURCHASE_FUND) \
-                      + get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_PURCHASE_AGREEMENT) \
-                      + get_cash_last_total_amount_by_type(cal_date=cal_date,
-                                                           cash_type=SV.CASH_TYPE_PURCHASE_MANAGEMENT)
+    purchase_amount = get_cash_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_PURCHASE_FUND) \
+                      + get_cash_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_PURCHASE_AGREEMENT) \
+                      + get_cash_total_amount_by_type(cal_date=cal_date,
+                                                      cash_type=SV.CASH_TYPE_PURCHASE_MANAGEMENT)
 
-    redeem_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_REDEEM_AGREEMENT) \
-                    + get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_REDEEM_FUND) \
-                    + get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_REDEEM_MANAGEMENT)
+    redeem_amount = get_cash_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_REDEEM_AGREEMENT) \
+                    + get_cash_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_REDEEM_FUND) \
+                    + get_cash_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_REDEEM_MANAGEMENT)
 
-    deposit_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_DEPOSIT)
-    ret_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_RET)
-    carry_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_CARRY)
-    draw_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_DRAW)
-    draw_fee_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_FEE)
+    deposit_amount = get_cash_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_DEPOSIT)
+    ret_amount = get_cash_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_RET)
+    carry_amount = get_cash_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_CARRY)
+    draw_amount = get_cash_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_DRAW)
+    draw_fee_amount = get_cash_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_FEE)
     return redeem_amount + deposit_amount + carry_amount + ret_amount - draw_fee_amount - draw_amount - purchase_amount
 
 

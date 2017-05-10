@@ -11,12 +11,11 @@ from services.CommonService import (
     add_asset_ret_with_asset_and_type,
     add_asset_trade_with_asset_and_type,
     add_cash_with_type,
-    get_asset_last_total_amount_by_asset_and_type,
-    get_asset_ret_last_total_amount_by_asset_and_type,
+    get_asset_ret_total_amount_by_asset_and_type,
     add_asset_fee_with_asset_and_type,
     query_by_id, save, get_management_asset_all_ret, get_management_trade_amount, get_management_trade_fees,
     get_all_mamangement_ids, get_all_asset_ids_by_type, get_expiry_management, get_management_fees_by_id,
-    is_date_has_ret, is_date_has_fee)
+    is_date_has_ret, is_date_has_fee, get_asset_total_amount_by_asset_and_type)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
 
@@ -99,18 +98,18 @@ def cal_agreement_ret(cal_date=date.today(), asset_id=None):
     :param asset:资产对象
     :return:
     '''
-    purchase_amount = get_asset_last_total_amount_by_asset_and_type(
+    purchase_amount = get_asset_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
         trade_type=SV.ASSET_TYPE_PURCHASE
     )
 
-    redeem_amount = get_asset_last_total_amount_by_asset_and_type(
+    redeem_amount = get_asset_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
         trade_type=SV.ASSET_TYPE_REDEEM
     )
-    carry_amount = get_asset_last_total_amount_by_asset_and_type(
+    carry_amount = get_asset_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
         trade_type=SV.ASSET_TYPE_RET_CARRY
@@ -154,12 +153,12 @@ def get_asset_agreement_detail(cal_date=date.today(), asset_id=None):
     asset = query_by_id(obj=AssetClass, obj_id=asset_id)
     ret.update(get_asset_base_detail(cal_date=cal_date, asset=asset))
 
-    total_carry = get_asset_ret_last_total_amount_by_asset_and_type(
+    total_carry = get_asset_ret_total_amount_by_asset_and_type(
         asset_id=asset_id,
         cal_date=cal_date,
         ret_type=SV.RET_TYPE_PRINCIPAL
     )
-    yes_total_carry = get_asset_ret_last_total_amount_by_asset_and_type(
+    yes_total_carry = get_asset_ret_total_amount_by_asset_and_type(
         asset_id=asset_id,
         cal_date=cal_date - timedelta(days=1),
         ret_type=SV.RET_TYPE_PRINCIPAL
@@ -167,13 +166,13 @@ def get_asset_agreement_detail(cal_date=date.today(), asset_id=None):
 
     ret[SV.ASSET_KEY_RET_CARRY_PRINCIPAL] = total_carry - yes_total_carry
 
-    total_ret = get_asset_ret_last_total_amount_by_asset_and_type(
+    total_ret = get_asset_ret_total_amount_by_asset_and_type(
         asset_id=asset.id,
         cal_date=cal_date,
         ret_type=SV.RET_TYPE_INTEREST
     )
 
-    yes_total_ret = get_asset_ret_last_total_amount_by_asset_and_type(
+    yes_total_ret = get_asset_ret_total_amount_by_asset_and_type(
         asset_id=asset.id,
         cal_date=cal_date - timedelta(days=1),
         ret_type=SV.RET_TYPE_INTEREST
@@ -303,13 +302,13 @@ def add_fund_daily_data(cal_date=date.today(), asset_id=None, ret_carry_cash_amo
 
 
 def get_total_fund_statistic_by_id(cal_date=date.today(), asset_id=None):
-    total_purchase_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
-                                                                          trade_type=SV.ASSET_TYPE_PURCHASE)
-    total_redeem_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
-                                                                        trade_type=SV.ASSET_TYPE_REDEEM)
+    total_purchase_amount = get_asset_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                     trade_type=SV.ASSET_TYPE_PURCHASE)
+    total_redeem_amount = get_asset_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                   trade_type=SV.ASSET_TYPE_REDEEM)
     total_amount = total_purchase_amount - total_redeem_amount
-    total_ret_amount = get_asset_ret_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
-                                                                         ret_type=SV.RET_TYPE_INTEREST)
+    total_ret_amount = get_asset_ret_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                    ret_type=SV.RET_TYPE_INTEREST)
     return {
         SV.ASSET_KEY_FUND_TOTAL_AMOUNT: total_amount,
         SV.ASSET_KEY_FUND_TOTAL_PURCHASE_AMOUNT: total_purchase_amount,
@@ -347,7 +346,7 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
     ret.update(get_asset_base_detail(cal_date=cal_date, asset=asset))
     ret.update({
         SV.ASSET_KEY_ASSET_RET:
-            get_asset_ret_last_total_amount_by_asset_and_type(
+            get_asset_ret_total_amount_by_asset_and_type(
                 cal_date=cal_date,
                 asset_id=asset_id,
                 ret_type=SV.RET_TYPE_INTEREST
@@ -355,7 +354,7 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
 
     ret.update({
         SV.ASSET_KEY_RET_CARRY_CASH:
-            get_asset_ret_last_total_amount_by_asset_and_type(
+            get_asset_ret_total_amount_by_asset_and_type(
                 asset_id=asset_id,
                 ret_type=SV.RET_TYPE_CASH,
                 cal_date=cal_date
@@ -365,12 +364,12 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
     ret.update({
         SV.ASSET_KEY_RET_NOT_CARRY:
             ret.get(SV.ASSET_KEY_ASSET_RET, 0) - ret.get(SV.ASSET_KEY_RET_CARRY_CASH, 0)})
-    total_purchase = get_asset_last_total_amount_by_asset_and_type(
+    total_purchase = get_asset_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
         trade_type=SV.ASSET_TYPE_PURCHASE
     )
-    total_redeem = get_asset_last_total_amount_by_asset_and_type(
+    total_redeem = get_asset_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
         trade_type=SV.ASSET_TYPE_REDEEM
@@ -534,14 +533,14 @@ def cal_all_manangement_fee(cal_date=date.today()):
 
 
 def get_total_management_statistic_by_id(cal_date=date.today(), asset_id=None):
-    total_purchase_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
-                                                                          trade_type=SV.ASSET_TYPE_PURCHASE)
-    total_redeem_amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
-                                                                        trade_type=SV.ASSET_TYPE_REDEEM)
+    total_purchase_amount = get_asset_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                     trade_type=SV.ASSET_TYPE_PURCHASE)
+    total_redeem_amount = get_asset_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                   trade_type=SV.ASSET_TYPE_REDEEM)
     total_amount = total_purchase_amount - total_redeem_amount
 
-    total_ret_amount = get_asset_ret_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
-                                                                         ret_type=SV.RET_TYPE_INTEREST)
+    total_ret_amount = get_asset_ret_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+                                                                    ret_type=SV.RET_TYPE_INTEREST)
 
     return {
         SV.ASSET_KEY_MANAGEMENT_AMOUNT: total_amount + total_ret_amount,
@@ -822,13 +821,13 @@ def get_key_by_asset_type_and_asset_class(asset_type=SV.CASH_TYPE_DEPOSIT, asset
 
 
 def get_asset_trades_sum_dic_by_type(cal_date=date.today(), asset=AssetClass(), trade_type=SV.ASSET_TYPE_PURCHASE):
-    total_amount = get_asset_last_total_amount_by_asset_and_type(
+    total_amount = get_asset_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset.id,
         trade_type=trade_type
     )
 
-    yes_total_amount = get_asset_last_total_amount_by_asset_and_type(
+    yes_total_amount = get_asset_total_amount_by_asset_and_type(
         cal_date=cal_date - timedelta(days=1),
         asset_id=asset.id,
         trade_type=trade_type
