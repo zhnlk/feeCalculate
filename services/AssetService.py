@@ -297,6 +297,18 @@ def add_fund_daily_data(cal_date=date.today(), asset_id=None, ret_carry_cash_amo
     :param ret_amount:收益
     :return:None
     '''
+
+    fund_total_ret_amount = get_asset_ret_total_amount_by_asset_and_type(
+        cal_date=cal_date,
+        asset_id=asset_id,
+        ret_type=SV.RET_TYPE_INTEREST
+    )  # 所有基金收益
+    fund_carry_ret_amount = get_asset_ret_total_amount_by_asset_and_type(
+        cal_date=cal_date,
+        asset_id=asset_id,
+        ret_type=SV.RET_TYPE_CASH
+    )  # 结转基金收益
+    ret_amount -= (fund_total_ret_amount - fund_carry_ret_amount)  # 输入未结转收益-当日未结转收益 = 当日收益
     add_daily_asset_data(cal_date=cal_date, asset_id=asset_id, ret_carry_cash_amount=ret_carry_cash_amount,
                          purchase_amount=purchase_amount, redeem_amount=redeem_amount, ret_amount=ret_amount)
 
@@ -344,26 +356,30 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
     # ret.update({SV.ASSET_KEY_NAME: asset.name})
     # ret.update({SV.ASSET_KEY_ASSET_ID: asset.id})
     ret.update(get_asset_base_detail(cal_date=cal_date, asset=asset))
-    ret.update({
-        SV.ASSET_KEY_ASSET_RET:
-            get_asset_ret_total_amount_by_asset_and_type(
-                cal_date=cal_date,
-                asset_id=asset_id,
-                ret_type=SV.RET_TYPE_INTEREST
-            )})
 
-    ret.update({
-        SV.ASSET_KEY_RET_CARRY_CASH:
-            get_asset_ret_total_amount_by_asset_and_type(
-                asset_id=asset_id,
-                ret_type=SV.RET_TYPE_CASH,
-                cal_date=cal_date
-            )
-    })
+    total_ret = get_asset_ret_total_amount_by_asset_and_type(
+        cal_date=cal_date,
+        asset_id=asset_id,
+        ret_type=SV.RET_TYPE_INTEREST)  # 总收益
+    yes_total_ret = get_asset_ret_total_amount_by_asset_and_type(
+        cal_date=cal_date - timedelta(days=1),
+        asset_id=asset_id,
+        ret_type=SV.RET_TYPE_INTEREST)  # 昨日之前总收益
 
-    ret.update({
-        SV.ASSET_KEY_RET_NOT_CARRY:
-            ret.get(SV.ASSET_KEY_ASSET_RET, 0) - ret.get(SV.ASSET_KEY_RET_CARRY_CASH, 0)})
+    ret.update({SV.ASSET_KEY_ASSET_RET: total_ret - yes_total_ret})
+
+    total_ret_carry = get_asset_ret_total_amount_by_asset_and_type(
+        cal_date=cal_date,
+        asset_id=asset_id,
+        ret_type=SV.RET_TYPE_CASH)
+    yes_total_ret_carry = get_asset_ret_total_amount_by_asset_and_type(
+        cal_date=cal_date - timedelta(days=1),
+        asset_id=asset_id,
+        ret_type=SV.RET_TYPE_CASH)
+
+    ret.update({SV.ASSET_KEY_RET_CARRY_CASH: total_ret_carry - yes_total_ret_carry})
+
+    ret.update({SV.ASSET_KEY_RET_NOT_CARRY: total_ret - total_ret_carry})  # 未结转收益
     total_purchase = get_asset_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
@@ -793,11 +809,11 @@ def add_daily_asset_data(cal_date=date.today(), asset_id=None, ret_carry_asset_a
     asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
     asset_ret_carry_to_principal(cal_date=cal_date, asset=asset,
                                  amount=ret_carry_asset_amount) if ret_carry_asset_amount else None
-    asset_ret_carry_to_cash(cal_date=cal_date, asset=asset,
-                            amount=ret_carry_cash_amount) if ret_carry_cash_amount else None
     purchase(asset=asset, amount=purchase_amount, cal_date=cal_date) if purchase_amount else None
     redeem(asset=asset, amount=redeem_amount, cal_date=cal_date) if redeem_amount else None
     add_trade_ret(cal_date=cal_date, ret_amount=ret_amount, asset=asset) if ret_amount else None
+    asset_ret_carry_to_cash(cal_date=cal_date, asset=asset,
+                            amount=ret_carry_cash_amount) if ret_carry_cash_amount else None
     asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
     cal_agreement_ret(cal_date=cal_date, asset_id=asset.id) if asset.type == SV.ASSET_CLASS_AGREEMENT else None
 
