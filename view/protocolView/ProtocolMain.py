@@ -1,12 +1,71 @@
 # -*- coding: utf-8 -*-
+import datetime
 from collections import OrderedDict
 
-from PyQt5.QtWidgets import QAction
+from PyQt5.QtWidgets import QAction, QVBoxLayout, QWidget, QLabel, QLineEdit, QPushButton, QHBoxLayout
 from PyQt5.QtWidgets import QApplication
 
 from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 from controller.EventType import EVENT_PD
 from controller.MainEngine import MainEngine
+
+
+class ProtocolViewMain(BasicFcView):
+    def __init__(self, mainEngine, parent=None):
+        super(ProtocolViewMain, self).__init__()
+        self.mainEngine = mainEngine
+        self.setMinimumSize(1300, 600)
+        self.initMain()
+
+    def initMain(self):
+        """初始化界面"""
+        self.setWindowTitle('现金主界面')
+        filterBar = FilterBar(self.mainEngine)
+        cashListView = ProtocolListView(self.mainEngine)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(filterBar)
+        vbox.addWidget(cashListView)
+        self.setLayout(vbox)
+
+    def show(self):
+        """显示"""
+        super(ProtocolViewMain, self).show()
+
+
+class FilterBar(QWidget):
+    def __init__(self, mainEngine, parent=None):
+        super(FilterBar, self).__init__()
+        self.initUI()
+
+    def initUI(self):
+        # 过滤的开始时间
+        filterStartDate_Label = QLabel('开始时间')
+        # 开始时间输入框
+        self.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterStartDate_Edit.setMaximumWidth(80)
+        # 过滤的结束时间
+        filterEndDate_Label = QLabel('结束时间')
+        # 结束时间输入框
+        self.filterEndDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterEndDate_Edit.setMaximumWidth(80)
+
+        # 筛选按钮
+        filterBtn = QPushButton('筛选')
+        # 导出按钮
+        outputBtn = QPushButton('导出')
+
+        filterHBox = QHBoxLayout()
+        filterHBox.addStretch()
+        filterHBox.addWidget(filterStartDate_Label)
+        filterHBox.addWidget(self.filterStartDate_Edit)
+        filterHBox.addWidget(filterEndDate_Label)
+        filterHBox.addWidget(self.filterEndDate_Edit)
+
+        filterHBox.addWidget(filterBtn)
+        filterHBox.addWidget(outputBtn)
+
+        self.setLayout(filterHBox)
 
 
 class ProtocolListView(BasicFcView):
@@ -27,7 +86,7 @@ class ProtocolListView(BasicFcView):
         # 协存项目
         d['total_amount'] = {'chinese': '总额', 'cellType': NumCell}
         d['total_principal'] = {'chinese': '协存本金', 'cellType': NumCell}
-        d['asset_ret'] = {'chinese': '协存利息', 'cellType': NumCell}
+        d['asset_ret'] = {'chinese': '当日协存利息和', 'cellType': NumCell}
         # 协存项目 输入项
         d['ret_carry_principal'] = {'chinese': '利息转结本金', 'cellType': NumCell}
         d['cash_to_agreement'] = {'chinese': '现金->协存', 'cellType': NumCell}
@@ -45,6 +104,7 @@ class ProtocolListView(BasicFcView):
         self.setMinimumSize(1200, 600)
         self.setFont(BASIC_FONT)
         self.initTable()
+        self.refresh()
         self.addMenuAction()
 
         self.signal.connect(self.refresh)
@@ -101,7 +161,7 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    plv = ProtocolListView(mainEngine)
+    plv = ProtocolViewMain(mainEngine)
 
     plv.show()
     sys.exit(app.exec_())
