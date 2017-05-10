@@ -16,7 +16,7 @@ from services.CommonService import (
     add_asset_fee_with_asset_and_type,
     query_by_id, save, get_management_asset_all_ret, get_management_trade_amount, get_management_trade_fees,
     get_all_mamangement_ids, get_all_asset_ids_by_type, get_expiry_management, get_start_and_expiry_management,
-    get_management_fees_by_id)
+    get_management_fees_by_id, is_date_has_ret, is_date_has_fee)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
 
@@ -340,7 +340,7 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
     '''
     ret = dict()
     asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
-    ret.update({SV.ASSET_KEY_NAME: asset.name})
+    # ret.update({SV.ASSET_KEY_NAME: asset.name})
     # ret.update({SV.ASSET_KEY_ASSET_ID: asset.id})
     ret.update(get_asset_base_detail(cal_date=cal_date, asset=asset))
     ret.update({
@@ -439,19 +439,20 @@ def add_management_class(
 ):
     asset = AssetClass(name=name, start_date=start_date, expiry_date=end_date, type=SV.ASSET_CLASS_MANAGEMENT,
                        ret_cal_method=SV.RET_TYPE_CASH_CUT_INTEREST, cal_date=cal_date)
-
-    asset_rate = AssetRetRate(asset_id=asset.id, ret_rate=ret_rate, interest_days=rate_days, cal_date=cal_date)
-
-    asset_fee_rate_bank = AssetFeeRate(asset_class=asset.id, rate=bank_fee_rate, type=SV.FEE_TYPE_PURCHASE,
-                                       fee_days=bank_days, cal_date=cal_date)
-    asset_fee_rate_manage = AssetFeeRate(asset_class=asset.id, rate=manage_fee_rate, type=SV.FEE_TYPE_PURCHASE,
-                                         fee_days=manage_days, cal_date=cal_date)
-
-    purchase(asset=asset, amount=trade_amount, cal_date=cal_date)
+    asset_id = asset.id
     save(asset)
+    asset_rate = AssetRetRate(asset_id=asset_id, ret_rate=ret_rate, interest_days=rate_days, cal_date=cal_date)
+
+    asset_fee_rate_bank = AssetFeeRate(asset_class=asset_id, rate=bank_fee_rate, type=SV.FEE_TYPE_LOAN_BANK,
+                                       fee_days=bank_days, cal_date=cal_date)
+    asset_fee_rate_manage = AssetFeeRate(asset_class=asset_id, rate=manage_fee_rate, type=SV.FEE_TYPE_MANAG_PLAN,
+                                         fee_days=manage_days, cal_date=cal_date)
+    purchase(asset=asset, amount=trade_amount, cal_date=cal_date)
+
     save(asset_rate)
     save(asset_fee_rate_bank)
     save(asset_fee_rate_manage)
+    cal_asset_all_mangement_ret_and_fee(start_date=start_date, end_date=end_date, asset_id=asset.id)
 
 
 def cal_management_ret(cal_date=None, asset_id=None):
@@ -462,15 +463,26 @@ def cal_management_ret(cal_date=None, asset_id=None):
     :return:
     '''
     asset = query_by_id(AssetClass, asset_id)
-    if asset.expiry_date > cal_date:
+    if asset.expiry_date > cal_date and asset.start_date <= cal_date and not is_date_has_ret(asset_id=asset_id,
+                                                                                             cal_date=cal_date):
         rate = get_asset_rate_by_amount(rates=asset.asset_ret_rate_list, amount=0)
         days = rate.interest_days
-        amount = get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
-                                                               trade_type=SV.ASSET_TYPE_PURCHASE)
-        ret = amount * rate / days
+        asset_trades = asset.asset_trade_list
+        amount = asset_trades[-1].total_amount if asset_trades else 0.0
+        ret = amount * rate.ret_rate / days
+        add_asset_ret_with_asset_and_type(
+            asset_id=asset_id,
+            amount=ret,
+            ret_type=SV.RET_TYPE_INTEREST,
+            cal_date=cal_date
+        )
 
-        add_asset_ret_with_asset_and_type(asset_id=asset_id, amount=ret, ret_type=SV.RET_TYPE_INTEREST,
-                                          cal_date=cal_date)
+
+def cal_asset_all_mangement_ret_and_fee(start_date=date.today(), end_date=date.today(), asset_id=None):
+    while start_date < end_date:
+        cal_management_ret(cal_date=start_date, asset_id=asset_id)
+        cal_management_fee(cal_date=start_date, asset_id=asset_id)
+        start_date += timedelta(days=1)
 
 
 def cal_all_management_ret(cal_date=date.today()):
@@ -486,7 +498,7 @@ def cal_all_management_ret(cal_date=date.today()):
 
 def cal_management_fee(cal_date=date.today(), asset_id=None):
     asset = query_by_id(AssetClass, asset_id)
-    if asset.expiry_date > cal_date:
+    if asset.expiry_date > cal_date and asset.start_date <= cal_date:
         asset_fee_rates = asset.asset_fee_rate_list
 
         asset_trades = asset.asset_trade_list
@@ -494,10 +506,11 @@ def cal_management_fee(cal_date=date.today(), asset_id=None):
         total_trade_amount = asset_trades[-1].total_amount if asset_trades else 0.0
         for asset_fee_rate in asset_fee_rates:
             add_asset_fee_with_asset_and_type(
+                cal_date=cal_date,
                 amount=total_trade_amount * asset_fee_rate.rate / asset_fee_rate.fee_days,
                 asset_id=asset_id,
                 fee_type=asset_fee_rate.type
-            )
+            ) if not is_date_has_fee(cal_date=cal_date, asset_id=asset_id, fee_type=asset_fee_rate.type) else None
     else:
         pass
 
@@ -558,7 +571,6 @@ def get_single_management_detail(asset_id=None):
         asset.expiry_date - asset.start_date).days}) if asset.expiry_date and asset.start_date and asset.expiry_date > asset.start_date else ret.update(
         {SV.ASSET_KEY_MANAGEMENT_DUE: 1})
     ret.update({SV.ASSET_KEY_ASSET_RET: get_management_asset_all_ret(asset_id=asset.id)})
-    # ret.update({SV.ASSET_KEY_MANAGEMENT_DAILY_RET: ret.get(SV.ASSET_KEY_MANAGEMENT_RET / SV.ASSET_KEY_MANAGEMENT_DUE)})
     ret.update({SV.ASSET_KEY_MANAGEMENT_AMOUNT: get_management_trade_amount(asset_id=asset_id)})
     asset = query_by_id(obj=AssetClass, obj_id=asset_id)
     ret.update({SV.ASSET_KEY_MANAGEMENT_RET_RATE: asset.asset_ret_rate_list[
@@ -594,7 +606,7 @@ def get_all_management_detail():
     return ret
 
 
-def cal_adjust_fee(cal_date=date.today(), fee_amount=200, asset_id=None):
+def cal_adjust_fee(cal_date=date.today(), fee_amount=200, asset_id=None, adjust_fee_type=SV.FEE_TYPE_ADJUST_BANK):
     '''
     添加调整费用
     :param cal_date:计算日期
@@ -602,7 +614,7 @@ def cal_adjust_fee(cal_date=date.today(), fee_amount=200, asset_id=None):
     :param asset_id:资产id
     :return:
     '''
-    add_asset_fee_with_asset_and_type(cal_date=cal_date, asset_id=asset_id, fee_type=SV.FEE_TYPE_ADJUST,
+    add_asset_fee_with_asset_and_type(cal_date=cal_date, asset_id=asset_id, fee_type=adjust_fee_type,
                                       amount=fee_amount)
 
 
@@ -625,30 +637,30 @@ def management_carry_ret_to_cash(cal_date=date.today(), asset_id=None):
             )
 
 
-def cal_daily_ret_and_fee(cal_date=date.today(), asset_id=None):
-    '''
-    计算资管的收益和费用
-    :param cal_date:计算日期
-    :param asset_id:资产id
-    :return:
-    '''
-    assetclass = query_by_id(obj=AssetClass(), obj_id=asset_id)
-    if cal_date < assetclass.expiry_date:
-        asset_ret_rates = assetclass.asset_ret_rate_list
-        asset_fee_rates = assetclass.asset_fee_rate_list
-        asset_trade_amount = get_asset_last_total_amount_by_asset_and_type(asset_id=assetclass.id,
-                                                                           trade_type=SV.ASSET_TYPE_PURCHASE,
-                                                                           cal_date=cal_date)
-
-        rate = asset_ret_rates[0]
-        add_asset_ret_with_asset_and_type(amount=asset_trade_amount * rate.ret_rate / rate.interest_days,
-                                          asset_id=asset_id, ret_type=SV.RET_TYPE_INTEREST, cal_date=cal_date)
-
-        for x in asset_fee_rates:
-            add_asset_fee_with_asset_and_type(
-                amount=asset_trade_amount * x.rate / x.fee_days,
-                asset_id=asset_id, fee_type=SV.FEE_TYPE_PURCHASE,
-                cal_date=cal_date)
+# def cal_daily_ret_and_fee(cal_date=date.today(), asset_id=None):
+#     '''
+#     计算资管的收益和费用
+#     :param cal_date:计算日期
+#     :param asset_id:资产id
+#     :return:
+#     '''
+#     assetclass = query_by_id(obj=AssetClass(), obj_id=asset_id)
+#     if cal_date < assetclass.expiry_date:
+#         asset_ret_rates = assetclass.asset_ret_rate_list
+#         asset_fee_rates = assetclass.asset_fee_rate_list
+#         asset_trade_amount = get_asset_last_total_amount_by_asset_and_type(asset_id=assetclass.id,
+#                                                                            trade_type=SV.ASSET_TYPE_PURCHASE,
+#                                                                            cal_date=cal_date)
+#
+#         rate = asset_ret_rates[0]
+#         add_asset_ret_with_asset_and_type(amount=asset_trade_amount * rate.ret_rate / rate.interest_days,
+#                                           asset_id=asset_id, ret_type=SV.RET_TYPE_INTEREST, cal_date=cal_date)
+#
+#         for x in asset_fee_rates:
+#             add_asset_fee_with_asset_and_type(
+#                 amount=asset_trade_amount * x.rate / x.fee_days,
+#                 asset_id=asset_id, fee_type=SV.FEE_TYPE_PURCHASE,
+#                 cal_date=cal_date)
 
 
 def cal_all_mangement_ret_and_fee(cal_date=date.today()):
@@ -816,15 +828,16 @@ if __name__ == '__main__':
     # add_management_class(name='management', trade_amount=10000, ret_rate=0.1, rate_days=360, start_date=date.today(),
     #                      end_date=date.today() + timedelta(days=200), bank_fee_rate=0.0003, manage_fee_rate=0.00015)
 
+    # cal_management_fee(cal_date=date(2017, 1, 14), asset_id='c20d796695ee44eaa4f2f5755bba2767')
     # add_management_class(name='management1')
-    print(get_agreement_detail_by_days())
+    # print(get_fund_detail_by_days())
     # print(get_single_agreement_detail_by_period(asset_id='b9537ae533d2487791f10155f814853b',
     #                                             start=date.today() - timedelta(days=10)))
     # print(get_agreement_detail_by_days())
     # cal_management_fee(asset_id='36429917ffd34b02b29f8c49eb25f557')
     # print(get_all_management_detail())
     # print(get_total_fund_statistic())
-    # print(get_single_management_detail(asset_id='8f62d3fb42ec49459de78934753f57ae'))
+    print(get_single_management_detail(asset_id='c20d796695ee44eaa4f2f5755bba2767'))
     # cal_daily_ret_and_fee(asset_id='7fe9c108cd874c10b167782f798e1d35')
     # cal_agreement_ret(cal_date=date.today(),
     #                   asset=query_by_id(obj=AssetClass, obj_id='7fe9c108cd874c10b167782f798e1d35'))
