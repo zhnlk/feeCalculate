@@ -125,18 +125,26 @@ def get_asset_ret_total_amount_by_asset_and_type(cal_date=date.today(), asset_id
     return ret.total_amount if ret.total_amount else 0.0
 
 
+@session_deco
+def del_ret_by_asset_and_date(asset_id=None, cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    session.query(AssetTradeRet).filter(
+        AssetTradeRet.is_active,
+        AssetTradeRet.asset_class == asset_id,
+        AssetTradeRet.date == cal_date).update(
+        {AssetTradeRet.is_active: False},
+        synchronize_session='fetch'
+    )
+
+
 def add_asset_ret_with_asset_and_type(amount=0.0, asset_id=None, ret_type=SV.RET_TYPE_CASH, cal_date=date.today()):
+    if is_date_has_ret(asset_id=asset_id, cal_date=cal_date):
+        del_ret_by_asset_and_date(asset_id=asset_id, cal_date=cal_date)
     last_total_amount = get_asset_ret_last_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
         ret_type=ret_type
     )
-    if is_date_has_ret(asset_id=asset_id, cal_date=cal_date):
-        last_total_amount = get_asset_ret_last_total_amount_by_asset_and_type(
-            cal_date=cal_date - timedelta(days=1),
-            asset_id=asset_id,
-            ret_type=ret_type
-        )
     save(
         AssetTradeRet(
             asset_class=asset_id,
@@ -491,13 +499,22 @@ def get_all_management(cal_date=date.today(), **kwargs):
 
     ret_obj = session.query(func.sum(AssetTradeRet.amount).label('total_amount')).filter(
         AssetTradeRet.is_active,
-        AssetTradeRet.date < cal_date + timedelta(
-            days=1),
+        AssetTradeRet.date < cal_date + timedelta(days=1),
         AssetTradeRet.asset_class_obj.has(
             AssetClass.type == SV.ASSET_CLASS_MANAGEMENT)).one()
     ret_amount = ret_obj.total_amount if ret_obj.total_amount else 0.0
 
-    return purchase_amount + ret_amount - redeem_amount
+    fee_obj = session.query(func.sum(AssetFee.amount).label('total_amount')).filter(
+        AssetFee.is_active,
+        AssetFee.date < cal_date + timedelta(days=1),
+        AssetFee.asset_class_obj.has(
+            AssetClass.type == SV.ASSET_CLASS_MANAGEMENT
+        )
+    ).one()
+
+    fee_amount = fee_obj.total_amount if fee_obj.total_amount else 0.0
+
+    return purchase_amount + ret_amount - redeem_amount - fee_amount
 
 
 @session_deco
