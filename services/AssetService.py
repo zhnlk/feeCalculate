@@ -92,10 +92,9 @@ def add_agreement_daily_data(cal_date=date.today(), asset_id=None, ret_carry_ass
 
 
 def cal_agreement_ret(cal_date=date.today(), asset_id=None):
-    dates = get_asset_date(asset_id=asset_id)
-    for tmp_date in dates:
-        if tmp_date >= cal_date:
-            cal_agreement_ret_of_asset(cal_date=date, asset_id=asset_id)
+    while cal_date <= date.today():
+        cal_agreement_ret_of_asset(cal_date=cal_date, asset_id=asset_id)
+        cal_date += timedelta(days=1)
 
 
 def cal_agreement_ret_of_asset(cal_date=date.today(), asset_id=None):
