@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
 from controller.EventEngine import Event
-from controller.EventType import EVENT_MAIN_FEE, EVENT_MAIN_VALUATION, EVENT_PD, EVENT_PD_INPUT
+from controller.EventType import EVENT_MAIN_FEE, EVENT_MAIN_VALUATION, EVENT_PD, EVENT_PD_INPUT, EVENT_CASH
 from view.BasicWidget import BASIC_FONT, BasicFcView
 from controller.MainEngine import MainEngine
 from utils import StaticValue as SV
@@ -135,17 +135,17 @@ class ProtocolInput(BasicFcView):
 
         # 加入数据后，更新列表显示
         self.mainEngine.eventEngine.put(Event(type_=EVENT_PD))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_CASH))
         self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_FEE))
         self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
         # self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_ASSERT_DETAIL))
 
         self.showInfo()
 
-
     def prepareData(self):
 
         result = self.mainEngine.get_all_asset_ids_by_type(SV.ASSET_CLASS_AGREEMENT)
-        for mf in result :
+        for mf in result:
             if not self.pd_ComboBox_list.__contains__(mf[0]):
                 self.pd_ComboBox_list.append(mf[0])
                 self.pd_ComboBox.addItem(mf[1])

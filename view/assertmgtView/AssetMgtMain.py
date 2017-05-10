@@ -3,7 +3,7 @@ import datetime
 from PyQt5 import QtCore
 from collections import OrderedDict
 
-from PyQt5.QtWidgets import QAction, QMainWindow, QDockWidget, QApplication
+from PyQt5.QtWidgets import QAction, QMainWindow, QDockWidget, QApplication, QVBoxLayout, QWidget, QLabel, QLineEdit, QPushButton, QHBoxLayout
 
 from view.assertmgtView.AdjustValuationView import AdjustValuationView
 from view.assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
@@ -28,13 +28,13 @@ class AssetMgtListView(QMainWindow, BasicFcView):
         self.setWindowTitle('资管明细')
 
         """初始化界面"""
-        self.setMinimumSize(1200, 600)
+        self.setMinimumSize(1300, 600)
         self.initDock()
 
     def initDock(self):
         # 创建浮动布局
         vidgetView1, dockView1 = self.createDock(AssetDailyInventoryView, '资管每日存量表', QtCore.Qt.TopDockWidgetArea)
-        vidgetView2, dockView2 = self.createDock(CommitteeDetailView, '委贷明细', QtCore.Qt.BottomDockWidgetArea)
+        vidgetView2, dockView2 = self.createDock(CommitteeDetailMain, '委贷明细', QtCore.Qt.BottomDockWidgetArea)
 
 
         # self.tabifyDockWidget(dockView1,dockView2)
@@ -119,6 +119,63 @@ class AssetDailyInventoryView(BasicFcView):
             row = row + 1
 
 
+class CommitteeDetailMain(BasicFcView):
+    def __init__(self, mainEngine, parent=None):
+        super(CommitteeDetailMain, self).__init__()
+        self.mainEngine = mainEngine
+        # self.setMinimumSize(1300, 600)
+        self.initMain()
+
+    def initMain(self):
+        """初始化界面"""
+        self.setWindowTitle('现金主界面')
+        filterBar = FilterBar(self.mainEngine)
+        cashListView = CommitteeDetailView(self.mainEngine)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(filterBar)
+        vbox.addWidget(cashListView)
+        self.setLayout(vbox)
+
+    def show(self):
+        """显示"""
+        super(CommitteeDetailView, self).show()
+
+
+class FilterBar(QWidget):
+    def __init__(self, mainEngine, parent=None):
+        super(FilterBar, self).__init__()
+        self.initUI()
+
+    def initUI(self):
+        # 过滤的开始时间
+        filterStartDate_Label = QLabel('开始时间')
+        # 开始时间输入框
+        self.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterStartDate_Edit.setMaximumWidth(80)
+        # 过滤的结束时间
+        filterEndDate_Label = QLabel('结束时间')
+        # 结束时间输入框
+        self.filterEndDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterEndDate_Edit.setMaximumWidth(80)
+
+        # 筛选按钮
+        filterBtn = QPushButton('筛选')
+        # 导出按钮
+        outputBtn = QPushButton('导出')
+
+        filterHBox = QHBoxLayout()
+        filterHBox.addStretch()
+        filterHBox.addWidget(filterStartDate_Label)
+        filterHBox.addWidget(self.filterStartDate_Edit)
+        filterHBox.addWidget(filterEndDate_Label)
+        filterHBox.addWidget(self.filterEndDate_Edit)
+
+        filterHBox.addWidget(filterBtn)
+        filterHBox.addWidget(outputBtn)
+
+        self.setLayout(filterHBox)
+
 class CommitteeDetailView(BasicFcView):
     def __init__(self, mainEngine, parent=None):
         """Constructor"""
@@ -158,7 +215,7 @@ class CommitteeDetailView(BasicFcView):
         # self.setMinimumSize(1200, 600)
         # self.setFont(BASIC_FONT)
         self.initTable()
-        self.show()
+        self.refresh()
         # self.addMenuAction()
         self.signal.connect(self.refresh)
         self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
@@ -243,9 +300,9 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    # mfm = AssetMgtListView(mainEngine)
+    mfm = AssetMgtListView(mainEngine)
     # mflv = AssetDailyInventoryView(mainEngine)
-    mfm = CommitteeDetailView(mainEngine)
+    # mfm = CommitteeDetailView(mainEngine)
     # mflv.showMaximized()
     # mainfdv.showMaximized()
     mfm.showMaximized()

@@ -18,7 +18,7 @@ from view.assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
 from view.assertmgtView.AssetMgtInput import AssetMgtInput
 from view.assertmgtView.AssetMgtMain import AssetMgtListView
 from view.cashView.CashInput import CashInput
-from view.cashView.CashMain import CashListView
+from view.cashView.CashMain import CashListView, CashViewMain
 from view.miscView.AboutMain import AboutWidget
 from view.miscView.ErrorMain import ErrorWidget
 from view.moneyfundView.MfCateInput import MfCateInput
@@ -26,7 +26,7 @@ from view.moneyfundView.MoneyFundInput import MoneyFundInput
 from view.moneyfundView.MoneyFundMain import MoneyFundMain
 from view.protocolView.PdCateInput import PdCateInput
 from view.protocolView.ProtocolInput import ProtocolInput
-from view.protocolView.ProtocolMain import ProtocolListView
+from view.protocolView.ProtocolMain import ProtocolListView, ProtocolViewMain
 
 
 class MainWindow(QMainWindow, BasicFcView):
@@ -114,7 +114,7 @@ class MainWindow(QMainWindow, BasicFcView):
         try:
             self.widgetDict['showCashListDetail'].show()
         except KeyError:
-            self.widgetDict['showCashListDetail'] = CashListView(self.mainEngine)
+            self.widgetDict['showCashListDetail'] = CashViewMain(self.mainEngine)
             self.widgetDict['showCashListDetail'].show()
 
     def openProtocolListDetail(self):
@@ -122,7 +122,7 @@ class MainWindow(QMainWindow, BasicFcView):
         try:
             self.widgetDict['openProtocolListDetail'].show()
         except KeyError:
-            self.widgetDict['openProtocolListDetail'] = ProtocolListView(self.mainEngine)
+            self.widgetDict['openProtocolListDetail'] = ProtocolViewMain(self.mainEngine)
             self.widgetDict['openProtocolListDetail'].show()
 
     def openMoneyFundListDetail(self):
