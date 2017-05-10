@@ -100,6 +100,15 @@ class MainEngine(object):
         """
         return CashService.get_cash_detail_by_days(days)
 
+    def get_cash_detail_by_period(self, start=datetime.date.today(), end=datetime.date.today()):
+        """
+        筛选现金明细
+        :param start: 
+        :param end: 
+        :return: 
+        """
+        return CashService.get_cash_detail_by_period(start=start, end=end)
+
     def add_cash_daily_data(self, cal_date, draw_amount, draw_fee, deposit_amount, ret_amount):
         """
         增加现金明细记录
