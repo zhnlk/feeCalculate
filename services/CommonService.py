@@ -415,7 +415,7 @@ def get_all_cash(cal_date=date.today()):
     carry_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_CARRY)
     draw_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_DRAW)
     draw_fee_amount = get_cash_last_total_amount_by_type(cal_date=cal_date, cash_type=SV.CASH_TYPE_FEE)
-    return redeem_amount + deposit_amount + carry_amount + ret_amount + draw_fee_amount - draw_amount - purchase_amount
+    return redeem_amount + deposit_amount + carry_amount + ret_amount - draw_fee_amount - draw_amount - purchase_amount
 
 
 @session_deco
