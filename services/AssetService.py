@@ -92,12 +92,20 @@ def add_agreement_daily_data(cal_date=date.today(), asset_id=None, ret_carry_ass
 
 
 def cal_agreement_ret(cal_date=date.today(), asset_id=None):
+    dates = get_asset_date(asset_id=asset_id)
+    for tmp_date in dates:
+        if tmp_date >= cal_date:
+            cal_agreement_ret_of_asset(cal_date=date, asset_id=asset_id)
+
+
+def cal_agreement_ret_of_asset(cal_date=date.today(), asset_id=None):
     '''
     计算协存的利息
     :param cal_date:计算日期
     :param asset:资产对象
     :return:
     '''
+
     purchase_amount = get_asset_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
@@ -378,7 +386,6 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
         ret_type=SV.RET_TYPE_CASH)
 
     ret.update({SV.ASSET_KEY_RET_CARRY_CASH: total_ret_carry - yes_total_ret_carry})
-
     ret.update({SV.ASSET_KEY_RET_NOT_CARRY: total_ret - yes_total_ret_carry})  # 未结转收益
     total_purchase = get_asset_total_amount_by_asset_and_type(
         cal_date=cal_date,
