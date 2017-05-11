@@ -461,7 +461,7 @@ def add_management_class(
         cal_date=date.today()
 ):
     asset = AssetClass(name=name, start_date=start_date, expiry_date=end_date, type=SV.ASSET_CLASS_MANAGEMENT,
-                       ret_cal_method=SV.RET_TYPE_CASH_CUT_INTEREST, cal_date=cal_date)
+                       ret_cal_method=SV.RET_TYPE_CASH_CUT_INTEREST, cal_date=start_date)
     asset_id = asset.id
     save(asset)
     asset_rate = AssetRetRate(asset_id=asset_id, ret_rate=ret_rate, interest_days=rate_days, cal_date=cal_date)
@@ -749,7 +749,8 @@ def get_all_mangement_fee(asset=AssetClass()):
     total_fee_amount = 0
     days = (asset.expiry_date - asset.start_date).days
     amount = asset.asset_trade_list[0].amount if asset.asset_trade_list else 0.0
-    asset_fee_rates = asset.asset_fee_rate_list
+    # query_by_id
+    asset_fee_rates = query_by_id(AssetClass, asset.id).asset_fee_rate_list  # asset.asset_fee_rate_list
     for asset_fee_rate in asset_fee_rates:
         total_fee_amount += amount * days * asset_fee_rate.rate / asset_fee_rate.fee_days if asset_fee_rate.fee_days else 0.0
     return total_fee_amount
