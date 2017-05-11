@@ -7,205 +7,44 @@ from PyQt5.QtWidgets import QAction, QMainWindow, QDockWidget, QApplication, QVB
 
 from view.assertmgtView.AdjustValuationView import AdjustValuationView
 from view.assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
-from view.BasicWidget import BasicFcView, BasicCell, NumCell
+from view.BasicWidget import BasicFcView, BasicCell, NumCell, BASIC_FONT
 from controller.EventType import EVENT_AM
 from controller.MainEngine import MainEngine
 
-# class AssetMgtViewMain(BasicFcView):
-#     def __init__(self,mainEngine,parent=None):
-#         super(AssetMgtViewMain,self).__init__()
-#         self.mainEngine= mainEngine
-#         self.setMinimumSize(1300,600)
-#         self.initMain()
-#     def initMain(self):
-#         ##########################
-#         # AssetDailyInventoryView
-#         #########################
-#
-#         #########################
-#         # FilterBar
-#         #########################
-#
-#         #########################
-#         # CommitteeDetailMain
-#         #########################
 
-class AssetMgtListView(QMainWindow, BasicFcView):
-    """现金详情"""
-
+class AssetMgtViewMain(BasicFcView):
     def __init__(self, mainEngine, parent=None):
-        """Constructor"""
-        super(AssetMgtListView, self).__init__()
-
+        super(AssetMgtViewMain, self).__init__()
         self.mainEngine = mainEngine
 
-        self.initUi()
-
-    def initUi(self):
-        """初始化界面"""
-        self.setWindowTitle('资管明细')
-
-        """初始化界面"""
+        self.widgetDict = {} #保存子窗口
         self.setMinimumSize(1300, 600)
-        self.initDock()
+        self.initMain()
 
-    def initDock(self):
-        # 创建浮动布局
-        vidgetView1, dockView1 = self.createDock(AssetDailyInventoryView, '资管每日存量表', QtCore.Qt.TopDockWidgetArea)
-        vidgetView2, dockView2 = self.createDock(CommitteeDetailMain, '委贷明细', QtCore.Qt.BottomDockWidgetArea)
-
-
-        # self.tabifyDockWidget(dockView1,dockView2)
-
-    def addMenuAction(self):
-        """增加右键菜单内容"""
-        refreshAction = QAction('刷新', self)
-        refreshAction.triggered.connect(self.refresh)
-
-        self.menu.addAction(refreshAction)
-
-    def createDock(self, widgetClass, widgetName, widgetArea):
-        """创建停靠组件"""
-        widget = widgetClass(self.mainEngine, self.eventEngine)
-        dock = QDockWidget(widgetName)
-        dock.setWidget(widget)
-        dock.setObjectName(widgetName)
-        dock.setFeatures(dock.DockWidgetFloatable | dock.DockWidgetMovable)
-        self.addDockWidget(widgetArea, dock)
-        return widget, dock
-
-
-class AssetDailyInventoryView(BasicFcView):
-    def __init__(self, mainEngine, parent=None):
-        """Constructor"""
-        super(AssetDailyInventoryView, self).__init__(parent=parent)
-
-        self.mainEngine = mainEngine
-
+    def initMain(self):
+        ##########################
+        # AssetDailyInventoryView
+        #########################
+        self.assetDailyInventoryView = BasicFcView(self.mainEngine)
         d = OrderedDict()
-
         d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
-        # d['input_date'] = {'chinese': '填表日', 'cellType': BasicCell}
         d['management_amount'] = {'chinese': '存量总额', 'cellType': NumCell}
         d['management_ret'] = {'chinese': '存量日收益', 'cellType': NumCell}
         d['cash_to_management'] = {'chinese': '总净流入', 'cellType': NumCell}
 
-        self.setHeaderDict(d)
+        self.assetDailyInventoryView.eventType = EVENT_AM
+        self.assetDailyInventoryView.setHeaderDict(d)
+        self.assetDailyInventoryView.setWindowTitle('资管每日存量')
+        self.assetDailyInventoryView.setFont(BASIC_FONT)
 
-        self.setEventType(EVENT_AM)
+        self.assetDailyInventoryView.initTable()
+        #########################
+        # CommitteeDetailMain
+        #########################
+        self.commiteeDetailMain = BasicFcView(self.mainEngine)
 
-        self.initUi()
-
-    def initUi(self):
-        """初始化界面"""
-        self.setWindowTitle('资管每日存量表')
-        # self.setMinimumSize(1200, 600)
-        # self.setFont(BASIC_FONT)
-        self.initTable()
-        self.show()
-        # self.addMenuAction()
-        self.signal.connect(self.refresh)
-        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
-
-    def show(self):
-        """显示"""
-        super(AssetDailyInventoryView, self).show()
-        self.refresh()
-
-    def refresh(self):
-        """刷新"""
-        self.menu.close()  # 关闭菜单
-        self.clearContents()
-        self.setRowCount(0)
-        self.showMoneyFundListDetail()
-
-    def showMoneyFundListDetail(self):
-        """显示所有合约数据"""
-        result = self.mainEngine.get_total_management_statistic()
-        # print(result)
-        self.setRowCount(len(result))
-        row = 0
-        for r in result:
-            # 按照定义的表头，进行数据填充
-            for n, header in enumerate(self.headerList):
-                content = r[header]
-                cellType = self.headerDict[header]['cellType']
-                cell = cellType(content)
-                # print(cell.text())
-                self.setItem(row, n, cell)
-
-            row = row + 1
-
-
-class CommitteeDetailMain(BasicFcView):
-    def __init__(self, mainEngine, parent=None):
-        super(CommitteeDetailMain, self).__init__()
-        self.mainEngine = mainEngine
-        # self.setMinimumSize(1300, 600)
-        self.initMain()
-
-    def initMain(self):
-        """初始化界面"""
-        self.setWindowTitle('现金主界面')
-        filterBar = FilterBar(self.mainEngine)
-        cashListView = CommitteeDetailView(self.mainEngine)
-
-        vbox = QVBoxLayout()
-        vbox.addWidget(filterBar)
-        vbox.addWidget(cashListView)
-        self.setLayout(vbox)
-
-    def show(self):
-        """显示"""
-        super(CommitteeDetailView, self).show()
-
-
-class FilterBar(QWidget):
-    def __init__(self, mainEngine, parent=None):
-        super(FilterBar, self).__init__()
-        self.initUI()
-
-    def initUI(self):
-        # 过滤的开始时间
-        filterStartDate_Label = QLabel('开始时间')
-        # 开始时间输入框
-        self.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
-        self.filterStartDate_Edit.setMaximumWidth(80)
-        # 过滤的结束时间
-        filterEndDate_Label = QLabel('结束时间')
-        # 结束时间输入框
-        self.filterEndDate_Edit = QLineEdit(str(datetime.date.today()))
-        self.filterEndDate_Edit.setMaximumWidth(80)
-
-        # 筛选按钮
-        filterBtn = QPushButton('筛选')
-        # 导出按钮
-        outputBtn = QPushButton('导出')
-
-        filterHBox = QHBoxLayout()
-        filterHBox.addStretch()
-        filterHBox.addWidget(filterStartDate_Label)
-        filterHBox.addWidget(self.filterStartDate_Edit)
-        filterHBox.addWidget(filterEndDate_Label)
-        filterHBox.addWidget(self.filterEndDate_Edit)
-
-        filterHBox.addWidget(filterBtn)
-        filterHBox.addWidget(outputBtn)
-
-        self.setLayout(filterHBox)
-
-class CommitteeDetailView(BasicFcView):
-    def __init__(self, mainEngine, parent=None):
-        """Constructor"""
-        super(CommitteeDetailView, self).__init__(parent=parent)
-
-        self.mainEngine = mainEngine
-        self.eventDict = {}  # 事件辅助字典
-        self.widgetDict = {}  # 用来保存子窗口的字典
-
+        self.commiteeDetailMain.eventDict = {} # 用来保存双双击事件所需的uuid
         d = OrderedDict()
-
-        # 货基项目
         # d['no'] = {'chinese': '序号', 'cellType': BasicCell}
         d['asset_name'] = {'chinese': '借款人', 'cellType': BasicCell}
         d['management_amount'] = {'chinese': '放款金额', 'cellType': NumCell}
@@ -222,25 +61,26 @@ class CommitteeDetailView(BasicFcView):
         d['uuid_view'] = {'chinese': '调整查看', 'cellType': BasicCell}
         d['uuid_input'] = {'chinese': '估值调整', 'cellType': BasicCell}
 
-        self.setHeaderDict(d)
+        self.commiteeDetailMain.eventType = EVENT_AM
+        self.commiteeDetailMain.setHeaderDict(d)
+        self.commiteeDetailMain.setWindowTitle('委贷明细')
+        self.commiteeDetailMain.setFont(BASIC_FONT)
 
-        self.setEventType(EVENT_AM)
-        self.initUi()
-
-    def initUi(self):
-        """初始化界面"""
-        self.setWindowTitle('委贷明细')
-        # self.setMinimumSize(1200, 600)
-        # self.setFont(BASIC_FONT)
-        self.initTable()
-        self.refresh()
-        # self.addMenuAction()
+        self.commiteeDetailMain.initTable()
+        ##########################
+        # 界面整合
+        ##########################
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.assetDailyInventoryView)
+        vbox.addWidget(self.commiteeDetailMain)
+        self.setLayout(vbox)
+        # 信号接入
         self.signal.connect(self.refresh)
-        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
+        self.mainEngine.eventEngine.register(self.commiteeDetailMain.eventType, self.signal.emit)
 
     def show(self):
         """显示"""
-        super(CommitteeDetailView, self).show()
+        super(AssetMgtViewMain, self).show()
         self.refresh()
 
     def refresh(self):
@@ -248,30 +88,49 @@ class CommitteeDetailView(BasicFcView):
         self.menu.close()  # 关闭菜单
         self.clearContents()
         self.setRowCount(0)
-        self.showMoneyFundSummary()
-
-    def showMoneyFundSummary(self):
-        """显示所有合约数据"""
+        self.showAssetMgtListDetail()
         result = self.mainEngine.get_all_management_detail()
-        print(result)
-        self.setRowCount(len(result))
+        self.showCommiteeDetail(result)
+
+    def showAssetMgtListDetail(self):
+        """显示所有合约数据"""
+        result = self.mainEngine.get_total_management_statistic()
+        # print(result)
+        self.assetDailyInventoryView.setRowCount(len(result))
         row = 0
         for r in result:
             # 按照定义的表头，进行数据填充
-            for n, header in enumerate(self.headerList):
+            for n, header in enumerate(self.assetDailyInventoryView.headerList):
+                content = r[header]
+                cellType = self.assetDailyInventoryView.headerDict[header]['cellType']
+                cell = cellType(content)
+                # print(cell.text())
+                self.assetDailyInventoryView.setItem(row, n, cell)
+
+            row = row + 1
+
+    def showCommiteeDetail(self, result):
+        """显示所有合约数据"""
+
+        print(result)
+        self.commiteeDetailMain.setRowCount(len(result))
+        row = 0
+        for r in result:
+            # 按照定义的表头，进行数据填充
+            for n, header in enumerate(self.commiteeDetailMain.headerList):
                 if header is 'uuid_view':
                     content = '查看'
                 elif header is 'uuid_input':
                     content = '调整'
                 else:
                     content = r[header]
-                self.eventDict[row] = r['uuid']
-                cellType = self.headerDict[header]['cellType']
+                self.commiteeDetailMain.eventDict[row] = r['uuid']
+                cellType = self.commiteeDetailMain.headerDict[header]['cellType']
                 cell = cellType(content)
-                self.setItem(row, n, cell)
+                self.commiteeDetailMain.setItem(row, n, cell)
             row = row + 1
 
-        self.setDoubleClickEvent(9)
+        # self.commiteeDetailMain.setDoubleClickEvent(9)
 
     def setDoubleClickEvent(self, n):
         for r in self.eventDict.keys():
@@ -280,7 +139,7 @@ class CommitteeDetailView(BasicFcView):
             print('set view item double clicked called', r, n, self.eventDict[r])
             # self.itemDoubleClicked(self.item(r, n + 1)).connect(self.showValuationInput(self.eventDict[r])).emit()
             # self.cellDoubleClicked(r, n + 1).connect(self.showValuationInput(self.eventDict[r]))
-            print('set input item double clicked called', r, n+1, self.eventDict[r])
+            print('set input item double clicked called', r, n + 1, self.eventDict[r])
 
     def showValuationInput(self, uuid):
         """打开估值调整的子窗口"""
@@ -318,10 +177,10 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    mfm = AssetMgtListView(mainEngine)
+    mfm = AssetMgtViewMain(mainEngine)
     # mflv = AssetDailyInventoryView(mainEngine)
     # mfm = CommitteeDetailView(mainEngine)
     # mflv.showMaximized()
     # mainfdv.showMaximized()
-    mfm.showMaximized()
+    mfm.show()
     sys.exit(app.exec_())
