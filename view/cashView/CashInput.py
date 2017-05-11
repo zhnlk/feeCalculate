@@ -109,7 +109,9 @@ class CashInput(BasicFcView):
             date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[0])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
-
+        if date > d:
+            self.showError()
+            return
         # print(cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
         try:
             self.mainEngine.add_cash_daily_data(cal_date=date, draw_amount=float(cash_to_investor), draw_fee=float(extract_fee),
