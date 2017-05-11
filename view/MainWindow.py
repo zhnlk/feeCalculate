@@ -213,10 +213,10 @@ class MainWindow(QMainWindow, BasicFcView):
 
     def openOutMoneFundData(self):
         try:
-            self.widgetDict['openOutMoneFundData'].show()
+            self.widgetDict['openOutMoneFundData'].saveToCsv()
         except KeyError:
-            self.widgetDict['openOutMoneFundData'] = ErrorWidget(self)
-            self.widgetDict['openOutMoneFundData'].show()
+            self.widgetDict['openOutMoneFundData'] = MoneyFundMain(self.mainEngine)
+            self.widgetDict['openOutMoneFundData'].saveToCsv()
 
     def openOutAssetMgtData(self):
         try:
