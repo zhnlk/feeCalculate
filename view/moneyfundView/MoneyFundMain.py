@@ -145,7 +145,6 @@ class MoneyFundMain(BasicFcView):
         self.showMoneyFundSummary()
         result = self.mainEngine.get_fund_detail_by_days(7)
         self.showMoneyFundListDetail(result)
-        print('mf main called ......')
 
     def filterRefresh(self, asset_id, start, end):
         """过滤刷新"""
@@ -158,20 +157,25 @@ class MoneyFundMain(BasicFcView):
     def showMoneyFundListDetail(self, result):
         """显示所有合约数据"""
 
-        print('showMoneyFundListDetail',result)
-        self.moneyfundDetailMain.setRowCount(len(result))
+        print('showMoneyFundListDetail', result)
+        count = 0
+        for d in result:
+            for v in d.values():
+                count = count + len(v)
+        print('showMoneyFundListDetail:count:', count)
+        self.moneyfundDetailMain.setRowCount(count)
         row = 0
+        # 遍历资产类型
         for r in result:
-            # 按照定义的表头，进行数据填充
-            for n, header in enumerate(self.moneyfundDetailMain.headerList):
-                # content = r[header]
-                for col in r.values():
-                    content = col[0][header]
-                cellType = self.moneyfundDetailMain.headerDict[header]['cellType']
-                cell = cellType(content)
-                self.moneyfundDetailMain.setItem(row, n, cell)
-
-            row = row + 1
+            # 遍历对应资产的记录
+            for col in r.values():
+                for c in col:
+                    # 按照定义的表头，进行数据填充
+                    for n, header in enumerate(self.moneyfundDetailMain.headerList):
+                        content = c[header]
+                        cell = self.moneyfundDetailMain.headerDict[header]['cellType'](content)
+                        self.moneyfundDetailMain.setItem(row, n, cell)
+                    row = row + 1
 
     def showMoneyFundSummary(self):
         """显示合约汇总数据"""
@@ -191,7 +195,7 @@ class MoneyFundMain(BasicFcView):
     def prepareMoneyfundData(self):
         """准备基金类别数据"""
         result = self.mainEngine.get_all_asset_ids_by_type(SV.ASSET_CLASS_FUND)
-        print('prepareMoneyfundData',result)
+        print('prepareMoneyfundData', result)
         for mf in result:
             if not self.filterView.moneyfundCate_list.__contains__(mf[0]):
                 self.filterView.moneyfundCate_list.append(mf[0])
