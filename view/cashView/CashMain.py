@@ -2,17 +2,16 @@
 import codecs
 import csv
 import datetime
+import re
 from collections import OrderedDict
 
-import re
-
-from PyQt5.QtWidgets import QLabel, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QFileDialog
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QLabel, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QFileDialog
 
-from MoneyFormat import outputmoney
-from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 from controller.EventType import EVENT_CASH
 from controller.MainEngine import MainEngine
+from utils.MoneyFormat import outputmoney
+from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 
 
 class CashViewMain(BasicFcView):
@@ -152,10 +151,10 @@ class CashViewMain(BasicFcView):
 
         csvContent = list()
         labels = [d['chinese'] for d in self.cashListView.headerDict.values()]
-        print('labels:',labels)
+        print('labels:', labels)
         csvContent.append(labels)
         content = self.mainEngine.get_cash_detail_by_days(7)
-        print('content:',content)
+        print('content:', content)
         for c in content:
             row = list()
             for n, header in enumerate(self.cashListView.headerDict.keys()):
@@ -171,14 +170,13 @@ class CashViewMain(BasicFcView):
         try:
             if path[0]:
                 print(path[0])
-                with codecs.open(path[0], 'w', 'utf_8_sig') as f :
+                with codecs.open(path[0], 'w', 'utf_8_sig') as f:
                     writer = csv.writer(f)
                     writer.writerows(csvContent)
             f.close()
 
         except IOError as e:
             pass
-
 
 
 if __name__ == '__main__':
