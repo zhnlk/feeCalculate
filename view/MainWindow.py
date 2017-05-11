@@ -219,10 +219,10 @@ class MainWindow(QMainWindow, BasicFcView):
     def openOutCashData(self):
         """打开现金导出"""
         try:
-            self.widgetDict['OutCashData'].show()
+            self.widgetDict['OutCashData'].saveToCsv()
         except KeyError:
-            self.widgetDict['OutCashData'] = ErrorWidget(self)
-            self.widgetDict['OutCashData'].show()
+            self.widgetDict['OutCashData'] = CashViewMain(self.mainEngine)
+            self.widgetDict['OutCashData'].saveToCsv()
 
     def createAction(self, actionName, function):
         """创建操作功能"""

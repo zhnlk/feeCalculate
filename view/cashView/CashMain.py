@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
+import codecs
+import csv
 import datetime
 from collections import OrderedDict
 
 import re
 
-from PyQt5.QtWidgets import QLabel, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout
+from PyQt5.QtWidgets import QLabel, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QFileDialog
 from PyQt5.QtWidgets import QApplication
 
+from MoneyFormat import outputmoney
 from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 from controller.EventType import EVENT_CASH
 from controller.MainEngine import MainEngine
@@ -33,10 +36,10 @@ class CashViewMain(BasicFcView):
         self.filterView.filterEndDate_Edit.setMaximumWidth(80)
 
         filterBtn = QPushButton('筛选')
-        outputBtn = QPushButton('导出')
+        # outputBtn = QPushButton('导出')
 
         filterBtn.clicked.connect(self.filterAction)
-        outputBtn.clicked.connect(self.outputAction)
+        # outputBtn.clicked.connect(self.outputAction)
 
         filterHBox = QHBoxLayout()
         filterHBox.addStretch()
@@ -45,7 +48,7 @@ class CashViewMain(BasicFcView):
         filterHBox.addWidget(filterEndDate_Label)
         filterHBox.addWidget(self.filterView.filterEndDate_Edit)
         filterHBox.addWidget(filterBtn)
-        filterHBox.addWidget(outputBtn)
+        # filterHBox.addWidget(outputBtn)
 
         self.filterView.setLayout(filterHBox)
         self.filterView.setMinimumHeight(100)
@@ -141,6 +144,41 @@ class CashViewMain(BasicFcView):
         result = self.mainEngine.get_cash_detail_by_period(start=start, end=end)
         print('result:', result)
         self.showCashListDetail(result=result)
+
+    def saveToCsv(self):
+
+        # 先隐藏右键菜单
+        self.menu.close()
+
+        csvContent = list()
+        labels = [d['chinese'] for d in self.cashListView.headerDict.values()]
+        print('labels:',labels)
+        csvContent.append(labels)
+        content = self.mainEngine.get_cash_detail_by_days(7)
+        print('content:',content)
+        for c in content:
+            row = list()
+            for n, header in enumerate(self.cashListView.headerDict.keys()):
+                if header is not 'cal_date':
+                    row.append(outputmoney(c[header]))
+                else:
+                    row.append(c[header])
+            csvContent.append(row)
+
+        # 获取想要保存的文件名
+        path = QFileDialog.getSaveFileName(self, '保存数据', '', 'CSV(*.csv)')
+
+        try:
+            if path[0]:
+                print(path[0])
+                with codecs.open(path[0], 'w', 'utf_8_sig') as f :
+                    writer = csv.writer(f)
+                    writer.writerows(csvContent)
+            f.close()
+
+        except IOError as e:
+            pass
+
 
 
 if __name__ == '__main__':
