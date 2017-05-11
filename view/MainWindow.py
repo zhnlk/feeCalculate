@@ -12,14 +12,13 @@ from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
 from controller import EventType
-from view.BasicWidget import BasicCell, BasicFcView, BASIC_FONT, NumCell
+from view.BasicWidget import BasicCell, BasicFcView, NumCell
 from controller.MainEngine import MainEngine
 from view.assertmgtView.AssetMgtInput import AssetMgtInput
-from view.assertmgtView.AssetMgtMain import AssetMgtListView
+from view.assertmgtView.AssetMgtMain import AssetMgtViewMain
 from view.cashView.CashInput import CashInput
 from view.cashView.CashMain import CashViewMain
 from view.miscView.AboutMain import AboutWidget
-from view.miscView.ErrorMain import ErrorWidget
 from view.moneyfundView.MfCateInput import MfCateInput
 from view.moneyfundView.MoneyFundInput import MoneyFundInput
 from view.moneyfundView.MoneyFundMain import MoneyFundMain
@@ -137,7 +136,7 @@ class MainWindow(QMainWindow, BasicFcView):
         try:
             self.widgetDict['openAssetMgtListDetail'].show()
         except KeyError:
-            self.widgetDict['openAssetMgtListDetail'] = AssetMgtListView(self.mainEngine)
+            self.widgetDict['openAssetMgtListDetail'] = AssetMgtViewMain(self.mainEngine)
             self.widgetDict['openAssetMgtListDetail'].show()
 
     # def oepnAdjustValuation(self):
@@ -220,10 +219,10 @@ class MainWindow(QMainWindow, BasicFcView):
 
     def openOutAssetMgtData(self):
         try:
-            self.widgetDict['openOutAssetMgtData'].show()
+            self.widgetDict['openOutAssetMgtData'].saveToCsv()
         except KeyError:
-            self.widgetDict['openOutAssetMgtData'] = ErrorWidget(self)
-            self.widgetDict['openOutAssetMgtData'].show()
+            self.widgetDict['openOutAssetMgtData'] = AssetMgtViewMain(self.mainEngine)
+            self.widgetDict['openOutAssetMgtData'].saveToCsv()
 
     def createAction(self, actionName, function):
         """创建操作功能"""
