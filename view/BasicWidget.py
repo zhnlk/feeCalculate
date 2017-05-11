@@ -290,7 +290,7 @@ class NumCell(QTableWidgetItem):
         """Constructor"""
         super(NumCell, self).__init__()
         self.data = None
-        if text:
+        if text is not None:
             self.setContent(text)
 
     def setContent(self, text):

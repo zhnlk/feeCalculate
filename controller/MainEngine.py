@@ -153,8 +153,6 @@ class MainEngine(object):
         :param days: 
         :return: 
         """
-        # return [{'rate': 0.035, 'asset_name': '浦发理财一号', 'cal_date': datetime.date(2017, 4, 20), 'cash_to_agreement': 20001.0,
-        #          'agreement_to_cash': 10001.0, 'ret_carry_principal': 1001.0, 'asset_ret': -1001.0, 'total_amount': 10000.0}]
         return AssetService.get_agreement_detail_by_days(days)
 
     def get_single_agreement_detail_by_period(self, asset_id=None, start=datetime.date.today(), end=datetime.date.today()):
@@ -173,9 +171,17 @@ class MainEngine(object):
         :param days: 
         :return: 
         """
-        # return [{'asset_name': '余额宝', 'cal_date': datetime.date(2017, 4, 20), 'cash_to_fund': 13009.0, 'fund_to_cash': 8011.0, 'asset_ret': 3005.0,
-        #          'ret_carry_cash': 1005.0, 'ret_not_carry': 2000.0, 'total_amount': 8003.0}]
         return AssetService.get_fund_detail_by_days(days)
+
+    def get_single_fund_detail_by_period(self, asset_id=None, start=datetime.date.today(), end=datetime.date.today()):
+        """
+        获取过滤后的货基明细f
+        :param asset_id: 
+        :param start: 
+        :param end: 
+        :return: 
+        """
+        return AssetService.get_single_fund_detail_by_period(asset_id=asset_id, start=start, end=end)
 
     def get_total_fund_statistic(self):
         """
