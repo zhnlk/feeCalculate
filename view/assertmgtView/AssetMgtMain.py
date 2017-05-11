@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
+import codecs
+import csv
 import datetime
 from PyQt5 import QtCore
 from collections import OrderedDict
 
-from PyQt5.QtWidgets import QAction, QMainWindow, QDockWidget, QApplication, QVBoxLayout, QWidget, QLabel, QLineEdit, QPushButton, QHBoxLayout
+from PyQt5.QtWidgets import QAction, QMainWindow, QDockWidget, QApplication, QVBoxLayout, QWidget, QLabel, QLineEdit, QPushButton, QHBoxLayout, \
+    QFileDialog
 
+from MoneyFormat import outputmoney
 from view.assertmgtView.AdjustValuationView import AdjustValuationView
 from view.assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
 from view.BasicWidget import BasicFcView, BasicCell, NumCell, BASIC_FONT
@@ -17,7 +21,7 @@ class AssetMgtViewMain(BasicFcView):
         super(AssetMgtViewMain, self).__init__()
         self.mainEngine = mainEngine
 
-        self.widgetDict = {} #保存子窗口
+        self.widgetDict = {}  # 保存子窗口
         self.setMinimumSize(1300, 600)
         self.initMain()
 
@@ -43,7 +47,7 @@ class AssetMgtViewMain(BasicFcView):
         #########################
         self.commiteeDetailMain = BasicFcView(self.mainEngine)
 
-        self.commiteeDetailMain.eventDict = {} # 用来保存双双击事件所需的uuid
+        self.commiteeDetailMain.eventDict = {}  # 用来保存双双击事件所需的uuid
         d = OrderedDict()
         # d['no'] = {'chinese': '序号', 'cellType': BasicCell}
         d['asset_name'] = {'chinese': '借款人', 'cellType': BasicCell}
@@ -130,7 +134,7 @@ class AssetMgtViewMain(BasicFcView):
                 self.commiteeDetailMain.setItem(row, n, cell)
             row = row + 1
 
-        # self.commiteeDetailMain.setDoubleClickEvent(9)
+            # self.commiteeDetailMain.setDoubleClickEvent(9)
 
     def setDoubleClickEvent(self, n):
         for r in self.eventDict.keys():
@@ -170,6 +174,44 @@ class AssetMgtViewMain(BasicFcView):
         event.accept()
         # else:
         #     event.ignore()
+
+    def saveToCsv(self):
+
+        # 先隐藏右键菜单
+        self.menu.close()
+
+        csvContent = list()
+        labels = [d['chinese'] for d in self.commiteeDetailMain.headerDict.values()]
+        print('labels:', labels)
+        csvContent.append(labels)
+        content = self.mainEngine.get_all_management_detail()
+        print('content:', content)
+
+        for c in content:
+            row = list()
+            for n, header in enumerate(self.commiteeDetailMain.headerDict.keys()):
+                if header not in ['asset_name', 'ret_rate', 'start_date', 'expiry_date', 'management_due',
+                                  'uuid_view', 'uuid_input']:
+                    row.append(outputmoney(c[header]))
+                elif header in ['uuid_view', 'uuid_input']:
+                    pass
+                else:
+                    row.append(c[header])
+            csvContent.append(row)
+
+        # 获取想要保存的文件名
+        path = QFileDialog.getSaveFileName(self, '保存数据', '', 'CSV(*.csv)')
+
+        try:
+            if path[0]:
+                print(path[0])
+                with codecs.open(path[0], 'w', 'utf_8_sig') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(csvContent)
+            f.close()
+
+        except IOError as e:
+            pass
 
 
 if __name__ == '__main__':
