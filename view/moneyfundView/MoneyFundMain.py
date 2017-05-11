@@ -4,8 +4,7 @@ import datetime
 import re
 from collections import OrderedDict
 
-from PyQt5.QtWidgets import QAction, QApplication, QMainWindow, QDockWidget, QVBoxLayout, QWidget, QLabel, QLineEdit, QPushButton, QHBoxLayout, \
-    QComboBox
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox
 
 from view.BasicWidget import BasicFcView, BasicCell, NumCell, BASIC_FONT
 from controller.EventType import EVENT_MF

@@ -7,8 +7,8 @@ import sys
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication
 
-from view.BasicWidget import BASIC_FONT
 from controller.MainEngine import MainEngine
+from view.BasicWidget import BASIC_FONT
 from view.MainWindow import MainWindow
 from utils.StaticValue import ICON_FILENAME
 

@@ -14,11 +14,10 @@ from PyQt5.QtWidgets import QMessageBox
 from controller import EventType
 from view.BasicWidget import BasicCell, BasicFcView, BASIC_FONT, NumCell
 from controller.MainEngine import MainEngine
-from view.assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
 from view.assertmgtView.AssetMgtInput import AssetMgtInput
 from view.assertmgtView.AssetMgtMain import AssetMgtListView
 from view.cashView.CashInput import CashInput
-from view.cashView.CashMain import CashListView, CashViewMain
+from view.cashView.CashMain import CashViewMain
 from view.miscView.AboutMain import AboutWidget
 from view.miscView.ErrorMain import ErrorWidget
 from view.moneyfundView.MfCateInput import MfCateInput
@@ -26,7 +25,7 @@ from view.moneyfundView.MoneyFundInput import MoneyFundInput
 from view.moneyfundView.MoneyFundMain import MoneyFundMain
 from view.protocolView.PdCateInput import PdCateInput
 from view.protocolView.ProtocolInput import ProtocolInput
-from view.protocolView.ProtocolMain import ProtocolListView, ProtocolViewMain
+from view.protocolView.ProtocolMain import ProtocolViewMain
 
 
 class MainWindow(QMainWindow, BasicFcView):

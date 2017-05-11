@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QPushButton
 
 from view.BasicWidget import BASIC_FONT, BasicFcView
 from controller.EventEngine import Event
-from controller.EventType import EVENT_CASH, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION, EVENT_MAIN_ASSERT_DETAIL
+from controller.EventType import EVENT_CASH, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION
 from controller.MainEngine import MainEngine
 
 

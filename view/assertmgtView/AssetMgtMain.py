@@ -7,10 +7,28 @@ from PyQt5.QtWidgets import QAction, QMainWindow, QDockWidget, QApplication, QVB
 
 from view.assertmgtView.AdjustValuationView import AdjustValuationView
 from view.assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
-from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
+from view.BasicWidget import BasicFcView, BasicCell, NumCell
 from controller.EventType import EVENT_AM
 from controller.MainEngine import MainEngine
 
+# class AssetMgtViewMain(BasicFcView):
+#     def __init__(self,mainEngine,parent=None):
+#         super(AssetMgtViewMain,self).__init__()
+#         self.mainEngine= mainEngine
+#         self.setMinimumSize(1300,600)
+#         self.initMain()
+#     def initMain(self):
+#         ##########################
+#         # AssetDailyInventoryView
+#         #########################
+#
+#         #########################
+#         # FilterBar
+#         #########################
+#
+#         #########################
+#         # CommitteeDetailMain
+#         #########################
 
 class AssetMgtListView(QMainWindow, BasicFcView):
     """现金详情"""

@@ -7,7 +7,7 @@
 import datetime
 import re
 
-from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QHBoxLayout
 from PyQt5.QtWidgets import QLabel
@@ -17,8 +17,8 @@ from PyQt5.QtWidgets import QPushButton
 from services import AssetService
 from controller.EventEngine import Event
 from controller.EventType import EVENT_AM, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION, EVENT_ADJUST_VIEW
-from view.BasicWidget import BASIC_FONT, BasicFcView
 from controller.MainEngine import MainEngine
+from view.BasicWidget import BASIC_FONT, BasicFcView
 from utils import StaticValue as SV
 
 
