@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
+import codecs
+import csv
 import datetime
 
 import re
 from collections import OrderedDict
 
-from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox, QFileDialog
 
+from MoneyFormat import outputmoney
 from view.BasicWidget import BasicFcView, BasicCell, NumCell, BASIC_FONT
 from controller.EventType import EVENT_MF
 from controller.MainEngine import MainEngine
@@ -199,6 +202,44 @@ class MoneyFundMain(BasicFcView):
             if not self.filterView.moneyfundCate_list.__contains__(mf[0]):
                 self.filterView.moneyfundCate_list.append(mf[0])
                 self.filterView.moneyfundCate.addItem(mf[1])
+    def saveToCsv(self):
+
+        # 先隐藏右键菜单
+        self.menu.close()
+
+        csvContent = list()
+        labels = [d['chinese'] for d in self.moneyfundDetailMain.headerDict.values()]
+        print('labels:', labels)
+        csvContent.append(labels)
+        content = self.mainEngine.get_fund_detail_by_days(7)
+        print('content:', content)
+        for r in content:
+            # 遍历对应资产的记录
+            for col in r.values():
+                for c in col:
+                    # 按照定义的表头，进行数据填充
+                    row = list()
+                    for n, header in enumerate(self.moneyfundDetailMain.headerList):
+                        if header not in ['cal_date', 'asset_name', 'rate']:
+                            row.append(outputmoney(c[header]))
+                        else:
+                            row.append(c[header])
+                    csvContent.append(row)
+
+        # 获取想要保存的文件名
+        path = QFileDialog.getSaveFileName(self, '保存数据', '', 'CSV(*.csv)')
+
+        try:
+            if path[0]:
+                print(path[0])
+                with codecs.open(path[0], 'w', 'utf_8_sig') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(csvContent)
+            f.close()
+
+        except IOError as e:
+            pass
+
 
 
 if __name__ == '__main__':
