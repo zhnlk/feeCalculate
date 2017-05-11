@@ -210,7 +210,7 @@ def get_single_agreement_detail_by_days(days=0, asset_id=None):
 def get_single_agreement_detail_by_period(asset_id=None, start=date.today(), end=date.today()):
     ret = list()
     while start <= end:
-        ret.append(get_asset_agreement_detail(cal_date=start, asset_id=asset_id))
+        ret.append({asset_id: get_asset_agreement_detail(cal_date=start, asset_id=asset_id)})
         start += timedelta(days=1)
     return ret
 
@@ -406,7 +406,7 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
 def get_single_fund_detail_by_period(asset_id=None, start=date.today(), end=date.today()):
     ret = list()
     while start <= end:
-        ret.append(get_asset_fund_detail(cal_date=start, asset_id=asset_id))
+        ret.append({asset_id: get_asset_fund_detail(cal_date=start, asset_id=asset_id)})
         start += timedelta(days=1)
     return ret
 
