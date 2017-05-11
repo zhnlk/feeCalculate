@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
+import codecs
+import csv
 import datetime
 from collections import OrderedDict
 
 import re
-from PyQt5.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox, QFileDialog
 from PyQt5.QtWidgets import QApplication
 
+from MoneyFormat import outputmoney
 from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 from controller.EventType import EVENT_PD
 from controller.MainEngine import MainEngine
@@ -39,10 +42,10 @@ class ProtocolViewMain(BasicFcView):
         self.filterView.filterEndDate_Edit.setMaximumWidth(80)
 
         filterBtn = QPushButton('筛选')
-        outputBtn = QPushButton('导出')
+        # outputBtn = QPushButton('导出')
 
         filterBtn.clicked.connect(self.filterAction)
-        outputBtn.clicked.connect(self.outputAction)
+        # outputBtn.clicked.connect(self.outputAction)
 
         filterHBox = QHBoxLayout()
         filterHBox.addStretch()
@@ -53,7 +56,7 @@ class ProtocolViewMain(BasicFcView):
         filterHBox.addWidget(filterEndDate_Label)
         filterHBox.addWidget(self.filterView.filterEndDate_Edit)
         filterHBox.addWidget(filterBtn)
-        filterHBox.addWidget(outputBtn)
+        # filterHBox.addWidget(outputBtn)
 
         self.filterView.setLayout(filterHBox)
         ################################
@@ -125,7 +128,7 @@ class ProtocolViewMain(BasicFcView):
         for d in result:
             for v in d.values():
                 count = count + len(v)
-        print('showProtocolListDetail:count:',count)
+        print('showProtocolListDetail:count:', count)
         self.protocolListView.setRowCount(count)
         row = 0
         # 遍历资产类型
@@ -161,6 +164,45 @@ class ProtocolViewMain(BasicFcView):
             if not self.filterView.protocolCate_list.__contains__(mf[0]):
                 self.filterView.protocolCate_list.append(mf[0])
                 self.filterView.protocolCate.addItem(mf[1])
+
+    def saveToCsv(self):
+
+        # 先隐藏右键菜单
+        self.menu.close()
+
+        csvContent = list()
+        labels = [d['chinese'] for d in self.protocolListView.headerDict.values()]
+        print('labels:', labels)
+        csvContent.append(labels)
+        content = self.mainEngine.get_agreement_detail_by_days(7)
+        print('content:', content)
+        for r in content:
+            # 遍历对应资产的记录
+            for col in r.values():
+                for c in col:
+                    # 按照定义的表头，进行数据填充
+                    row = list()
+                    for n, header in enumerate(self.protocolListView.headerList):
+                        if header not in ['cal_date', 'asset_name', 'rate']:
+                            row.append(outputmoney(c[header]))
+                        else:
+                            row.append(c[header])
+                    csvContent.append(row)
+
+        # 获取想要保存的文件名
+        path = QFileDialog.getSaveFileName(self, '保存数据', '', 'CSV(*.csv)')
+
+        try:
+            if path[0]:
+                print(path[0])
+                with codecs.open(path[0], 'w', 'utf_8_sig') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(csvContent)
+            f.close()
+
+        except IOError as e:
+            pass
+
 
 if __name__ == '__main__':
     import sys
