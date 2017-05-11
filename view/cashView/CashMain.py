@@ -2,7 +2,9 @@
 import datetime
 from collections import OrderedDict
 
-from PyQt5.QtWidgets import QAction, QMainWindow, QLabel, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QWidget
+import re
+
+from PyQt5.QtWidgets import QLabel, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout
 from PyQt5.QtWidgets import QApplication
 
 from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
@@ -18,64 +20,39 @@ class CashViewMain(BasicFcView):
         self.initMain()
 
     def initMain(self):
-        """初始化界面"""
-        self.setWindowTitle('现金主界面')
-        filterBar = FilterBar(self.mainEngine)
-        cashListView = CashListView(self.mainEngine)
+        ###############################
+        # FilterBar
+        ###############################
+        self.filterView = BasicFcView(self.mainEngine)
 
-        vbox = QVBoxLayout()
-        vbox.addWidget(filterBar)
-        vbox.addWidget(cashListView)
-        self.setLayout(vbox)
-
-    def show(self):
-        """显示"""
-        super(CashViewMain, self).show()
-
-
-class FilterBar(QWidget):
-    def __init__(self, mainEngine, parent=None):
-        super(FilterBar, self).__init__()
-        self.initUI()
-
-    def initUI(self):
-        # 过滤的开始时间
         filterStartDate_Label = QLabel('开始时间')
-        # 开始时间输入框
-        self.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
-        self.filterStartDate_Edit.setMaximumWidth(80)
-        # 过滤的结束时间
+        self.filterView.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterView.filterStartDate_Edit.setMaximumWidth(80)
         filterEndDate_Label = QLabel('结束时间')
-        # 结束时间输入框
-        self.filterEndDate_Edit = QLineEdit(str(datetime.date.today()))
-        self.filterEndDate_Edit.setMaximumWidth(80)
+        self.filterView.filterEndDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterView.filterEndDate_Edit.setMaximumWidth(80)
 
-        # 筛选按钮
         filterBtn = QPushButton('筛选')
-        # 导出按钮
         outputBtn = QPushButton('导出')
+
+        filterBtn.clicked.connect(self.filterAction)
+        outputBtn.clicked.connect(self.outputAction)
 
         filterHBox = QHBoxLayout()
         filterHBox.addStretch()
         filterHBox.addWidget(filterStartDate_Label)
-        filterHBox.addWidget(self.filterStartDate_Edit)
+        filterHBox.addWidget(self.filterView.filterStartDate_Edit)
         filterHBox.addWidget(filterEndDate_Label)
-        filterHBox.addWidget(self.filterEndDate_Edit)
-
+        filterHBox.addWidget(self.filterView.filterEndDate_Edit)
         filterHBox.addWidget(filterBtn)
         filterHBox.addWidget(outputBtn)
 
-        self.setLayout(filterHBox)
-
-
-class CashListView(BasicFcView):
-    """现金详情"""
-
-    def __init__(self, mainEngine, parent=None):
-        """Constructor"""
-        super(CashListView, self).__init__(parent=parent)
-
-        self.mainEngine = mainEngine
+        self.filterView.setLayout(filterHBox)
+        self.filterView.setMinimumHeight(100)
+        #############################
+        # CashListView
+        ############################
+        self.cashListView = BasicFcView(self.mainEngine)
 
         d = OrderedDict()
         d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
@@ -91,68 +68,79 @@ class CashListView(BasicFcView):
         d['cash_return'] = {'chinese': '现金收入', 'cellType': NumCell}
         d['cash_draw_fee'] = {'chinese': '提取费用', 'cellType': NumCell}
 
-        self.setEventType(EVENT_CASH)
+        self.cashListView.eventType = EVENT_CASH
+        self.cashListView.setHeaderDict(d)
+        self.cashListView.setWindowTitle('现金明细')
+        self.cashListView.setFont(BASIC_FONT)
 
-        self.setHeaderDict(d)
-
-        self.eventType = 'eCash'
-
-        self.initUi()
-
-    # ----------------------------------------------------------------------
-    def initUi(self):
-        """初始化界面"""
-        self.setWindowTitle('现金明细')
-        # self.setMinimumSize(1300, 600)
-
-        self.setFont(BASIC_FONT)
-
-        # self.initFilterBar()
-        self.initTable()
-        self.addMenuAction()
-        self.refresh()
-
+        self.cashListView.initTable()
+        #####################
+        # 界面整合合
+        ####################
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.filterView)
+        vbox.addWidget(self.cashListView)
+        self.setLayout(vbox)
         # 将信号连接到refresh函数
         self.signal.connect(self.refresh)
-        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
+        self.mainEngine.eventEngine.register(self.cashListView.eventType, self.signal.emit)
 
-    def showCashListDetail(self):
-        """显示现金记录明细"""
+    def filterAction(self):
+        d = datetime.date.today()
+        filter_start_date = str(self.filterView.filterStartDate_Edit.text()).split('-')
+        filter_end_date = str(self.filterView.filterEndDate_Edit.text()).split('-')
+        if filter_start_date is None or filter_end_date is None:
+            start_date = datetime.date(d.year, d.month, d.day)
+            end_date = datetime.date(d.year, d.month, d.day)
+        else:
+            start_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[0])),
+                                       int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[1])),
+                                       int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[2])))
+            end_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[0])),
+                                     int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[1])),
+                                     int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[2])))
 
-        result = self.mainEngine.get_cash_detail_by_days(7)
+        print('filter Action', start_date, end_date)
+        self.filterRefresh(start_date, end_date)
 
-        # print(result)
-        self.setRowCount(len(result))
-        row = 0
-        for r in result:
-            # 按照定义的表头，进行填充数据
-            for n, header in enumerate(self.headerList):
-                content = r[header]
-                # print(content)
-                cellType = self.headerDict[header]['cellType']
-                cell = cellType(content)
-                self.setItem(row, n, cell)
-
-            row = row + 1
-
-    def refresh(self):
-        """刷新"""
-        self.menu.close()  # 关闭菜单
-        self.clearContents()
-        self.setRowCount(0)
-        self.showCashListDetail()
-
-    def addMenuAction(self):
-        """增加右键菜单内容"""
-        refreshAction = QAction('刷新', self)
-        refreshAction.triggered.connect(self.refresh)
-
-        self.menu.addAction(refreshAction)
+    def outputAction(self):
+        print('output Action')
 
     def show(self):
         """显示"""
-        super(CashListView, self).show()
+        super(CashViewMain, self).show()
         self.refresh()
+
+    def showCashListDetail(self, result):
+        """显示现金记录明细"""
+
+        print('showCashListDetail:', result)
+        self.cashListView.setRowCount(len(result))
+        row = 0
+        for r in result:
+            # 按照定义的表头，进行填充数据
+            for n, header in enumerate(self.cashListView.headerList):
+                content = r[header]
+                cellType = self.cashListView.headerDict[header]['cellType']
+                cell = cellType(content)
+                self.cashListView.setItem(row, n, cell)
+            row = row + 1
+
+    def refresh(self):
+        """默认刷新"""
+        self.menu.close()  # 关闭菜单
+        self.clearContents()
+        self.setRowCount(0)
+        result = self.mainEngine.get_cash_detail_by_days(7)
+        self.showCashListDetail(result)
+
+    def filterRefresh(self, start, end):
+        """过滤刷新"""
+        self.clearContents()
+        self.setRowCount(0)
+        result = self.mainEngine.get_cash_detail_by_period(start=start, end=end)
+        print('result:', result)
+        self.showCashListDetail(result=result)
 
 
 if __name__ == '__main__':
@@ -160,7 +148,6 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    # clv = CashListView(mainEngine)
     clv = CashViewMain(mainEngine)
     clv.show()
     sys.exit(app.exec_())

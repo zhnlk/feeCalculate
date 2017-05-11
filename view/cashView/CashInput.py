@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QPushButton
 
 from view.BasicWidget import BASIC_FONT, BasicFcView
 from controller.EventEngine import Event
-from controller.EventType import EVENT_CASH, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION, EVENT_MAIN_ASSERT_DETAIL
+from controller.EventType import EVENT_CASH, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION
 from controller.MainEngine import MainEngine
 
 
@@ -109,7 +109,9 @@ class CashInput(BasicFcView):
             date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[0])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[1])),
                                  int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", date_str[2])))
-
+        if date > d:
+            self.showError()
+            return
         # print(cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
         try:
             self.mainEngine.add_cash_daily_data(cal_date=date, draw_amount=float(cash_to_investor), draw_fee=float(extract_fee),

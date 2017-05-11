@@ -1,123 +1,68 @@
 # -*- coding: utf-8 -*-
 import datetime
-from PyQt5 import QtCore
+
+import re
 from collections import OrderedDict
 
-from PyQt5.QtWidgets import QAction, QApplication, QMainWindow, QDockWidget, QVBoxLayout, QWidget, QLabel, QLineEdit, QPushButton, QHBoxLayout
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox
 
-from view.BasicWidget import BasicFcView, BasicCell, NumCell
+from view.BasicWidget import BasicFcView, BasicCell, NumCell, BASIC_FONT
 from controller.EventType import EVENT_MF
 from controller.MainEngine import MainEngine
+from utils import StaticValue as SV
 
 
-class MoneyFundMain(QMainWindow, BasicFcView):
+class MoneyFundMain(BasicFcView):
     """现金详情"""
 
     def __init__(self, mainEngine):
-        """Constructor"""
         super(MoneyFundMain, self).__init__()
-
         self.mainEngine = mainEngine
-
-        self.initUi()
-
-    def initUi(self):
-        """初始化界面"""
-        self.setWindowTitle('货基')
         self.setMinimumSize(1300, 600)
-        self.initDock()
-
-    def initDock(self):
-        # 创建浮动布局
-        vidgetView1, dockView1 = self.createDock(MoneyFundDetailMain, '货基明细', QtCore.Qt.TopDockWidgetArea)
-        vidgetView2, dockView2 = self.createDock(MoneyFundSummaryView, '今日货基总额统计', QtCore.Qt.BottomDockWidgetArea)
-        # self.tabifyDockWidget(dockView1,dockView2)
-
-    def addMenuAction(self):
-        """增加右键菜单内容"""
-        refreshAction = QAction('刷新', self)
-        refreshAction.triggered.connect(self.refresh)
-
-        self.menu.addAction(refreshAction)
-
-    def createDock(self, widgetClass, widgetName, widgetArea):
-        """创建停靠组件"""
-        widget = widgetClass(self.mainEngine, self.eventEngine)
-        dock = QDockWidget(widgetName)
-        dock.setWidget(widget)
-        dock.setObjectName(widgetName)
-        dock.setFeatures(dock.DockWidgetFloatable | dock.DockWidgetMovable)
-        self.addDockWidget(widgetArea, dock)
-        return widget, dock
-
-class MoneyFundDetailMain(BasicFcView):
-    def __init__(self, mainEngine, parent=None):
-        super(MoneyFundDetailMain, self).__init__()
-        self.mainEngine = mainEngine
-        # self.setMinimumSize(1300, 600)
         self.initMain()
 
     def initMain(self):
-        """初始化界面"""
-        self.setWindowTitle('现金主界面')
-        filterBar = FilterBar(self.mainEngine)
-        cashListView = MoneyFundDetailView(self.mainEngine)
+        ##########################
+        # FilterBar
+        ##########################
+        self.filterView = BasicFcView(self.mainEngine)
 
-        vbox = QVBoxLayout()
-        vbox.addWidget(filterBar)
-        vbox.addWidget(cashListView)
-        self.setLayout(vbox)
+        self.filterView.moneyfundCate_list = list()
+        # 下拉框，用来选择不同的协存项目
+        moneyfundCate_Label = QLabel("协存项目")
+        self.filterView.moneyfundCate = QComboBox()
+        self.prepareMoneyfundData()
 
-    def show(self):
-        """显示"""
-        super(MoneyFundDetailMain, self).show()
-
-
-class FilterBar(QWidget):
-    def __init__(self, mainEngine, parent=None):
-        super(FilterBar, self).__init__()
-        self.initUI()
-
-    def initUI(self):
-        # 过滤的开始时间
         filterStartDate_Label = QLabel('开始时间')
-        # 开始时间输入框
-        self.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
-        self.filterStartDate_Edit.setMaximumWidth(80)
-        # 过滤的结束时间
+        self.filterView.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterView.filterStartDate_Edit.setMaximumWidth(80)
         filterEndDate_Label = QLabel('结束时间')
-        # 结束时间输入框
-        self.filterEndDate_Edit = QLineEdit(str(datetime.date.today()))
-        self.filterEndDate_Edit.setMaximumWidth(80)
+        self.filterView.filterEndDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterView.filterEndDate_Edit.setMaximumWidth(80)
 
-        # 筛选按钮
         filterBtn = QPushButton('筛选')
-        # 导出按钮
         outputBtn = QPushButton('导出')
+
+        filterBtn.clicked.connect(self.filterAction)
+        outputBtn.clicked.connect(self.outputAction)
 
         filterHBox = QHBoxLayout()
         filterHBox.addStretch()
+        filterHBox.addWidget(moneyfundCate_Label)
+        filterHBox.addWidget(self.filterView.moneyfundCate)
         filterHBox.addWidget(filterStartDate_Label)
-        filterHBox.addWidget(self.filterStartDate_Edit)
+        filterHBox.addWidget(self.filterView.filterStartDate_Edit)
         filterHBox.addWidget(filterEndDate_Label)
-        filterHBox.addWidget(self.filterEndDate_Edit)
-
+        filterHBox.addWidget(self.filterView.filterEndDate_Edit)
         filterHBox.addWidget(filterBtn)
         filterHBox.addWidget(outputBtn)
 
-        self.setLayout(filterHBox)
-
-
-
-class MoneyFundDetailView(BasicFcView):
-    def __init__(self, mainEngine, parent=None):
-        """Constructor"""
-        super(MoneyFundDetailView, self).__init__(parent=parent)
-
-        self.mainEngine = mainEngine
-
+        self.filterView.setLayout(filterHBox)
+        ##########################
+        # MoneyFundDetailMain
+        ##########################
+        self.moneyfundDetailMain = BasicFcView(self.mainEngine)
         d = OrderedDict()
-
         d['asset_name'] = {'chinese': '货基项目名称', 'cellType': BasicCell}
         d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
         d['total_amount'] = {'chinese': '金额', 'cellType': NumCell}
@@ -127,65 +72,17 @@ class MoneyFundDetailView(BasicFcView):
         d['ret_not_carry'] = {'chinese': '未结转收益', 'cellType': NumCell}
         d['ret_carry_cash'] = {'chinese': '结转金额', 'cellType': NumCell}
 
-        self.setHeaderDict(d)
+        self.moneyfundDetailMain.eventType = EVENT_MF
+        self.moneyfundDetailMain.setHeaderDict(d)
+        self.moneyfundDetailMain.setWindowTitle('货基明细')
+        self.moneyfundDetailMain.setFont(BASIC_FONT)
 
-        self.setEventType(EVENT_MF)
-
-        self.initUi()
-
-    def initUi(self):
-        """初始化界面"""
-        self.setWindowTitle('货基明细')
-        # self.setMinimumSize(1200, 600)
-        # self.setFont(BASIC_FONT)
-        self.initTable()
-        self.refresh()
-        self.signal.connect(self.refresh)
-        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
-        # self.show()
-
-    def show(self):
-        """显示"""
-        super(MoneyFundDetailView, self).show()
-        self.refresh()
-
-    def refresh(self):
-        """刷新"""
-        self.menu.close()  # 关闭菜单
-        self.clearContents()
-        self.setRowCount(0)
-        self.showMoneyFundListDetail()
-        print('mf main called ......')
-
-    def showMoneyFundListDetail(self):
-        """显示所有合约数据"""
-
-        result = self.mainEngine.get_fund_detail_by_days(7)
-        # print(result)
-        self.setRowCount(len(result))
-        row = 0
-        for r in result:
-            # 按照定义的表头，进行数据填充
-            for n, header in enumerate(self.headerList):
-                # content = r[header]
-                for col in r.values():
-                    content = col[0][header]
-                cellType = self.headerDict[header]['cellType']
-                cell = cellType(content)
-                self.setItem(row, n, cell)
-
-            row = row + 1
-
-
-class MoneyFundSummaryView(BasicFcView):
-    def __init__(self, mainEngine, parent=None):
-        """Constructor"""
-        super(MoneyFundSummaryView, self).__init__(parent=parent)
-
-        self.mainEngine = mainEngine
-
+        self.moneyfundDetailMain.initTable()
+        ##########################
+        # MoneyFundSummaryView
+        ##########################
+        self.moneyfundSummaryView = BasicFcView(self.mainEngine)
         d = OrderedDict()
-
         d['asset_name'] = {'chinese': '货基项目名称', 'cellType': BasicCell}
         # 货基项目
         d['total_amount'] = {'chinese': '金额', 'cellType': NumCell}
@@ -193,26 +90,50 @@ class MoneyFundSummaryView(BasicFcView):
         d['total_purchase_amount'] = {'chinese': '申购总额', 'cellType': NumCell}
         d['total_redeem_amount'] = {'chinese': '赎回总额', 'cellType': NumCell}
 
-        self.setHeaderDict(d)
+        self.moneyfundSummaryView.eventType = EVENT_MF
+        self.moneyfundSummaryView.setHeaderDict(d)
+        self.moneyfundSummaryView.setWindowTitle('货基汇总')
+        self.moneyfundSummaryView.setFont(BASIC_FONT)
 
-        self.setEventType(EVENT_MF)
-
-        self.initUi()
-
-    def initUi(self):
-        """初始化界面"""
-        self.setWindowTitle('今日货基总额统计')
-        # self.setMinimumSize(1200, 600)
-        # self.setFont(BASIC_FONT)
-        self.initTable()
+        self.moneyfundSummaryView.initTable()
+        #########################
+        # 界面整合
+        #########################
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.filterView)
+        vbox.addWidget(self.moneyfundDetailMain)
+        vbox.addWidget(self.moneyfundSummaryView)
+        self.setLayout(vbox)
+        # 将信号接入
         self.signal.connect(self.refresh)
-        self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
-        self.show()
-        # self.addMenuAction()
+        self.mainEngine.eventEngine.register(self.moneyfundDetailMain.eventType, self.signal.emit)
+
+    def filterAction(self):
+        d = datetime.date.today()
+        asset_id_index = str(self.filterView.moneyfundCate.currentIndex())
+        asset_id = self.filterView.moneyfundCate_list[int(asset_id_index)]
+        filter_start_date = str(self.filterView.filterStartDate_Edit.text()).split('-')
+        filter_end_date = str(self.filterView.filterEndDate_Edit.text()).split('-')
+        if filter_start_date is None or filter_end_date is None:
+            start_date = datetime.date(d.year, d.month, d.day)
+            end_date = datetime.date(d.year, d.month, d.day)
+        else:
+            start_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[0])),
+                                       int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[1])),
+                                       int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[2])))
+            end_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[0])),
+                                     int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[1])),
+                                     int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[2])))
+
+        print('filter Action', asset_id, start_date, end_date)
+        self.filterRefresh(asset_id, start_date, end_date)
+
+    def outputAction(self):
+        print('output Action')
 
     def show(self):
         """显示"""
-        super(MoneyFundSummaryView, self).show()
+        super(MoneyFundMain, self).show()
         self.refresh()
 
     def refresh(self):
@@ -221,23 +142,63 @@ class MoneyFundSummaryView(BasicFcView):
         self.clearContents()
         self.setRowCount(0)
         self.showMoneyFundSummary()
-        print('mf main called....')
+        result = self.mainEngine.get_fund_detail_by_days(7)
+        self.showMoneyFundListDetail(result)
 
-    def showMoneyFundSummary(self):
+    def filterRefresh(self, asset_id, start, end):
+        """过滤刷新"""
+        self.menu.close()
+        self.clearContents()
+        self.setRowCount(0)
+        result = self.mainEngine.get_single_fund_detail_by_period(asset_id=asset_id, start=start, end=end)
+        self.showMoneyFundListDetail(result)
+
+    def showMoneyFundListDetail(self, result):
         """显示所有合约数据"""
 
+        print('showMoneyFundListDetail', result)
+        count = 0
+        for d in result:
+            for v in d.values():
+                count = count + len(v)
+        print('showMoneyFundListDetail:count:', count)
+        self.moneyfundDetailMain.setRowCount(count)
+        row = 0
+        # 遍历资产类型
+        for r in result:
+            # 遍历对应资产的记录
+            for col in r.values():
+                for c in col:
+                    # 按照定义的表头，进行数据填充
+                    for n, header in enumerate(self.moneyfundDetailMain.headerList):
+                        content = c[header]
+                        cell = self.moneyfundDetailMain.headerDict[header]['cellType'](content)
+                        self.moneyfundDetailMain.setItem(row, n, cell)
+                    row = row + 1
+
+    def showMoneyFundSummary(self):
+        """显示合约汇总数据"""
         result = self.mainEngine.get_total_fund_statistic()
-        self.setRowCount(len(result))
+        self.moneyfundSummaryView.setRowCount(len(result))
         row = 0
         for r in result:
             # 按照定义的表头，进行数据填充
-            for n, header in enumerate(self.headerList):
+            for n, header in enumerate(self.moneyfundSummaryView.headerList):
                 content = r[header]
-                cellType = self.headerDict[header]['cellType']
+                cellType = self.moneyfundSummaryView.headerDict[header]['cellType']
                 cell = cellType(content)
-                self.setItem(row, n, cell)
+                self.moneyfundSummaryView.setItem(row, n, cell)
 
             row = row + 1
+
+    def prepareMoneyfundData(self):
+        """准备基金类别数据"""
+        result = self.mainEngine.get_all_asset_ids_by_type(SV.ASSET_CLASS_FUND)
+        print('prepareMoneyfundData', result)
+        for mf in result:
+            if not self.filterView.moneyfundCate_list.__contains__(mf[0]):
+                self.filterView.moneyfundCate_list.append(mf[0])
+                self.filterView.moneyfundCate.addItem(mf[1])
 
 
 if __name__ == '__main__':
@@ -250,5 +211,5 @@ if __name__ == '__main__':
     # mainfdv = MoneyFundSummaryView(mainEngine)
     # mflv.showMaximized()
     # mainfdv.showMaximized()
-    mfm.showMaximized()
+    mfm.show()
     sys.exit(app.exec_())

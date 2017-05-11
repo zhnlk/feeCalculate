@@ -408,7 +408,7 @@ def get_single_fund_detail_by_period(asset_id=None, start=date.today(), end=date
     while start <= end:
         ret.append(get_asset_fund_detail(cal_date=start, asset_id=asset_id))
         start += timedelta(days=1)
-    return {asset_id: ret}
+    return [{asset_id: ret}]
 
 
 def get_single_fund_detail_by_days(days=0, asset_id=None):
