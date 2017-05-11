@@ -180,12 +180,21 @@ class MainWindow(QMainWindow, BasicFcView):
             self.widgetDict['openAddProtocolCate'] = PdCateInput(self.mainEngine)
             self.widgetDict['openAddProtocolCate'].show()
 
-    def openOutProtocolData(self):
+    def openOutCashData(self):
+        """打开现金导出"""
         try:
-            self.widgetDict['openOutProtocolData'].show()
+            self.widgetDict['openOutCashData'].saveToCsv()
         except KeyError:
-            self.widgetDict['openOutProtocolData'] = ErrorWidget(self)
-            self.widgetDict['openOutProtocolData'].show()
+            self.widgetDict['openOutCashData'] = CashViewMain(self.mainEngine)
+            self.widgetDict['openOutCashData'].saveToCsv()
+
+    def openOutProtocolData(self):
+        """导出协存"""
+        try:
+            self.widgetDict['openOutProtocolData'].saveToCsv()
+        except KeyError:
+            self.widgetDict['openOutProtocolData'] = ProtocolViewMain(self.mainEngine)
+            self.widgetDict['openOutProtocolData'].saveToCsv()
 
     def openAddMoneyFundDetail(self):
         """打开货基输入界面"""
@@ -215,14 +224,6 @@ class MainWindow(QMainWindow, BasicFcView):
         except KeyError:
             self.widgetDict['openOutAssetMgtData'] = ErrorWidget(self)
             self.widgetDict['openOutAssetMgtData'].show()
-
-    def openOutCashData(self):
-        """打开现金导出"""
-        try:
-            self.widgetDict['OutCashData'].saveToCsv()
-        except KeyError:
-            self.widgetDict['OutCashData'] = CashViewMain(self.mainEngine)
-            self.widgetDict['OutCashData'].saveToCsv()
 
     def createAction(self, actionName, function):
         """创建操作功能"""
