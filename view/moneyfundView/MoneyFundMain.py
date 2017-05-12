@@ -2,17 +2,17 @@
 import codecs
 import csv
 import datetime
-
 import re
 from collections import OrderedDict
 
-from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox, QFileDialog
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox, \
+    QFileDialog
 
-from view.BasicWidget import BasicFcView, BasicCell, NumCell, BASIC_FONT
 from controller.EventType import EVENT_MF
 from controller.MainEngine import MainEngine
-from utils.MoneyFormat import outputmoney
 from utils import StaticValue as SV
+from utils.MoneyFormat import outputmoney
+from view.BasicWidget import BasicFcView, BasicCell, NumCell, BASIC_FONT
 
 
 class MoneyFundMain(BasicFcView):
@@ -142,7 +142,7 @@ class MoneyFundMain(BasicFcView):
 
     def refresh(self):
         """刷新"""
-        self.menu.close()  # 关闭菜单
+        # self.menu.close()  # 关闭菜单
         self.clearContents()
         self.setRowCount(0)
         self.showMoneyFundSummary()
@@ -151,7 +151,7 @@ class MoneyFundMain(BasicFcView):
 
     def filterRefresh(self, asset_id, start, end):
         """过滤刷新"""
-        self.menu.close()
+        # self.menu.close()
         self.clearContents()
         self.setRowCount(0)
         result = self.mainEngine.get_single_fund_detail_by_period(asset_id=asset_id, start=start, end=end)
@@ -203,6 +203,7 @@ class MoneyFundMain(BasicFcView):
             if not self.filterView.moneyfundCate_list.__contains__(mf[0]):
                 self.filterView.moneyfundCate_list.append(mf[0])
                 self.filterView.moneyfundCate.addItem(mf[1])
+
     def saveToCsv(self):
 
         # 先隐藏右键菜单
@@ -240,7 +241,6 @@ class MoneyFundMain(BasicFcView):
 
         except IOError as e:
             pass
-
 
 
 if __name__ == '__main__':
