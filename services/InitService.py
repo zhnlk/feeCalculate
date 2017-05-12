@@ -241,7 +241,7 @@ def init_fund_data(
 
     init_total_amount = total_amount - purchase_amount + redeem_amount - not_carry_amount
     add_asset_trade_with_asset_and_type(init_total_amount, SV.ASSET_TYPE_INIT, asset.id,
-                                        cal_date) if init_total_amount else None;
+                                        cal_date) if init_total_amount else None
     add_asset_trade_with_asset_and_type(purchase_amount, SV.ASSET_TYPE_PURCHASE, asset.id,
                                         cal_date) if purchase_amount else None
     add_asset_trade_with_asset_and_type(redeem_amount, SV.ASSET_TYPE_REDEEM, asset.id,

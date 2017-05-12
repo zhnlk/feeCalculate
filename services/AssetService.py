@@ -317,6 +317,7 @@ def add_fund_daily_data(cal_date=date.today(), asset_id=None, ret_carry_cash_amo
         ret_type=SV.RET_TYPE_INTEREST
     )  # 所有基金收益
     fund_total_ret_amount += ret_init
+
     fund_carry_ret_amount = get_asset_ret_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
@@ -393,7 +394,7 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
 
     init_ret_amount = get_asset_ret_total_amount_by_asset_and_type(cal_date, asset_id, SV.RET_TYPE_INIT)
 
-    ret.update({SV.ASSET_KEY_ASSET_RET: total_ret - yes_total_ret + init_ret_amount})
+    ret.update({SV.ASSET_KEY_ASSET_RET: total_ret - yes_total_ret})
 
     total_ret_carry = get_asset_ret_total_amount_by_asset_and_type(
         cal_date=cal_date,
@@ -408,7 +409,7 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
     # yes_total_ret += init_ret_amount
 
     ret.update({SV.ASSET_KEY_RET_CARRY_CASH: total_ret_carry - yes_total_ret_carry})
-    ret.update({SV.ASSET_KEY_RET_NOT_CARRY: total_ret - yes_total_ret_carry})  # 未结转收益
+    ret.update({SV.ASSET_KEY_RET_NOT_CARRY: total_ret - yes_total_ret_carry + init_ret_amount})  # 未结转收益
     total_purchase = get_asset_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
@@ -421,8 +422,8 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
     )
     init_asset_amount = get_asset_total_amount_by_asset_and_type(cal_date, asset_id, SV.ASSET_TYPE_INIT)
 
-    ret.update({SV.ASSET_KEY_ASSET_TOTAL: total_purchase - total_redeem + ret.get(SV.ASSET_KEY_ASSET_RET, 0) - ret.get(
-        SV.ASSET_KEY_RET_CARRY_CASH, 0) + init_asset_amount})
+    ret.update({SV.ASSET_KEY_ASSET_TOTAL: total_purchase - total_redeem + ret.get(
+        SV.ASSET_KEY_RET_NOT_CARRY) + init_asset_amount})
 
     return ret
 
