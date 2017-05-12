@@ -8,10 +8,10 @@ import re
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox, QFileDialog
 from PyQt5.QtWidgets import QApplication
 
-from utils.MoneyFormat import outputmoney
 from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 from controller.EventType import EVENT_PD
 from controller.MainEngine import MainEngine
+from utils.MoneyFormat import outputmoney
 from utils import StaticValue as SV
 
 
