@@ -2,4 +2,3 @@ build/
 dist/
 __pycache__/
 .idea/
-utils/data-beta.db
