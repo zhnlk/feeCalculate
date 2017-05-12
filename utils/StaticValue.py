@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 # 资产类型
 import os
-
 import sys
 
 ASSET_CLASS_AGREEMENT = 2  # 协存
@@ -25,6 +24,7 @@ CASH_TYPE_DRAW = 6  # 提出
 CASH_TYPE_FEE = 7  # 提出费用
 CASH_TYPE_RET = 8  # 现金收入
 CASH_TYPE_CARRY = 9  # 收益结转
+CASH_TYPE_INIT = 0  # 初始化
 
 CASH_KEY_TOTAL_AMOUNT = 'cash_total_amount'
 CASH_KEY_PURCHASE_MANAGEMENT = 'cash_to_management'
@@ -44,7 +44,7 @@ CASH_KEY_CASH_TOTAL = 'total_amount'
 ASSET_TYPE_PURCHASE = 1  # 申购资产
 ASSET_TYPE_REDEEM = -1  # 赎回资产
 ASSET_TYPE_RET_CARRY = 2  # 收益结转
-ASSET_TYPE_OTHERS = 0  # 其它
+ASSET_TYPE_INIT = 0  # 初始化
 
 ASSET_KEY_NAME = 'asset_name'
 ASSET_KEY_CAL_DATE = CASH_KEY_CAL_DATE
@@ -89,11 +89,12 @@ ASSET_KEY_FEE_AMOUNT = 'fee_amount'
 ASSET_KEY_FEE_TYPE = 'fee_type'
 
 # 收益变化类型
-RET_TYPE_INTEREST = 1
-RET_TYPE_PRINCIPAL = 0
-RET_TYPE_CASH = -1
-RET_TYPE_CASH_CUT_INTEREST = 2
-RET_TYPE_CASH_ONE_TIME = 3
+RET_TYPE_INTEREST = 1  # 收益
+RET_TYPE_PRINCIPAL = 0  # 结转本金
+RET_TYPE_CASH = -1  # 结转现金
+RET_TYPE_CASH_CUT_INTEREST = 2  # 砍头息
+RET_TYPE_CASH_ONE_TIME = 3  # 到期结息
+RET_TYPE_INIT = -2  # 初始化
 
 # 费用扣取方式
 FEE_METHOD_RATIO_ONE_TIME = 0
@@ -107,6 +108,7 @@ FEE_TYPE_ADJUST_BANK = 2  # 银行费用
 FEE_TYPE_ADJUST_CHECK = 3  # 支票费用
 FEE_TYPE_LOAN_BANK = 4  # 委贷银行费率
 FEE_TYPE_MANAG_PLAN = 5  # 资管计划费用
+FEE_TYPE_INIT = -1  # 初始化
 
 # 结转
 
