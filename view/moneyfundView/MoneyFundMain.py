@@ -94,7 +94,6 @@ class MoneyFundMain(BasicFcView):
         d['total_purchase_amount'] = {'chinese': '申购总额', 'cellType': NumCell}
         d['total_redeem_amount'] = {'chinese': '赎回总额', 'cellType': NumCell}
 
-        self.moneyfundSummaryView.eventType = EVENT_MF
         self.moneyfundSummaryView.setHeaderDict(d)
         self.moneyfundSummaryView.setWindowTitle('货基汇总')
         self.moneyfundSummaryView.setFont(BASIC_FONT)
