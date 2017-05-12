@@ -147,7 +147,7 @@ class ProtocolViewMain(BasicFcView):
 
     def refresh(self):
         """默认刷新"""
-        self.menu.close()  # 关闭菜单
+        # self.menu.close()  # 关闭菜单
         self.clearContents()
         self.setRowCount(0)
         result = self.mainEngine.get_agreement_detail_by_days(7)
