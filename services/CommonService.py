@@ -674,6 +674,16 @@ def get_total_evaluate_detail(days=0):
     return ret
 
 
+def get_total_evaluate_detail_by_period(start=date.today(), end=date.today()):
+    ret = list()
+    while start <= end:
+        ret.append(get_total_evaluate_detail_by_date(start))
+        start += timedelta(days=1)
+    if not ret:
+        ret.append(get_total_evaluate_detail_by_date(date.today()))
+    return ret
+
+
 def get_today_fees():
     return get_total_evaluate_detail_by_date(cal_date=date.today())
 
