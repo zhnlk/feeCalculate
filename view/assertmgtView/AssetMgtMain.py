@@ -44,7 +44,6 @@ class AssetMgtViewMain(BasicFcView):
         #########################
         self.commiteeDetailMain = BasicFcView(self.mainEngine)
 
-        self.commiteeDetailMain.eventDict = {}  # 用来保存双双击事件所需的uuid
         d = OrderedDict()
         # d['no'] = {'chinese': '序号', 'cellType': BasicCell}
         d['asset_name'] = {'chinese': '借款人', 'cellType': BasicCell}
@@ -66,8 +65,11 @@ class AssetMgtViewMain(BasicFcView):
         self.commiteeDetailMain.setHeaderDict(d)
         self.commiteeDetailMain.setWindowTitle('委贷明细')
         self.commiteeDetailMain.setFont(BASIC_FONT)
+        self.commiteeDetailMain.saveData = True
 
         self.commiteeDetailMain.initTable()
+        # 链接信号
+        self.connectSignal()
         ##########################
         # 界面整合
         ##########################
@@ -84,9 +86,22 @@ class AssetMgtViewMain(BasicFcView):
         super(AssetMgtViewMain, self).show()
         self.refresh()
 
+    def connectSignal(self):
+        self.commiteeDetailMain.itemDoubleClicked.connect(self.doubleClickTrigger)
+
+    def doubleClickTrigger(self, cell):
+        op = cell.data[0]
+        op_uuid = cell.data[1]
+        if op is 'uuid_input':
+            # print('uuid input hhhhhhhhhhhhhhhhhh')
+            self.showValuationInput(uuid=op_uuid)
+        elif op is 'uuid_view':
+            # print('uuid view hhhhhhhhhhhhhhhhhh')
+            self.showValuationView(uuid=op_uuid)
+
     def refresh(self):
         """刷新"""
-        self.menu.close()  # 关闭菜单
+        # self.menu.close()  # 关闭菜单
         self.clearContents()
         self.setRowCount(0)
         self.showAssetMgtListDetail()
@@ -125,18 +140,18 @@ class AssetMgtViewMain(BasicFcView):
                     content = '调整'
                 else:
                     content = r[header]
-                self.commiteeDetailMain.eventDict[row] = r['uuid']
                 cellType = self.commiteeDetailMain.headerDict[header]['cellType']
                 cell = cellType(content)
+                if self.commiteeDetailMain.saveData:
+                    if header in ['uuid_view', 'uuid_input']:
+                        cell.data = (header, r['uuid'])
                 self.commiteeDetailMain.setItem(row, n, cell)
             row = row + 1
 
-            # self.commiteeDetailMain.setDoubleClickEvent(9)
-
     def setDoubleClickEvent(self, n):
-        for r in self.eventDict.keys():
-            # self.itemDoubleClicked(self.item(r, n)).connect(self.showValuationView(self.eventDict[r])).emit()
-            # self.cellDoubleClicked(r, n).connect(self.showValuationView(self.eventDict[r]))
+        for r in self.commiteeDetailMain.eventDict.keys():
+            # self.commiteeDetailMain.itemDoubleClicked(self.item(r, n)).connect(self.showValuationView(self.eventDict[r])).emit()
+            self.commiteeDetailMain.cellDoubleClicked(r, n).connect(self.showValuationView(self.eventDict[r]))
             print('set view item double clicked called', r, n, self.eventDict[r])
             # self.itemDoubleClicked(self.item(r, n + 1)).connect(self.showValuationInput(self.eventDict[r])).emit()
             # self.cellDoubleClicked(r, n + 1).connect(self.showValuationInput(self.eventDict[r]))

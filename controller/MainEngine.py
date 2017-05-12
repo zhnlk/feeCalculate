@@ -212,14 +212,14 @@ class MainEngine(object):
         """
         return CommonService.get_total_evaluate_detail(days)
 
-    def get_total_evaluate_detail_by_period(self,start=datetime.date.today(),end=datetime.date.today()):
+    def get_total_evaluate_detail_by_period(self, start=datetime.date.today(), end=datetime.date.today()):
         """
         估值明细筛选
         :param start: 
         :param end: 
         :return: 
         """
-        return CommonService.get_total_evaluate_detail_by_period(start=start,end=end)
+        return CommonService.get_total_evaluate_detail_by_period(start=start, end=end)
 
     def get_today_fees(self):
         """
@@ -230,8 +230,21 @@ class MainEngine(object):
 
     def get_management_fee_by_id(self, uuid):
         """
-        获取费用调整明细
+        获取费用明细
         :param uuid: 
         :return: 
         """
         return AssetService.get_management_fee_by_id(cal_date=datetime.date.today(), asset_id=uuid)
+
+    def get_management_adjust_fee_by_id(self, uuid):
+        """
+        获取费用调整明细
+        :param uuid: 
+        :return: 
+        """
+        result = list()
+        allFees = AssetService.get_management_fee_by_id(cal_date=datetime.date.today(), asset_id=uuid)
+        for f in allFees:
+            if f['fee_type'] in [2, 3]:
+                result.append(f)
+        return result

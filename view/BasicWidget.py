@@ -69,18 +69,22 @@ class BasicFcView(QTableWidget):
 
         # 监控的事件类型
         self.eventType = ''
-
-        # 字体
         self.font = None
 
         # 保存数据对象到单元格
         self.saveData = False
-
         # 默认不允许根据表头进行排序，需要的组件可以开启
         self.sorting = True
-
         # 初始化右键菜单
-        self.initPopMenu()
+        # self.initPopMenu()
+    def connectSignal(self):
+        """连接信号"""
+        # 双击单元格撤单
+        self.itemDoubleClicked.connect(self.doubleClickTrigger)
+
+    def doubleClickTrigger(self, cell):
+        """根据单元格的数据撤单"""
+        print('basic widget double click trigger called')
 
     def setHeaderDict(self, headerDict):
         """设置表头有序字典"""
