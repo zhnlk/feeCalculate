@@ -21,6 +21,7 @@ class MoneyFundMain(BasicFcView):
     def __init__(self, mainEngine):
         super(MoneyFundMain, self).__init__()
         self.mainEngine = mainEngine
+        self.setWindowTitle('货基界面')
         self.setMinimumSize(1300, 600)
         self.initMain()
 

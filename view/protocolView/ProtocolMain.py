@@ -19,6 +19,7 @@ class ProtocolViewMain(BasicFcView):
     def __init__(self, mainEngine, parent=None):
         super(ProtocolViewMain, self).__init__()
         self.mainEngine = mainEngine
+        self.setWindowTitle('协存界面')
         self.setMinimumSize(1300, 600)
         self.initMain()
 

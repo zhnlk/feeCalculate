@@ -20,7 +20,7 @@ class AssetMgtViewMain(BasicFcView):
     def __init__(self, mainEngine, parent=None):
         super(AssetMgtViewMain, self).__init__()
         self.mainEngine = mainEngine
-
+        self.setWindowTitle('资管界面')
         self.widgetDict = {}  # 保存子窗口
         self.setMinimumSize(1300, 600)
         self.initMain()
