@@ -208,7 +208,7 @@ class AssetMgtViewMain(BasicFcView):
                 with codecs.open(path[0], 'w', 'utf_8_sig') as f:
                     writer = csv.writer(f)
                     writer.writerows(csvContent)
-            f.close()
+                f.close()
 
         except IOError as e:
             pass
