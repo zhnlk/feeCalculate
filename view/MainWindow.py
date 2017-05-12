@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import codecs
+import csv
 from collections import OrderedDict
 
 import datetime
@@ -6,13 +8,14 @@ import datetime
 from PyQt5 import QtCore
 
 from PyQt5.QtCore import QSettings
-from PyQt5.QtWidgets import QAction, QApplication
+from PyQt5.QtWidgets import QAction, QApplication, QFileDialog
 from PyQt5.QtWidgets import QDockWidget
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
-from controller import EventType
+from utils.MoneyFormat import outputmoney
 from view.BasicWidget import BasicCell, BasicFcView, NumCell
+from controller import EventType
 from controller.MainEngine import MainEngine
 from view.assertmgtView.AssetMgtInput import AssetMgtInput
 from view.assertmgtView.AssetMgtMain import AssetMgtViewMain
@@ -66,6 +69,7 @@ class MainWindow(QMainWindow, BasicFcView):
 
         # 设计为只显示存在的接口
         sysMenu = menubar.addMenu('系统')
+        sysMenu.addAction(self.createAction('导出估值数据', self.openValuationDetail))
         sysMenu.addAction(self.createAction('退出', self.close))
         sysMenu.addSeparator()
 
@@ -106,6 +110,13 @@ class MainWindow(QMainWindow, BasicFcView):
         except KeyError:
             self.widgetDict['aboutW'] = AboutWidget(self)
             self.widgetDict['aboutW'].show()
+
+    def openValuationDetail(self):
+        try:
+            self.widgetDict['openValuationDetail'].saveToCsv()
+        except KeyError:
+            self.widgetDict['openValuationDetail'] = TotalValuationView(self.mainEngine)
+            self.widgetDict['openValuationDetail'].saveToCsv()
 
     def openCashListDetail(self):
         """打开现金明细"""
@@ -438,8 +449,10 @@ class AssertTotalView(BasicFcView):
 class TotalValuationView(BasicFcView):
     """总估值表"""
 
-    def __init__(self, mainEngine, eventEngine, parent=None):
-        super(TotalValuationView, self).__init__(mainEngine, eventEngine, parent)
+    def __init__(self, mainEngine, parent=None):
+        super(TotalValuationView, self).__init__(mainEngine=mainEngine)
+        self.mainEngine = mainEngine
+        self.eventEngine = mainEngine.eventEngine
 
         # 设置表头有序字典
         d = OrderedDict()
@@ -505,6 +518,39 @@ class TotalValuationView(BasicFcView):
                 cell = cellType(content)
                 self.setItem(row, n, cell)
             row = row + 1
+
+    def saveToCsv(self):
+        # 先隐藏右键菜单
+        self.menu.close()
+
+        csvContent = list()
+        labels = [d['chinese'] for d in self.headerDict.values()]
+        print('labels:', labels)
+        csvContent.append(labels)
+        content = self.mainEngine.get_total_evaluate_detail(7)
+        print('content:', content)
+        for c in content:
+            row = list()
+            for n, header in enumerate(self.headerDict.keys()):
+                if header is not 'cal_date':
+                    row.append(outputmoney(c[header]))
+                else:
+                    row.append(c[header])
+            csvContent.append(row)
+
+        # 获取想要保存的文件名
+        path = QFileDialog.getSaveFileName(self, '保存数据', '', 'CSV(*.csv)')
+
+        try:
+            if path[0]:
+                print(path[0])
+                with codecs.open(path[0], 'w', 'utf_8_sig') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(csvContent)
+            f.close()
+
+        except IOError as e:
+            pass
 
 
 if __name__ == '__main__':
