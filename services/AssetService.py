@@ -59,22 +59,22 @@ def add_agreement_class(name=None, rate=0.03, threshold_amount=0, threshold_rate
     ) if threshold_amount and threshold_rate else None
 
 
-def asset_ret_carry_to_principal(cal_date=date.today(), asset=AssetClass(), amount=0):
-    if amount > 0:
-        add_asset_ret_with_asset_and_type(
-            amount=amount,
-            asset_id=asset.id,
-            cal_date=cal_date,
-            ret_type=SV.RET_TYPE_PRINCIPAL
-        )
-        add_asset_trade_with_asset_and_type(
-            amount=amount,
-            asset_id=asset.id,
-            cal_date=cal_date,
-            trade_type=SV.ASSET_TYPE_RET_CARRY
-        )
-    else:
-        pass
+# def asset_ret_carry_to_principal(cal_date=date.today(), asset=AssetClass(), amount=0):
+#     if amount > 0:
+#         add_asset_ret_with_asset_and_type(
+#             amount=amount,
+#             asset_id=asset.id,
+#             cal_date=cal_date,
+#             ret_type=SV.RET_TYPE_PRINCIPAL
+#         )
+#         add_asset_trade_with_asset_and_type(
+#             amount=amount,
+#             asset_id=asset.id,
+#             cal_date=cal_date,
+#             trade_type=SV.ASSET_TYPE_RET_CARRY
+#         )
+#     else:
+#         pass
 
 
 def add_agreement_daily_data(cal_date=date.today(), asset_id=None, ret_carry_asset_amount=0, purchase_amount=0,
@@ -265,7 +265,7 @@ def add_fund_class(name='XX FUND', code=None):
     save(AssetClass(name=name, code=code, type=SV.ASSET_CLASS_FUND))
 
 
-def asset_ret_carry_to_cash(cal_date=date.today(), asset=AssetClass(), amount=0):
+def asset_ret_carry_to_principal(cal_date=date.today(), asset=AssetClass(), amount=0):
     '''
     结转货基收益到现金
     :param cal_date:
@@ -279,20 +279,14 @@ def asset_ret_carry_to_cash(cal_date=date.today(), asset=AssetClass(), amount=0)
             amount=amount,
             asset_id=asset.id,
             cal_date=cal_date,
-            ret_type=SV.RET_TYPE_CASH
+            ret_type=SV.RET_TYPE_PRINCIPAL
         )
-
-        add_cash_with_type(
-            amount=amount,
-            cash_type=SV.CASH_TYPE_CARRY,
-            cal_date=cal_date
-        )
+        add_asset_trade_with_asset_and_type(amount, SV.ASSET_TYPE_RET_CARRY, asset.id, cal_date)
     else:
         pass
 
 
-def add_fund_daily_data(cal_date=date.today(), asset_id=None, ret_carry_cash_amount=0, purchase_amount=0,
-                        redeem_amount=0,
+def add_fund_daily_data(cal_date=date.today(), asset_id=None, ret_carry_amount=0, purchase_amount=0, redeem_amount=0,
                         ret_amount=0):
     '''
     添加货基每日记录
@@ -321,11 +315,15 @@ def add_fund_daily_data(cal_date=date.today(), asset_id=None, ret_carry_cash_amo
     fund_carry_ret_amount = get_asset_ret_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
-        ret_type=SV.RET_TYPE_CASH
+        ret_type=SV.RET_TYPE_PRINCIPAL
     )  # 结转基金收益
     ret_amount -= (fund_total_ret_amount - fund_carry_ret_amount)  # 输入未结转收益-当日未结转收益 = 当日收益
-    add_daily_asset_data(cal_date=cal_date, asset_id=asset_id, ret_carry_cash_amount=ret_carry_cash_amount,
-                         purchase_amount=purchase_amount, redeem_amount=redeem_amount, ret_amount=ret_amount)
+    add_daily_asset_data(
+        cal_date=cal_date, asset_id=asset_id,
+        purchase_amount=purchase_amount,
+        redeem_amount=redeem_amount, ret_amount=ret_amount,
+        ret_carry_asset_amount=ret_carry_amount
+    )
 
 
 def get_total_fund_statistic_by_id(cal_date=date.today(), asset_id=None):
@@ -399,14 +397,11 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
     total_ret_carry = get_asset_ret_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
-        ret_type=SV.RET_TYPE_CASH)
+        ret_type=SV.RET_TYPE_PRINCIPAL)
     yes_total_ret_carry = get_asset_ret_total_amount_by_asset_and_type(
         cal_date=cal_date - timedelta(days=1),
         asset_id=asset_id,
-        ret_type=SV.RET_TYPE_CASH)
-
-    # total_ret += init_ret_amount
-    # yes_total_ret += init_ret_amount
+        ret_type=SV.RET_TYPE_PRINCIPAL)
 
     ret.update({SV.ASSET_KEY_RET_CARRY_CASH: total_ret_carry - yes_total_ret_carry})
     ret.update({SV.ASSET_KEY_RET_NOT_CARRY: total_ret - yes_total_ret_carry + init_ret_amount})  # 未结转收益
@@ -422,8 +417,8 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
     )
     init_asset_amount = get_asset_total_amount_by_asset_and_type(cal_date, asset_id, SV.ASSET_TYPE_INIT)
 
-    ret.update({SV.ASSET_KEY_ASSET_TOTAL: total_purchase - total_redeem + ret.get(
-        SV.ASSET_KEY_RET_NOT_CARRY) + init_asset_amount})
+    ret.update(
+        {SV.ASSET_KEY_ASSET_TOTAL: total_purchase - total_redeem + total_ret + init_asset_amount + init_ret_amount})
 
     return ret
 
@@ -833,7 +828,7 @@ def add_trade_ret(cal_date=date.today(), ret_amount=0, asset=AssetClass()):
     )
 
 
-def add_daily_asset_data(cal_date=date.today(), asset_id=None, ret_carry_asset_amount=0, ret_carry_cash_amount=0,
+def add_daily_asset_data(cal_date=date.today(), asset_id=None, ret_carry_asset_amount=0,
                          purchase_amount=0,
                          redeem_amount=0, ret_amount=0):
     asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
@@ -842,8 +837,8 @@ def add_daily_asset_data(cal_date=date.today(), asset_id=None, ret_carry_asset_a
     purchase(asset=asset, amount=purchase_amount, cal_date=cal_date) if purchase_amount else None
     redeem(asset=asset, amount=redeem_amount, cal_date=cal_date) if redeem_amount else None
     add_trade_ret(cal_date=cal_date, ret_amount=ret_amount, asset=asset) if ret_amount else None
-    asset_ret_carry_to_cash(cal_date=cal_date, asset=asset,
-                            amount=ret_carry_cash_amount) if ret_carry_cash_amount else None
+    # asset_ret_carry_to_cash(cal_date=cal_date, asset=asset,
+    #                         amount=ret_carry_cash_amount) if ret_carry_cash_amount else None
     asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
     cal_agreement_ret(cal_date=cal_date, asset_id=asset.id) if asset.type == SV.ASSET_CLASS_AGREEMENT else None
 

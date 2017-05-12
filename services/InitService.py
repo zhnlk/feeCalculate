@@ -251,7 +251,7 @@ def init_fund_data(
                                       cal_date) if init_ret_amount else None
     add_asset_ret_with_asset_and_type(ret_amount, asset.id, SV.RET_TYPE_INTEREST,
                                       cal_date) if ret_amount else None
-    add_asset_ret_with_asset_and_type(carry_amount, asset.id, SV.RET_TYPE_CASH, cal_date) if carry_amount else None
+    add_asset_ret_with_asset_and_type(carry_amount, asset.id, SV.RET_TYPE_PRINCIPAL, cal_date) if carry_amount else None
 
 
 if __name__ == '__main__':

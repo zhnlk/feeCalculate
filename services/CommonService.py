@@ -100,7 +100,8 @@ def add_asset_trade_with_asset_and_type(amount=0.0, trade_type=SV.ASSET_TYPE_PUR
 
 #### AssetTradeRet
 @session_deco
-def get_asset_ret_last_total_amount_by_asset_and_type(cal_date=date.today(), asset_id=None, ret_type=SV.RET_TYPE_CASH,
+def get_asset_ret_last_total_amount_by_asset_and_type(cal_date=date.today(), asset_id=None,
+                                                      ret_type=SV.RET_TYPE_PRINCIPAL,
                                                       **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
     ret = session.query(AssetTradeRet, func.max(AssetTradeRet.time).label('max_time')).filter(
@@ -113,7 +114,7 @@ def get_asset_ret_last_total_amount_by_asset_and_type(cal_date=date.today(), ass
 
 
 @session_deco
-def get_asset_ret_total_amount_by_asset_and_type(cal_date=date.today(), asset_id=None, ret_type=SV.RET_TYPE_CASH,
+def get_asset_ret_total_amount_by_asset_and_type(cal_date=date.today(), asset_id=None, ret_type=SV.RET_TYPE_PRINCIPAL,
                                                  **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
     ret = session.query(func.sum(AssetTradeRet.amount).label('total_amount')).filter(
@@ -140,7 +141,7 @@ def del_ret_by_asset_and_date(asset_id=None, cal_date=date.today(), ret_type=SV.
     )
 
 
-def add_asset_ret_with_asset_and_type(amount=0.0, asset_id=None, ret_type=SV.RET_TYPE_CASH, cal_date=date.today()):
+def add_asset_ret_with_asset_and_type(amount=0.0, asset_id=None, ret_type=SV.RET_TYPE_PRINCIPAL, cal_date=date.today()):
     if is_date_has_ret(asset_id=asset_id, cal_date=cal_date, ret_type=ret_type):
         del_ret_by_asset_and_date(asset_id=asset_id, cal_date=cal_date, ret_type=ret_type)
     last_total_amount = get_asset_ret_last_total_amount_by_asset_and_type(
@@ -560,7 +561,7 @@ def get_all_management(cal_date=date.today(), **kwargs):
     car_ret_obj = session.query(func.sum(AssetTradeRet.amount).label('total_amount')).filter(
         AssetTradeRet.is_active,
         AssetTradeRet.date < cal_date + timedelta(days=1),
-        AssetTradeRet.type == SV.RET_TYPE_CASH,
+        AssetTradeRet.type == SV.RET_TYPE_PRINCIPAL,
         AssetTradeRet.asset_class_obj.has(
             AssetClass.type == SV.ASSET_CLASS_MANAGEMENT)).one()
     car_ret_amount = ret_obj.total_amount if car_ret_obj.total_amount else 0.0
