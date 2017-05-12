@@ -62,6 +62,7 @@ class MoneyFundMain(BasicFcView):
         # filterHBox.addWidget(outputBtn)
 
         self.filterView.setLayout(filterHBox)
+        self.filterView.setMaximumHeight(50)
         ##########################
         # MoneyFundDetailMain
         ##########################

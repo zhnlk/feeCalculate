@@ -51,7 +51,7 @@ class CashViewMain(BasicFcView):
         # filterHBox.addWidget(outputBtn)
 
         self.filterView.setLayout(filterHBox)
-        self.filterView.setMinimumHeight(100)
+        self.filterView.setMaximumHeight(50)
         #############################
         # CashListView
         ############################
