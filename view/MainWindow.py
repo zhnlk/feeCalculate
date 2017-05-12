@@ -5,17 +5,18 @@ from collections import OrderedDict
 
 import datetime
 
+import re
 from PyQt5 import QtCore
 
 from PyQt5.QtCore import QSettings
-from PyQt5.QtWidgets import QAction, QApplication, QFileDialog
+from PyQt5.QtWidgets import QAction, QApplication, QFileDialog, QHBoxLayout, QPushButton, QLineEdit, QLabel, QComboBox, QVBoxLayout
 from PyQt5.QtWidgets import QDockWidget
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
-from EventType import EVENT_MAIN_VALUATION, EVENT_MAIN_ASSERT_DETAIL, EVENT_MAIN_FEE
+from controller.EventType import EVENT_MAIN_VALUATION, EVENT_MAIN_ASSERT_DETAIL, EVENT_MAIN_FEE
 from utils.MoneyFormat import outputmoney
-from view.BasicWidget import BasicCell, BasicFcView, NumCell
+from view.BasicWidget import BasicCell, BasicFcView, NumCell, BASIC_FONT
 from controller import EventType
 from controller.MainEngine import MainEngine
 from view.assertmgtView.AssetMgtInput import AssetMgtInput
@@ -59,7 +60,7 @@ class MainWindow(QMainWindow, BasicFcView):
         widgetMainView1, dockMainView1 = self.createDock(DateMainView, '今日资金成本', QtCore.Qt.LeftDockWidgetArea)
         widgetMainView2, dockMainView2 = self.createDock(FeeTotalView, '费用详情统计', QtCore.Qt.RightDockWidgetArea)
         widgetMainView3, dockMainView3 = self.createDock(AssertTotalView, '存量资产详情', QtCore.Qt.BottomDockWidgetArea)
-        widgetMainView4, dockMainView4 = self.createDock(TotalValuationView, '总估值表', QtCore.Qt.BottomDockWidgetArea)
+        widgetMainView4, dockMainView4 = self.createDock(TotalValuationMain, '总估值表', QtCore.Qt.BottomDockWidgetArea)
         self.tabifyDockWidget(dockMainView3, dockMainView4)
 
         # dockMainView.raise_()
@@ -116,7 +117,7 @@ class MainWindow(QMainWindow, BasicFcView):
         try:
             self.widgetDict['openValuationDetail'].saveToCsv()
         except KeyError:
-            self.widgetDict['openValuationDetail'] = TotalValuationView(self.mainEngine)
+            self.widgetDict['openValuationDetail'] = TotalValuationMain(self.mainEngine)
             self.widgetDict['openValuationDetail'].saveToCsv()
 
     def openCashListDetail(self):
@@ -438,14 +439,51 @@ class AssertTotalView(BasicFcView):
         self.initTable()
 
 
-class TotalValuationView(BasicFcView):
+class TotalValuationMain(BasicFcView):
     """总估值表"""
 
     def __init__(self, mainEngine, parent=None):
-        super(TotalValuationView, self).__init__(mainEngine=mainEngine)
+        super(TotalValuationMain, self).__init__(mainEngine=mainEngine)
         self.mainEngine = mainEngine
         self.eventEngine = mainEngine.eventEngine
 
+        self.initUI()
+        self.refresh()
+
+    def initUI(self):
+        ############################
+        # FilterBar
+        ############################
+        self.filterView = BasicFcView(self.mainEngine)
+
+        filterStartDate_Label = QLabel('开始时间')
+        self.filterView.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterView.filterStartDate_Edit.setMaximumWidth(80)
+        filterEndDate_Label = QLabel('结束时间')
+        self.filterView.filterEndDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterView.filterEndDate_Edit.setMaximumWidth(80)
+
+        filterBtn = QPushButton('筛选')
+        # outputBtn = QPushButton('导出')
+
+        filterBtn.clicked.connect(self.filterAction)
+        # outputBtn.clicked.connect(self.outputAction)
+
+        filterHBox = QHBoxLayout()
+        filterHBox.addStretch()
+        filterHBox.addWidget(filterStartDate_Label)
+        filterHBox.addWidget(self.filterView.filterStartDate_Edit)
+        filterHBox.addWidget(filterEndDate_Label)
+        filterHBox.addWidget(self.filterView.filterEndDate_Edit)
+        filterHBox.addWidget(filterBtn)
+        # filterHBox.addWidget(outputBtn)
+
+        self.filterView.setLayout(filterHBox)
+        self.filterView.setMaximumHeight(50)
+        #############################
+        # TotalValuationView
+        #############################
+        self.totalValuationView = BasicFcView(self.mainEngine)
         # 设置表头有序字典
         d = OrderedDict()
         d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
@@ -463,47 +501,73 @@ class TotalValuationView(BasicFcView):
         # d['today_product_revenue'] = {'chinese': '当日产品收益', 'cellType': BasicCell}
         # d['fee_accual'] = {'chinese': '费用计提', 'cellType': BasicCell}
 
-        self.setHeaderDict(d)
-        self.setDataKey('fcSymbol')
-        self.eventType = EVENT_MAIN_VALUATION
-        # self.setFont(BASIC_FONT)
-        self.setSorting(True)
+        self.totalValuationView.eventType = EVENT_MAIN_VALUATION
+        self.totalValuationView.setHeaderDict(d)
+        self.totalValuationView.setFont(BASIC_FONT)
+        self.totalValuationView.setSorting(True)
+        self.totalValuationView.initTable()
 
-        self.initUI()
+        #########################
+        # 界面整合
+        #########################
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.filterView)
+        vbox.addWidget(self.totalValuationView)
+        self.setLayout(vbox)
 
-    def initUI(self):
-        # 初始化表格
-        self.initTable()
-        self.refresh()
-        self.addPopAction()
-
+        # 链接信号
         self.signal.connect(self.refresh)
         self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
 
-    def refresh(self):
-        self.initData()
-        print('TotalValuationView called...')
+    def filterAction(self):
+        d = datetime.date.today()
+        filter_start_date = str(self.filterView.filterStartDate_Edit.text()).split('-')
+        filter_end_date = str(self.filterView.filterEndDate_Edit.text()).split('-')
+        if filter_start_date is None or filter_end_date is None:
+            start_date = datetime.date(d.year, d.month, d.day)
+            end_date = datetime.date(d.year, d.month, d.day)
+        else:
+            start_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[0])),
+                                       int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[1])),
+                                       int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[2])))
+            end_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[0])),
+                                     int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[1])),
+                                     int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[2])))
 
-    def addPopAction(self):
+        print('filter Action', start_date, end_date)
+        self.filterRefresh(start_date, end_date)
+
+    def refresh(self):
+        """默认刷新"""
+        self.clearContents()
+        self.setRowCount(0)
+        result = self.mainEngine.get_total_evaluate_detail(7)
+        self.showTotalEvaluateDetail(result)
+
+    def filterRefresh(self, start, end):
+        """过滤刷新"""
+        self.clearContents()
+        self.setRowCount(0)
+        result = self.mainEngine.get_total_evaluate_detail_by_period(start=start, end=end)
+        self.showTotalEvaluateDetail(result)
+
+    def addPopAction(self, start, end):
         """增加右键菜单内容"""
         refreshAction = QAction('刷新', self)
         refreshAction.triggered.connect(self.refresh)
-
         self.menu.addAction(refreshAction)
 
-    def initData(self):
+    def showTotalEvaluateDetail(self, result):
         """初始化数据"""
-        result = self.mainEngine.get_total_evaluate_detail(7)
-        # print(result)
-        self.setRowCount(len(result))
+        self.totalValuationView.setRowCount(len(result))
         row = 0
         for r in result:
             # 按照定义的表头，进行数据填充
-            for n, header in enumerate(self.headerList):
+            for n, header in enumerate(self.totalValuationView.headerList):
                 content = r[header]
-                cellType = self.headerDict[header]['cellType']
+                cellType = self.totalValuationView.headerDict[header]['cellType']
                 cell = cellType(content)
-                self.setItem(row, n, cell)
+                self.totalValuationView.setItem(row, n, cell)
             row = row + 1
 
     def saveToCsv(self):

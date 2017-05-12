@@ -212,6 +212,15 @@ class MainEngine(object):
         """
         return CommonService.get_total_evaluate_detail(days)
 
+    def get_total_evaluate_detail_by_period(self,start=datetime.date.today(),end=datetime.date.today()):
+        """
+        估值明细筛选
+        :param start: 
+        :param end: 
+        :return: 
+        """
+        return CommonService.get_total_evaluate_detail_by_period(start=start,end=end)
+
     def get_today_fees(self):
         """
         获取今日费用
