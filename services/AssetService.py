@@ -305,11 +305,18 @@ def add_fund_daily_data(cal_date=date.today(), asset_id=None, ret_carry_cash_amo
     :return:None
     '''
 
+    ret_init = get_asset_ret_total_amount_by_asset_and_type(
+        cal_date,
+        asset_id,
+        SV.RET_TYPE_INIT
+    )
+
     fund_total_ret_amount = get_asset_ret_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
         ret_type=SV.RET_TYPE_INTEREST
     )  # 所有基金收益
+    fund_total_ret_amount += ret_init
     fund_carry_ret_amount = get_asset_ret_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
