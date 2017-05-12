@@ -18,6 +18,7 @@ class CashViewMain(BasicFcView):
     def __init__(self, mainEngine, parent=None):
         super(CashViewMain, self).__init__()
         self.mainEngine = mainEngine
+        self.setWindowTitle('现金界面')
         self.setMinimumSize(1300, 600)
         self.initMain()
 
