@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import QDockWidget
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
+from EventType import EVENT_MAIN_VALUATION, EVENT_MAIN_ASSERT_DETAIL, EVENT_MAIN_FEE
 from utils.MoneyFormat import outputmoney
 from view.BasicWidget import BasicCell, BasicFcView, NumCell
 from controller import EventType
@@ -348,19 +349,14 @@ class FeeTotalView(BasicFcView):
         # 设置数据键
         self.setDataKey('fcSymbol')
 
-        self.setEventType(EventType.EVENT_MAIN_FEE)
+        self.eventType = EVENT_MAIN_FEE
 
         # 设置字体
         # self.setFont(BASIC_FONT)
 
         # 设置允许排序
         self.setSorting(True)
-
-        # 初始化表格
         self.initUI()
-
-        # 注册事件监听
-        # self.registerEvent()
 
     def initUI(self):
         # 初始化表格
@@ -431,8 +427,7 @@ class AssertTotalView(BasicFcView):
         self.setDataKey('fcSymbol')
 
         # 设置监控事件类型
-        self.setEventType(EventType.EVENT_MAIN_ASSERT_DETAIL)
-
+        self.eventType = EVENT_MAIN_ASSERT_DETAIL
         # 设置字体
         # self.setFont(BASIC_FONT)
 
@@ -441,9 +436,6 @@ class AssertTotalView(BasicFcView):
 
         # 初始化表格
         self.initTable()
-
-        # 注册事件监听
-        # self.registerEvent()
 
 
 class TotalValuationView(BasicFcView):
@@ -474,15 +466,13 @@ class TotalValuationView(BasicFcView):
         self.setHeaderDict(d)
         self.setDataKey('fcSymbol')
 
-        self.setEventType(EventType.EVENT_MAIN_VALUATION)
+        self.eventType = EVENT_MAIN_VALUATION
 
         # self.setFont(BASIC_FONT)
 
         self.setSorting(True)
 
         self.initUI()
-
-        # self.registerEvent()
 
     def initUI(self):
         # 初始化表格
