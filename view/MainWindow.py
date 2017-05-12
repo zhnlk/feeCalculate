@@ -465,11 +465,8 @@ class TotalValuationView(BasicFcView):
 
         self.setHeaderDict(d)
         self.setDataKey('fcSymbol')
-
         self.eventType = EVENT_MAIN_VALUATION
-
         # self.setFont(BASIC_FONT)
-
         self.setSorting(True)
 
         self.initUI()
