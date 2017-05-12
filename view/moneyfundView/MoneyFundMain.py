@@ -45,10 +45,10 @@ class MoneyFundMain(BasicFcView):
         self.filterView.filterEndDate_Edit.setMaximumWidth(80)
 
         filterBtn = QPushButton('筛选')
-        outputBtn = QPushButton('导出')
+        # outputBtn = QPushButton('导出')
 
         filterBtn.clicked.connect(self.filterAction)
-        outputBtn.clicked.connect(self.outputAction)
+        # outputBtn.clicked.connect(self.outputAction)
 
         filterHBox = QHBoxLayout()
         filterHBox.addStretch()
@@ -59,7 +59,7 @@ class MoneyFundMain(BasicFcView):
         filterHBox.addWidget(filterEndDate_Label)
         filterHBox.addWidget(self.filterView.filterEndDate_Edit)
         filterHBox.addWidget(filterBtn)
-        filterHBox.addWidget(outputBtn)
+        # filterHBox.addWidget(outputBtn)
 
         self.filterView.setLayout(filterHBox)
         ##########################
