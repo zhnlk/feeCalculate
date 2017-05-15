@@ -575,14 +575,12 @@ class TotalValuationMain(BasicFcView):
         # self.menu.close()
 
         csvContent = list()
-        labels = [d['chinese'] for d in self.headerDict.values()]
-        print('labels:', labels)
+        labels = [d['chinese'] for d in self.totalValuationView.headerDict.values()]
         csvContent.append(labels)
         content = self.mainEngine.get_total_evaluate_detail(7)
-        print('content:', content)
         for c in content:
             row = list()
-            for n, header in enumerate(self.headerDict.keys()):
+            for n, header in enumerate(self.totalValuationView.headerDict.keys()):
                 if header is not 'cal_date':
                     row.append(outputmoney(c[header]))
                 else:
