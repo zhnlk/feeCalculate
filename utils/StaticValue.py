@@ -91,7 +91,7 @@ ASSET_KEY_FEE_TYPE = 'fee_type'
 # 收益变化类型
 RET_TYPE_INTEREST = 1  # 收益
 RET_TYPE_PRINCIPAL = 0  # 结转本金
-# RET_TYPE_CASH = -1  # 结转现金
+RET_TYPE_CASH = -1  # 结转现金
 RET_TYPE_CASH_CUT_INTEREST = 2  # 砍头息
 RET_TYPE_CASH_ONE_TIME = 3  # 到期结息
 RET_TYPE_INIT = -2  # 初始化

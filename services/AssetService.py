@@ -286,6 +286,20 @@ def asset_ret_carry_to_principal(cal_date=date.today(), asset=AssetClass(), amou
         pass
 
 
+def asset_ret_carry_to_cash(cal_date=date.today(), asset=AssetClass(), amount=0):
+    if amount > 0:
+
+        add_asset_ret_with_asset_and_type(
+            amount=amount,
+            asset_id=asset.id,
+            cal_date=cal_date,
+            ret_type=SV.RET_TYPE_CASH
+        )
+        add_asset_ret_with_asset_and_type(amount, asset.id, SV.ASSET_TYPE_RET_CARRY, cal_date)
+    else:
+        pass
+
+
 def add_fund_daily_data(cal_date=date.today(), asset_id=None, ret_carry_amount=0, purchase_amount=0, redeem_amount=0,
                         ret_amount=0):
     '''
