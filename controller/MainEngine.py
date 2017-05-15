@@ -204,7 +204,7 @@ class MainEngine(object):
         """
         return AssetService.get_all_management_detail()
 
-    def get_total_evaluate_detail(self, days=7):
+    def get_total_evaluate_detail(self, days=0):
         """
         估计明细
         :param days: 

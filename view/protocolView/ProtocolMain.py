@@ -176,7 +176,7 @@ class ProtocolViewMain(BasicFcView):
         labels = [d['chinese'] for d in self.protocolListView.headerDict.values()]
         print('labels:', labels)
         csvContent.append(labels)
-        content = self.mainEngine.get_agreement_detail_by_days(7)
+        content = self.mainEngine.get_agreement_detail_by_days()
         print('content:', content)
         for r in content:
             # 遍历对应资产的记录

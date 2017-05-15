@@ -154,7 +154,7 @@ class CashViewMain(BasicFcView):
         labels = [d['chinese'] for d in self.cashListView.headerDict.values()]
         print('labels:', labels)
         csvContent.append(labels)
-        content = self.mainEngine.get_cash_detail_by_days(7)
+        content = self.mainEngine.get_cash_detail_by_days()
         print('content:', content)
         for c in content:
             row = list()

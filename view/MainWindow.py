@@ -577,7 +577,7 @@ class TotalValuationMain(BasicFcView):
         csvContent = list()
         labels = [d['chinese'] for d in self.totalValuationView.headerDict.values()]
         csvContent.append(labels)
-        content = self.mainEngine.get_total_evaluate_detail(7)
+        content = self.mainEngine.get_total_evaluate_detail()
         for c in content:
             row = list()
             for n, header in enumerate(self.totalValuationView.headerDict.keys()):
