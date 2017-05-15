@@ -572,7 +572,7 @@ class TotalValuationMain(BasicFcView):
 
     def saveToCsv(self):
         # 先隐藏右键菜单
-        self.menu.close()
+        # self.menu.close()
 
         csvContent = list()
         labels = [d['chinese'] for d in self.headerDict.values()]
