@@ -92,7 +92,7 @@ class MainEngine(object):
         """
         return CommonService.get_all_asset_ids_by_type(asset_type)
 
-    def get_cash_detail_by_days(self, days):
+    def get_cash_detail_by_days(self, days=0):
         """
         获取现金明细
         :param days:获取days内的现金明细
