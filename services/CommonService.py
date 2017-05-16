@@ -144,7 +144,7 @@ def del_ret_by_asset_and_date(asset_id=None, cal_date=date.today(), ret_type=SV.
 def add_asset_ret_with_asset_and_type(amount=0.0, asset_id=None, ret_type=SV.RET_TYPE_PRINCIPAL, cal_date=date.today()):
     if is_date_has_ret(asset_id=asset_id, cal_date=cal_date, ret_type=ret_type):
         del_ret_by_asset_and_date(asset_id=asset_id, cal_date=cal_date, ret_type=ret_type)
-    last_total_amount = get_asset_ret_last_total_amount_by_asset_and_type(
+    last_total_amount = get_asset_ret_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,
         ret_type=ret_type

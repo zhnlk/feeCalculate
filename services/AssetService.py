@@ -295,7 +295,9 @@ def asset_ret_carry_to_cash(cal_date=date.today(), asset=AssetClass(), amount=0)
             cal_date=cal_date,
             ret_type=SV.RET_TYPE_CASH
         )
-        add_asset_ret_with_asset_and_type(amount, asset.id, SV.ASSET_TYPE_RET_CARRY, cal_date)
+        add_cash_with_type(amount=amount, cash_type=SV.CASH_TYPE_CARRY, asset_id=asset.id, cal_date=cal_date)
+
+        # add_asset_ret_with_asset_and_type(amount, asset.id, SV.ASSET_TYPE_RET_CARRY, cal_date)
     else:
         pass
 
@@ -599,10 +601,13 @@ def get_total_management_statistic_by_id(cal_date=date.today(), asset_id=None):
 
     total_ret_amount = get_asset_ret_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
                                                                     ret_type=SV.RET_TYPE_INTEREST)
-
+    total_carry_ret_amount = get_asset_ret_total_amount_by_asset_and_type(cal_date, asset_id, SV.RET_TYPE_CASH)
+    total_ret_amount -= total_carry_ret_amount
     return {
+        SV.ASSET_KEY_ASSET_ID: asset_id,
+        SV.ASSET_KEY_NAME: query_by_id(AssetClass, asset_id).name,
         SV.ASSET_KEY_MANAGEMENT_AMOUNT: total_amount + total_ret_amount,
-        SV.ASSET_KEY_PURCHASE_MANAGEMENT: total_purchase_amount,
+        SV.ASSET_KEY_PURCHASE_MANAGEMENT: total_purchase_amount - total_redeem_amount,
         SV.ASSET_KEY_MANAGEMENT_RET: total_ret_amount,
         SV.CASH_KEY_CAL_DATE: cal_date,
     }
@@ -682,24 +687,24 @@ def cal_adjust_fee(cal_date=date.today(), fee_amount=200, asset_id=None, adjust_
                                       amount=fee_amount)
 
 
-def management_carry_ret_to_cash(cal_date=date.today(), asset_id=None):
-    asset = query_by_id(obj=AssetClass, obj_id=asset_id)
-    if asset.ret_cal_method == SV.RET_TYPE_CASH_CUT_INTEREST:
-        if asset.start_date == cal_date:
-            add_asset_ret_with_asset_and_type(
-                cal_date=cal_date,
-                amount=get_management_asset_all_ret(asset_id=asset_id, cal_date=cal_date),
-                asset_id=asset_id,
-                ret_type=SV.RET_TYPE_CASH_CUT_INTEREST
-            )
-    elif asset.ret_cal_method == SV.RET_TYPE_CASH_ONE_TIME:
-        if asset.expiry_date == cal_date:
-            add_asset_ret_with_asset_and_type(
-                cal_date=cal_date,
-                amount=get_management_asset_all_ret(asset_id=asset_id, cal_date=cal_date),
-                ret_type=SV.RET_TYPE_CASH_ONE_TIME
-            )
-
+# def management_carry_ret_to_cash(cal_date=date.today(), asset_id=None):
+#     asset = query_by_id(obj=AssetClass, obj_id=asset_id)
+#     if asset.ret_cal_method == SV.RET_TYPE_CASH_CUT_INTEREST:
+#         if asset.start_date == cal_date:
+#             add_asset_ret_with_asset_and_type(
+#                 cal_date=cal_date,
+#                 amount=get_management_asset_all_ret(asset_id=asset_id, cal_date=cal_date),
+#                 asset_id=asset_id,
+#                 ret_type=SV.RET_TYPE_CASH_CUT_INTEREST
+#             )
+#     elif asset.ret_cal_method == SV.RET_TYPE_CASH_ONE_TIME:
+#         if asset.expiry_date == cal_date:
+#             add_asset_ret_with_asset_and_type(
+#                 cal_date=cal_date,
+#                 amount=get_management_asset_all_ret(asset_id=asset_id, cal_date=cal_date),
+#                 ret_type=SV.RET_TYPE_CASH_ONE_TIME
+#             )
+#
 
 # def cal_daily_ret_and_fee(cal_date=date.today(), asset_id=None):
 #     '''
