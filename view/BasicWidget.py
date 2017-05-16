@@ -221,7 +221,7 @@ class BasicFcView(QTableWidget):
     def saveToCsv(self):
         """保存表格内容到CSV文件"""
         # 先隐藏右键菜单
-        self.menu.close()
+        # self.menu.close()
 
         # 获取想要保存的文件名
         path = QFileDialog.getSaveFileName(self, '保存数据', '', 'CSV(*.csv)')
@@ -251,19 +251,19 @@ class BasicFcView(QTableWidget):
         except IOError as e:
             pass
 
-    def initPopMenu(self):
-        """初始化右键菜单"""
-        pass
-        self.menu = QMenu(self)
+    # def initPopMenu(self):
+    #     """初始化右键菜单"""
+    #     pass
+    #     self.menu = QMenu(self)
+    #
+    #     saveAction = QAction('保存内容', self)
+    #     saveAction.triggered.connect(self.saveToCsv)
+    #
+    #     self.menu.addAction(saveAction)
 
-        saveAction = QAction('保存内容', self)
-        saveAction.triggered.connect(self.saveToCsv)
-
-        self.menu.addAction(saveAction)
-
-    def contextMenuEvent(self, event):
-        """右键点击事件"""
-        self.menu.popup(QCursor.pos())
+    # def contextMenuEvent(self, event):
+    #     """右键点击事件"""
+    #     self.menu.popup(QCursor.pos())
 
 
 ########################################################################
