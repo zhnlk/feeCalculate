@@ -109,6 +109,7 @@ FEE_TYPE_ADJUST_CHECK = 3  # 支票费用
 FEE_TYPE_LOAN_BANK = 4  # 委贷银行费率
 FEE_TYPE_MANAG_PLAN = 5  # 资管计划费用
 FEE_TYPE_INIT = -1  # 初始化
+FEE_TYPE_COST = 6  # 资金成本
 
 # 结转
 

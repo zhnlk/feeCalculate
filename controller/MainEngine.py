@@ -195,7 +195,8 @@ class MainEngine(object):
         资管汇总表
         :return: 
         """
-        return AssetService.get_total_management_statistic()
+        # return AssetService.get_total_management_statistic()
+        return AssetService.get_total_management_statistic_by_days(7)
 
     def get_all_management_detail(self):
         """

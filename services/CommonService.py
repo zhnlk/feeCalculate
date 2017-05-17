@@ -9,7 +9,6 @@ from sqlalchemy import and_, func, or_
 from models.AssetClassModel import AssetClass
 from models.AssetFeeModel import AssetFee
 from models.AssetFeeRateModel import AssetFeeRate
-from models.AssetRetRateModel import AssetRetRate
 from models.AssetTradeModel import AssetTrade
 from models.AssetTradeRetModel import AssetTradeRet
 from models.CashModel import Cash
@@ -315,19 +314,19 @@ def redeem(asset=AssetClass(), amount=0.0, cal_date=date.today()):
     )
 
 
-@session_deco
-def get_management_asset_all_ret(asset_id=None, cal_date=date.today(), **kwargs):
-    session = kwargs.get(SV.SESSION_KEY)
-    asset = session.query(AssetClass).filter(AssetClass.is_active, AssetClass.id == asset_id).one()
-    asset_ret = session.query(AssetRetRate).filter(AssetRetRate.is_active, AssetRetRate.asset_class == asset_id)
-    if asset_ret.count():
-        asset_ret = asset_ret.one()
-    else:
-        return 0.0
-
-    return asset_ret.ret_rate * get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
-                                                                              trade_type=SV.ASSET_TYPE_PURCHASE) * (
-               asset.expiry_date - asset.start_date).days / asset_ret.interest_days if asset_ret else 0.0
+# @session_deco
+# def get_management_asset_all_ret(asset_id=None, cal_date=date.today(), **kwargs):
+#     session = kwargs.get(SV.SESSION_KEY)
+#     asset = query_by_id(AssetClass, asset_id)
+#     asset_ret = session.query(AssetRetRate).filter(AssetRetRate.is_active, AssetRetRate.asset_class == asset_id)
+#     if asset_ret.count():
+#         asset_ret = asset_ret.one()
+#     else:
+#         return 0.0
+#
+#     return asset_ret.ret_rate * get_asset_last_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
+#                                                                               trade_type=SV.ASSET_TYPE_PURCHASE) * (
+#                asset.expiry_date - asset.start_date).days / asset_ret.interest_days if asset_ret else 0.0
 
 
 # 统计各类资产的买入卖出
@@ -458,7 +457,7 @@ def get_asset_fee_total_amount_by_class_and_type(cal_date=date.today(), asset_cl
         AssetFee.asset_class_obj.has(AssetClass.type == asset_class)
     ).one()
 
-    return fee_obj.total_amount if fee_obj.total_amount else None
+    return fee_obj.total_amount if fee_obj.total_amount else 0.0
 
 
 def get_all_agreement(cal_date=date.today()):
@@ -585,9 +584,9 @@ def get_all_ret_daily(cal_date=date.today(), **kwargs):
 @session_deco
 def get_asset_date(days=0, **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
-    dates = session.query(AssetTrade.date).filter(AssetTrade.is_active, AssetTrade.date <= date.today()).distinct()
+    # dates = session.query(AssetTrade.date).filter(AssetTrade.is_active, AssetTrade.date <= date.today()).distinct()
     dates = session.query(AssetTradeRet.date).filter(AssetTradeRet.is_active,
-                                                     AssetTrade.date <= date.today()).distinct()
+                                                     AssetTradeRet.date <= date.today()).distinct()
     dates = sorted(map(lambda x: x.date, dates))
     if days:
         return dates[-days:]

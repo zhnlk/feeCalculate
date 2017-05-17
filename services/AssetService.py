@@ -7,16 +7,18 @@ from models.AssetClassModel import AssetClass
 from models.AssetFeeRateModel import AssetFeeRate
 from models.AssetRetRateModel import AssetRetRate
 from models.AssetTradeRetModel import AssetTradeRet
+from services import CommonService
 from services.CommonService import (
     add_asset_ret_with_asset_and_type,
     add_asset_trade_with_asset_and_type,
     add_cash_with_type,
     get_asset_ret_total_amount_by_asset_and_type,
     add_asset_fee_with_asset_and_type,
-    query_by_id, save, get_management_asset_all_ret, get_management_trade_amount, get_management_trade_fees,
+    query_by_id, save, get_management_trade_amount, get_management_trade_fees,
     get_all_mamangement_ids, get_all_asset_ids_by_type, get_expiry_management, get_management_fees_by_id,
     is_date_has_ret, is_date_has_fee, get_asset_total_amount_by_asset_and_type, get_asset_date_by_id,
-    get_asset_ret_last_date_before_cal_date)
+    get_asset_ret_last_date_before_cal_date, get_asset_total_amount_by_class_and_type,
+    get_asset_ret_total_amount_by_class_and_type, get_asset_fee_total_amount_by_class_and_type)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
 
@@ -497,7 +499,7 @@ def add_management_class(
         cal_date=date.today()
 ):
     asset = AssetClass(name=name, start_date=start_date, expiry_date=end_date, type=SV.ASSET_CLASS_MANAGEMENT,
-                       ret_cal_method=SV.RET_TYPE_CASH_CUT_INTEREST, cal_date=start_date)
+                       ret_cal_method=SV.RET_TYPE_CASH_ONE_TIME, cal_date=start_date)
     asset_id = asset.id
     save(asset)
     asset_rate = AssetRetRate(asset_id=asset_id, ret_rate=ret_rate, interest_days=rate_days, cal_date=cal_date)
@@ -613,6 +615,45 @@ def get_total_management_statistic_by_id(cal_date=date.today(), asset_id=None):
     }
 
 
+def get_total_management_statistic_by_date(cal_date=date.today()):
+    total_purchase_amount = get_asset_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
+                                                                     SV.ASSET_TYPE_PURCHASE)
+    total_redeem_amount = get_asset_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
+                                                                   SV.ASSET_TYPE_REDEEM)
+    total_ret_amount = get_asset_ret_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
+                                                                    SV.RET_TYPE_INTEREST)
+    total_ret_carry = get_asset_ret_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
+                                                                   SV.RET_TYPE_CASH)
+    total_fee_amount = get_asset_fee_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
+                                                                    SV.FEE_TYPE_ADJUST_BANK) \
+                       + get_asset_fee_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
+                                                                      SV.FEE_TYPE_ADJUST_CHECK) \
+                       + get_asset_fee_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
+                                                                      SV.FEE_TYPE_LOAN_BANK) \
+                       + get_asset_fee_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
+                                                                      SV.FEE_TYPE_MANAG_PLAN) \
+                       + get_asset_fee_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
+                                                                      SV.FEE_TYPE_INIT)
+    # total_carry_fee_amount = get_asset_fee_total_amount_by_class_and_type(cal_date,SV.ASSET_CLASS_MANAGEMENT,SV.feetype)
+
+    total_amount = total_purchase_amount - total_redeem_amount + total_ret_amount - total_ret_carry - total_fee_amount
+
+    return {
+        SV.ASSET_KEY_CAL_DATE: cal_date,
+        SV.ASSET_KEY_MANAGEMENT_AMOUNT: total_amount,
+        SV.ASSET_KEY_PURCHASE_MANAGEMENT: total_purchase_amount - total_redeem_amount,
+        SV.ASSET_KEY_MANAGEMENT_RET: total_ret_amount - total_ret_carry
+    }
+
+
+def get_total_management_statistic_by_days(days=0):
+    dates = CommonService.get_asset_date(days)
+    ret = list()
+    for cal_date in dates:
+        ret.append(get_total_management_statistic_by_date(cal_date))
+    return ret
+
+
 def get_total_management_statistic(cal_date=date.today()):
     '''
     计算日期的统计数据
@@ -627,6 +668,16 @@ def get_total_management_statistic(cal_date=date.today()):
         ret.append(management_ret)
 
     return ret
+
+
+def get_management_asset_all_ret(asset_id=None):
+    asset_rate_list = query_by_id(obj=AssetClass, obj_id=asset_id).asset_ret_rate_list
+    asset_rate = get_asset_rate_by_amount(asset_rate_list)
+    asset_trade_list = query_by_id(obj=AssetClass, obj_id=asset_id).asset_trade_list
+    asset_trade_amount = asset_trade_list[-1].total_amount
+    asset = query_by_id(obj=AssetClass, obj_id=asset_id)
+    return asset_trade_amount * asset_rate.ret_rate * (
+    asset.expiry_date - asset.start_date).days / asset_rate.interest_days if asset_rate.interest_days else 0.0
 
 
 def get_single_management_detail(asset_id=None):
@@ -941,7 +992,8 @@ if __name__ == '__main__':
     # cal_management_fee(asset_id='36429917ffd34b02b29f8c49eb25f557')
     # print(get_all_management_detail())
     # print(get_total_fund_statistic())
-    print(get_fund_detail_by_days())
+    # print(get_fund_detail_by_days())
+    print(get_management_asset_all_ret('64fb8ad0c30f422bb65edff33535602a'))
     # cal_daily_ret_and_fee(asset_id='7fe9c108cd874c10b167782f798e1d35')
     # cal_agreement_ret(cal_date=date.today(),
     #                   asset=query_by_id(obj=AssetClass, obj_id='7fe9c108cd874c10b167782f798e1d35'))
