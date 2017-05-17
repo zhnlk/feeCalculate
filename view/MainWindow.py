@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import QDockWidget
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
+from miscView.TodayCostInput import TodayCostInput
 from utils.MoneyFormat import outputmoney
 from controller.EventType import EVENT_MAIN_VALUATION, EVENT_MAIN_ASSERT_DETAIL, EVENT_MAIN_FEE
 from controller import EventType
@@ -72,6 +73,7 @@ class MainWindow(QMainWindow, BasicFcView):
         # 设计为只显示存在的接口
         sysMenu = menubar.addMenu('系统')
         sysMenu.addAction(self.createAction('导出估值数据', self.openValuationDetail))
+        sysMenu.addAction(self.createAction('输入今日资金成本', self.openAddTodayCost))
         sysMenu.addAction(self.createAction('退出', self.close))
         sysMenu.addSeparator()
 
@@ -176,6 +178,13 @@ class MainWindow(QMainWindow, BasicFcView):
         except KeyError:
             self.widgetDict['addCashDetail'] = CashInput(self.mainEngine)
             self.widgetDict['addCashDetail'].show()
+    def openAddTodayCost(self):
+        """打开今日资金成本输入框"""
+        try:
+            self.widgetDict['openAddTodayCost'].show()
+        except KeyError:
+            self.widgetDict['openAddTodayCost'] = TodayCostInput(self.mainEngine)
+            self.widgetDict['openAddTodayCost'].show()
 
     def openAddProtocolDetail(self):
         """打开协存输入界面"""
@@ -507,6 +516,7 @@ class TotalValuationMain(BasicFcView):
         d['fee2'] = {'chinese': '费用2', 'cellType': NumCell}
         d['fee3'] = {'chinese': '费用3', 'cellType': NumCell}
         d['fee4'] = {'chinese': '费用4', 'cellType': NumCell}
+        d['cost'] = {'chinese': '当日资金成本', 'cellType': NumCell}
         # d['today_product_revenue'] = {'chinese': '当日产品收益', 'cellType': BasicCell}
         # d['fee_accual'] = {'chinese': '费用计提', 'cellType': BasicCell}
 

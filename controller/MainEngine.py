@@ -3,6 +3,7 @@ import datetime
 
 from services import AssetService, CashService, CommonService
 from controller.EventEngine import *
+from utils import StaticValue as SV
 
 
 class MainEngine(object):
@@ -23,7 +24,7 @@ class MainEngine(object):
         self.eventEngine.stop()
 
     def getMainCostData(self):
-        today_asset_cost = CommonService.get_today_fees()['fee4']
+        today_asset_cost = CommonService.get_total_evaluate_detail(1)[0]['cost']
         return self.todayDate, today_asset_cost
 
     def getMainFeeData(self):
@@ -198,7 +199,7 @@ class MainEngine(object):
         # return AssetService.get_total_management_statistic()
         return AssetService.get_total_management_statistic_by_days(7)
 
-    def get_total_management_statistic_period(self,start_date, end_date):
+    def get_total_management_statistic_period(self, start_date, end_date):
         """
         筛选后的资管汇总表
         :param start_date: 
@@ -258,3 +259,12 @@ class MainEngine(object):
             if f['fee_type'] in [2, 3]:
                 result.append(f)
         return result
+
+    def add_asset_fee_with_asset_and_type(self, amount=0, cal_date=datetime.date.today()):
+        """
+        增加今日资金成本
+        :param amount: 
+        :param cal_date: 
+        :return: 
+        """
+        AssetService.add_asset_fee_with_asset_and_type(amount, asset_id=None, fee_type=SV.FEE_TYPE_COST, cal_date=cal_date)
