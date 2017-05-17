@@ -532,9 +532,9 @@ def cal_management_ret(cal_date=None, asset_id=None):
     if asset.expiry_date > cal_date and asset.start_date <= cal_date and not is_date_has_ret(asset_id=asset_id,
                                                                                              ret_type=SV.RET_TYPE_INTEREST,
                                                                                              cal_date=cal_date):
-        rate = get_asset_rate_by_amount(rates=asset.asset_ret_rate_list, amount=0)
+        rate = get_asset_rate_by_amount(rates=query_by_id(AssetClass, asset_id).asset_ret_rate_list, amount=0)
         days = rate.interest_days
-        asset_trades = asset.asset_trade_list
+        asset_trades = query_by_id(AssetClass, asset_id).asset_trade_list
         amount = asset_trades[-1].total_amount if asset_trades else 0.0
         ret = amount * rate.ret_rate / days
         add_asset_ret_with_asset_and_type(
@@ -568,9 +568,9 @@ def cal_all_management_ret_and_fee(cal_date=date.today()):
 def cal_management_fee(cal_date=date.today(), asset_id=None):
     asset = query_by_id(AssetClass, asset_id)
     if asset.expiry_date > cal_date and asset.start_date <= cal_date:
-        asset_fee_rates = asset.asset_fee_rate_list
+        asset_fee_rates = query_by_id(AssetClass, asset_id).asset_fee_rate_list
 
-        asset_trades = asset.asset_trade_list
+        asset_trades = query_by_id(AssetClass, asset_id).asset_trade_list
         total_trade_amount = asset_trades[-1].total_amount if asset_trades else 0.0
         for asset_fee_rate in asset_fee_rates:
             add_asset_fee_with_asset_and_type(
