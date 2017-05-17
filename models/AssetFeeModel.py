@@ -16,7 +16,7 @@ class AssetFee(MixinTotalBase):
     method = Column(Integer, default=0)
     asset_class_obj = relationship('AssetClass', cascade='all')
 
-    def __init__(self, amount=0, asset_class='', type=1, total_amount=0.0, method=1, cal_date=date.today()):
+    def __init__(self, amount=0, asset_class=None, type=1, total_amount=0.0, method=1, cal_date=date.today()):
         MixinBase.__init__(self)
         self.amount = amount
         self.asset_class = asset_class
@@ -26,5 +26,4 @@ class AssetFee(MixinTotalBase):
         self.method = method
 
     def __repr__(self):
-        return '<TradeFee id=%s, amount=%s, asset_trade=%s, type=%s>' % (
-            self.id, self.amount, self.asset_trade, self.type)
+        return '<TradeFee id=%s, type=%s, asset_class=%s>' % (self.id, self.type, self.asset_class)

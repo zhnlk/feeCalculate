@@ -648,15 +648,17 @@ def get_total_evaluate_detail_by_date(cal_date=date.today()):
     ret[SV.ASSET_KEY_ALL_EVALUATE_FUND] = fund_amount
     ret[SV.ASSET_KEY_ALL_EVALUATE_MANAGEMENT] = management_amount
     ret[SV.ASSET_KEY_ALL_EVALUATE_RET] = ret_amount
-    ret[SV.ASSET_KEY_ALL_VALUE] = cash_amount + fund_amount + management_amount + agreement_amount
+
     ret[SV.ASSET_KEY_ALL_CURRENT_RATE] = (cash_amount + fund_amount + agreement_amount) / ret.get(
         SV.ASSET_KEY_ALL_VALUE) if ret.get(SV.ASSET_KEY_ALL_VALUE) else 0.0
     ret['fee1'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.02 / 36000
     ret['fee2'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.03 / 36000
     ret['fee3'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.04 / 36500
+    cost_fee = get_asset_fee_by_date_and_type(cal_date, SV.FEE_TYPE_COST)
 
-    ret['fee4'] = ret.get(SV.ASSET_KEY_ALL_EVALUATE_RET) - ret['fee1'] - ret['fee2'] - ret['fee3'] - get_daily_fee(
-        cal_date=cal_date)
+    ret['cost'] = cost_fee[-1].amount if cost_fee else 0.0
+    ret[SV.ASSET_KEY_ALL_VALUE] = cash_amount + fund_amount + management_amount + agreement_amount - ret.get('cost')
+    ret['fee4'] = ret.get(SV.ASSET_KEY_ALL_EVALUATE_RET) - ret['fee1'] - ret['fee2'] - ret['fee3'] - ret.get('cost')
 
     # from services.AssetService import cal_all_agreement_ret
     # cal_all_agreement_ret(cal_date=date.today())
@@ -752,9 +754,21 @@ def get_asset_ret_last_date_before_cal_date(cal_date=date.today(), asset_id='', 
     return lst_date.date + timedelta(days=1) if lst_date.date else query_by_id(AssetClass, asset_id).date
 
 
+@session_deco
+def get_asset_fee_by_date_and_type(cal_date=date.today(), fee_type=SV.FEE_TYPE_COST, **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    fee = session.query(AssetFee).filter(
+        AssetFee.is_active,
+        AssetFee.date == cal_date,
+        AssetFee.type == fee_type
+    )
+    return fee if fee.count() else None
+
+
 if __name__ == '__main__':
-    print(get_asset_ret_last_date_before_cal_date(cal_date=date.today(), asset_id='c96d0e9aaf924d398cb85095fd0a95cc'))
-    print(get_all_cash())
+    print(get_asset_fee_by_date_and_type(date(2017, 5, 17), SV.FEE_TYPE_COST))
+    # print(get_asset_ret_last_date_before_cal_date(cal_date=date.today(), asset_id='c96d0e9aaf924d398cb85095fd0a95cc'))
+    # print(get_all_cash())
     # print(get_asset_total_amount_by_class_and_type(cal_date=date.today(), asset_class=SV.ASSET_CLASS_FUND,
     #                                                asset_type=SV.ASSET_TYPE_INIT))
     # print(get_total_evaluate_detail_by_date())
