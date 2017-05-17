@@ -338,7 +338,7 @@ def get_asset_trade_change(cal_date=date.today(), asset_type=SV.ASSET_CLASS_AGRE
     asset_trades = []
 
     for asset in assets:
-        asset_trades += asset.asset_trade_list
+        asset_trades += query_by_id(obj=AssetClass, obj_id=asset.id).asset_trade_list
 
     asset_trades = filter(
         lambda y: y.type == trade_type and y.date >= cal_date and y.date < cal_date + timedelta(days=1), asset_trades)
