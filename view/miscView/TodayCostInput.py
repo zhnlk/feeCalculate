@@ -4,8 +4,8 @@
 # @Email: dG9tbGVhZGVyMDgyOEBnbWFpbC5jb20=  
 # @Github:github/zhnlk
 import datetime
-
 import re
+
 from PyQt5.QtWidgets import QLabel, QLineEdit, QPushButton, QMessageBox, QApplication, QHBoxLayout, QGridLayout
 
 from view.BasicWidget import BasicFcView, BASIC_FONT
@@ -89,7 +89,7 @@ class TodayCostInput(BasicFcView):
             return
         # print(cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
         try:
-            self.mainEngine.add_asset_fee_with_asset_and_type(amount=float(today_cost),cal_date=date)
+            self.mainEngine.add_asset_fee_with_asset_and_type(amount=float(today_cost), cal_date=date)
         except ValueError:
             self.showError()
             return
