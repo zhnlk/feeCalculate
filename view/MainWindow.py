@@ -99,7 +99,8 @@ class MainWindow(QMainWindow, BasicFcView):
         assertMgtMenu.addAction(self.createAction('显示明细', self.openAssetMgtListDetail))
         # assertMgtMenu.addAction(self.createAction('资管估值调整', self.oepnAdjustValuation))
         assertMgtMenu.addAction(self.createAction('增加资管类别', self.openAddAssetMgtCate))
-        assertMgtMenu.addAction(self.createAction('导出记录', self.openOutAssetMgtData))
+        assertMgtMenu.addAction(self.createAction('导出存量记录', self.openOutAssetMgtUpData))
+        assertMgtMenu.addAction(self.createAction('导出委贷记录', self.openOutAssetMgtData))
         sysMenu.addSeparator()
         # 帮助
         helpMenu = menubar.addMenu('帮助')
@@ -236,6 +237,14 @@ class MainWindow(QMainWindow, BasicFcView):
         except KeyError:
             self.widgetDict['openOutAssetMgtData'] = AssetMgtViewMain(self.mainEngine)
             self.widgetDict['openOutAssetMgtData'].saveToCsv()
+
+    def openOutAssetMgtUpData(self):
+        try:
+            self.widgetDict['openOutAssetMgtData'].saveUpToCsv()
+        except KeyError:
+            self.widgetDict['openOutAssetMgtData'] = AssetMgtViewMain(self.mainEngine)
+            self.widgetDict['openOutAssetMgtData'].saveUpToCsv()
+
 
     def createAction(self, actionName, function):
         """创建操作功能"""

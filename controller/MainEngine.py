@@ -198,6 +198,15 @@ class MainEngine(object):
         # return AssetService.get_total_management_statistic()
         return AssetService.get_total_management_statistic_by_days(7)
 
+    def get_total_management_statistic_period(self,start_date, end_date):
+        """
+        筛选后的资管汇总表
+        :param start_date: 
+        :param end_date: 
+        :return: 
+        """
+        return AssetService.get_total_management_statistic_period(start_date, end_date)
+
     def get_all_management_detail(self):
         """
         资管相关明细
