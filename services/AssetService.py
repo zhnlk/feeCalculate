@@ -646,6 +646,14 @@ def get_total_management_statistic_by_date(cal_date=date.today()):
     }
 
 
+def get_total_management_statistic_period(start_date=date.today(), end_date=date.today()):
+    ret = list()
+    while start_date <= end_date:
+        ret.append(get_total_management_statistic_by_date(start_date))
+        start_date += timedelta(days=1)
+    return ret
+
+
 def get_total_management_statistic_by_days(days=0):
     dates = CommonService.get_asset_date(days)
     ret = list()
@@ -677,7 +685,7 @@ def get_management_asset_all_ret(asset_id=None):
     asset_trade_amount = asset_trade_list[-1].total_amount
     asset = query_by_id(obj=AssetClass, obj_id=asset_id)
     return asset_trade_amount * asset_rate.ret_rate * (
-    asset.expiry_date - asset.start_date).days / asset_rate.interest_days if asset_rate.interest_days else 0.0
+        asset.expiry_date - asset.start_date).days / asset_rate.interest_days if asset_rate.interest_days else 0.0
 
 
 def get_single_management_detail(asset_id=None):
