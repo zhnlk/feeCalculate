@@ -1,27 +1,26 @@
 # -*- coding: utf-8 -*-
+# @Author:zhnlk
+# @Date:  2017/5/17
+# @Email: dG9tbGVhZGVyMDgyOEBnbWFpbC5jb20=  
+# @Github:github/zhnlk
 import datetime
+
 import re
+from PyQt5.QtWidgets import QLabel, QLineEdit, QPushButton, QMessageBox, QApplication, QHBoxLayout, QGridLayout
 
-from PyQt5.QtWidgets import QApplication, QMessageBox, QMainWindow
-from PyQt5.QtWidgets import QGridLayout
-from PyQt5.QtWidgets import QHBoxLayout
-from PyQt5.QtWidgets import QLabel
-from PyQt5.QtWidgets import QLineEdit
-from PyQt5.QtWidgets import QPushButton
-
-from view.BasicWidget import BASIC_FONT, BasicFcView
-from controller.EventEngine import Event
-from controller.EventType import EVENT_CASH, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION
-from controller.MainEngine import MainEngine
+from BasicWidget import BasicFcView, BASIC_FONT
+from EventEngine import Event
+from EventType import EVENT_MAIN_VALUATION, EVENT_MAIN_FEE
+from MainEngine import MainEngine
 
 
-class CashInput(BasicFcView):
+class TodayCostInput(BasicFcView):
     """现金详情"""
 
     # ----------------------------------------------------------------------
     def __init__(self, mainEngine, parent=None):
         """Constructor"""
-        super(CashInput, self).__init__(parent=parent)
+        super(TodayCostInput, self).__init__(parent=parent)
 
         self.mainEngine = mainEngine
 
@@ -30,7 +29,7 @@ class CashInput(BasicFcView):
     # ----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
-        self.setWindowTitle('输入现金明细')
+        self.setWindowTitle('输入今日资金成本')
         # self.setMinimumSize(800, 800)
         self.setFont(BASIC_FONT)
         # self.initTable()
@@ -42,17 +41,11 @@ class CashInput(BasicFcView):
         """设置输入框"""
 
         # 设置组件
-        cash_to_investor_Label = QLabel("现金->兑付投资人")
-        extract_fee_Label = QLabel("提取费用")
-        investor_to_cash_Label = QLabel("投资人->现金")
-        cash_revenue_Label = QLabel("现金收入")
+        today_cost_Label = QLabel("今日资金成本")
 
         date_Label = QLabel("日期")
 
-        self.cash_to_investor_Edit = QLineEdit("0.00")
-        self.extract_fee_Edit = QLineEdit("0.00")
-        self.invest_to_cash_Edit = QLineEdit("0.00")
-        self.cash_revenue_Edit = QLineEdit("0.00")
+        self.today_cost_Edit = QLineEdit("0.00")
         self.date_Edit = QLineEdit(str(datetime.date.today()))
 
         okButton = QPushButton("确定")
@@ -67,39 +60,21 @@ class CashInput(BasicFcView):
         buttonHBox.addWidget(cancelButton)
 
         grid = QGridLayout()
-        grid.addWidget(cash_to_investor_Label, 0, 0)
-        grid.addWidget(extract_fee_Label, 1, 0)
-        grid.addWidget(investor_to_cash_Label, 2, 0)
-        grid.addWidget(cash_revenue_Label, 3, 0)
-        grid.addWidget(date_Label, 4, 0)
+        grid.addWidget(today_cost_Label, 0, 0)
+        grid.addWidget(date_Label, 1, 0)
 
-        grid.addWidget(self.cash_to_investor_Edit, 0, 1)
-        grid.addWidget(self.extract_fee_Edit, 1, 1)
-        grid.addWidget(self.invest_to_cash_Edit, 2, 1)
-        grid.addWidget(self.cash_revenue_Edit, 3, 1)
-        grid.addWidget(self.date_Edit, 4, 1)
-        grid.addLayout(buttonHBox, 6, 0, 1, 2)
+        grid.addWidget(self.today_cost_Edit, 0, 1)
+        grid.addWidget(self.date_Edit, 1, 1)
+        grid.addLayout(buttonHBox, 2, 0, 1, 2)
 
         self.setLayout(grid)
 
     # ----------------------------------------------------------------------
     def addData(self):
         """增加数据"""
-        cash_to_investor = str(self.cash_to_investor_Edit.text())
-        if cash_to_investor == '':
-            cash_to_investor = '0.00'
-
-        extract_fee = str(self.extract_fee_Edit.text())
-        if extract_fee == '':
-            extract_fee = '0.00'
-
-        invest_to_cash = str(self.invest_to_cash_Edit.text())
-        if invest_to_cash == '':
-            invest_to_cash = '0.00'
-
-        cash_revenue = str(self.cash_revenue_Edit.text())
-        if cash_revenue == '':
-            cash_revenue = '0.00'
+        today_cost = str(self.today_cost_Edit.text())
+        if today_cost == '':
+            today_cost = '0.00'
 
         date_str = str(self.date_Edit.text()).split('-')
         d = datetime.date.today()
@@ -114,14 +89,13 @@ class CashInput(BasicFcView):
             return
         # print(cash_to_investor, extract_fee, invest_to_cash, cash_revenue)
         try:
-            self.mainEngine.add_cash_daily_data(cal_date=date, draw_amount=float(cash_to_investor), draw_fee=float(extract_fee),
-                                                deposit_amount=float(invest_to_cash), ret_amount=float(cash_revenue))
+            self.mainEngine.add_asset_fee_with_asset_and_type(amount=float(today_cost),cal_date=date)
         except ValueError:
             self.showError()
             return
 
         # 加入数据后，更新列表显示
-        self.mainEngine.eventEngine.put(Event(type_=EVENT_CASH))
+        # self.mainEngine.eventEngine.put(Event(type_=EVENT_CASH))
         self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_FEE))
         self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
         # self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_ASSERT_DETAIL))
@@ -141,6 +115,6 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    cashInput = CashInput(mainEngine)
+    cashInput = TodayCostInput(mainEngine)
     cashInput.show()
     sys.exit(app.exec_())
