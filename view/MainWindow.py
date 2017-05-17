@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import QDockWidget
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
-from miscView.TodayCostInput import TodayCostInput
+from view.miscView.TodayCostInput import TodayCostInput
 from utils.MoneyFormat import outputmoney
 from controller.EventType import EVENT_MAIN_VALUATION, EVENT_MAIN_ASSERT_DETAIL, EVENT_MAIN_FEE
 from controller import EventType
