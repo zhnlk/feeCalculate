@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import codecs
 import csv
+import datetime
 from collections import OrderedDict
 
-from PyQt5.QtWidgets import QApplication, QVBoxLayout, QFileDialog
+import re
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QFileDialog, QLabel, QLineEdit, QPushButton, QHBoxLayout
 
 from controller.EventType import EVENT_AM
 from controller.MainEngine import MainEngine
@@ -23,6 +25,35 @@ class AssetMgtViewMain(BasicFcView):
         self.initMain()
 
     def initMain(self):
+        ###############################
+        # FilterBar
+        ###############################
+        self.filterView = BasicFcView(self.mainEngine)
+
+        filterStartDate_Label = QLabel('开始时间')
+        self.filterView.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterView.filterStartDate_Edit.setMaximumWidth(80)
+        filterEndDate_Label = QLabel('结束时间')
+        self.filterView.filterEndDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterView.filterEndDate_Edit.setMaximumWidth(80)
+
+        filterBtn = QPushButton('筛选')
+        # outputBtn = QPushButton('导出')
+
+        filterBtn.clicked.connect(self.filterAction)
+        # outputBtn.clicked.connect(self.outputAction)
+
+        filterHBox = QHBoxLayout()
+        filterHBox.addStretch()
+        filterHBox.addWidget(filterStartDate_Label)
+        filterHBox.addWidget(self.filterView.filterStartDate_Edit)
+        filterHBox.addWidget(filterEndDate_Label)
+        filterHBox.addWidget(self.filterView.filterEndDate_Edit)
+        filterHBox.addWidget(filterBtn)
+        # filterHBox.addWidget(outputBtn)
+
+        self.filterView.setLayout(filterHBox)
+        self.filterView.setMaximumHeight(50)
         ##########################
         # AssetDailyInventoryView
         #########################
@@ -74,6 +105,7 @@ class AssetMgtViewMain(BasicFcView):
         # 界面整合
         ##########################
         vbox = QVBoxLayout()
+        vbox.addWidget(self.filterView)
         vbox.addWidget(self.assetDailyInventoryView)
         vbox.addWidget(self.commiteeDetailMain)
         self.setLayout(vbox)
@@ -86,31 +118,61 @@ class AssetMgtViewMain(BasicFcView):
         super(AssetMgtViewMain, self).show()
         self.refresh()
 
+    def filterAction(self):
+        d = datetime.date.today()
+        filter_start_date = str(self.filterView.filterStartDate_Edit.text()).split('-')
+        filter_end_date = str(self.filterView.filterEndDate_Edit.text()).split('-')
+        if filter_start_date is None or filter_end_date is None:
+            start_date = datetime.date(d.year, d.month, d.day)
+            end_date = datetime.date(d.year, d.month, d.day)
+        else:
+            start_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[0])),
+                                       int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[1])),
+                                       int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[2])))
+            end_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[0])),
+                                     int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[1])),
+                                     int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[2])))
+
+        print('filter Action', start_date, end_date)
+        self.filterRefresh(start_date, end_date)
+
     def connectSignal(self):
         self.commiteeDetailMain.itemDoubleClicked.connect(self.doubleClickTrigger)
 
     def doubleClickTrigger(self, cell):
-        op = cell.data[0]
-        op_uuid = cell.data[1]
-        if op is 'uuid_input':
-            # print('uuid input hhhhhhhhhhhhhhhhhh')
-            self.showValuationInput(uuid=op_uuid)
-        elif op is 'uuid_view':
-            # print('uuid view hhhhhhhhhhhhhhhhhh')
-            self.showValuationView(uuid=op_uuid)
+        try:
+            op = cell.data[0]
+            op_uuid = cell.data[1]
+            if op is 'uuid_input':
+                # print('uuid input hhhhhhhhhhhhhhhhhh')
+                self.showValuationInput(uuid=op_uuid)
+            elif op is 'uuid_view':
+                # print('uuid view hhhhhhhhhhhhhhhhhh')
+                self.showValuationView(uuid=op_uuid)
+        except TypeError:
+            pass
+
 
     def refresh(self):
         """刷新"""
         # self.menu.close()  # 关闭菜单
         self.clearContents()
         self.setRowCount(0)
-        self.showAssetMgtListDetail()
-        result = self.mainEngine.get_all_management_detail()
-        self.showCommiteeDetail(result)
-
-    def showAssetMgtListDetail(self):
-        """显示所有合约数据"""
         result = self.mainEngine.get_total_management_statistic()
+        self.showAssetMgtListDetail(result)
+        self.showCommiteeDetail()
+
+    def filterRefresh(self, start_date, end_date):
+        """筛选后刷新"""
+        self.clearContents()
+        self.setRowCount(0)
+        result = self.mainEngine.get_total_management_statistic_period(start_date, end_date)
+        self.showAssetMgtListDetail(result)
+        self.showCommiteeDetail()
+
+    def showAssetMgtListDetail(self, result):
+        """显示所有合约数据"""
+
         # print(result)
         self.assetDailyInventoryView.setRowCount(len(result))
         row = 0
@@ -125,9 +187,9 @@ class AssetMgtViewMain(BasicFcView):
 
             row = row + 1
 
-    def showCommiteeDetail(self, result):
+    def showCommiteeDetail(self):
         """显示所有合约数据"""
-
+        result = self.mainEngine.get_all_management_detail()
         print(result)
         self.commiteeDetailMain.setRowCount(len(result))
         row = 0
@@ -187,10 +249,38 @@ class AssetMgtViewMain(BasicFcView):
         # else:
         #     event.ignore()
 
-    def saveToCsv(self):
+    def saveUpToCsv(self):
+        csvContent = list()
+        labels = [d['chinese'] for d in self.assetDailyInventoryView.headerDict.values()]
+        print('labels:', labels)
+        csvContent.append(labels)
+        content = self.mainEngine.get_total_management_statistic()
+        print('content:', content)
 
-        # 先隐藏右键菜单
-        # self.menu.close()
+        for c in content:
+            row = list()
+            for n, header in enumerate(self.assetDailyInventoryView.headerDict.keys()):
+                if header is not 'cal_date':
+                    row.append(outputmoney(c[header]))
+                else:
+                    row.append(c[header])
+            csvContent.append(row)
+
+        # 获取想要保存的文件名
+        path = QFileDialog.getSaveFileName(self, '保存数据', '', 'CSV(*.csv)')
+
+        try:
+            if path[0]:
+                print(path[0])
+                with codecs.open(path[0], 'w', 'utf_8_sig') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(csvContent)
+                f.close()
+
+        except IOError as e:
+            pass
+
+    def saveToCsv(self):
 
         csvContent = list()
         labels = [d['chinese'] for d in self.commiteeDetailMain.headerDict.values()]
