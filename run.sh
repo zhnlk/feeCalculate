@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-git checkout -- .
+git pull
 python3 fcMain.py
