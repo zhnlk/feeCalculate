@@ -16,8 +16,7 @@ from PyQt5.QtWidgets import QMessageBox
 
 from view.miscView.TodayCostInput import TodayCostInput
 from utils.MoneyFormat import outputmoney
-from controller.EventType import EVENT_MAIN_VALUATION, EVENT_MAIN_ASSERT_DETAIL, EVENT_MAIN_FEE
-from controller import EventType
+from controller.EventType import EVENT_MAIN_VALUATION, EVENT_MAIN_ASSERT_DETAIL, EVENT_MAIN_FEE, EVENT_MAIN_COST
 from controller.MainEngine import MainEngine
 from view.BasicWidget import BasicCell, BasicFcView, NumCell, BASIC_FONT
 from view.assertmgtView.AssetMgtInput import AssetMgtInput
@@ -178,6 +177,7 @@ class MainWindow(QMainWindow, BasicFcView):
         except KeyError:
             self.widgetDict['addCashDetail'] = CashInput(self.mainEngine)
             self.widgetDict['addCashDetail'].show()
+
     def openAddTodayCost(self):
         """打开今日资金成本输入框"""
         try:
@@ -254,7 +254,6 @@ class MainWindow(QMainWindow, BasicFcView):
             self.widgetDict['openOutAssetMgtData'] = AssetMgtViewMain(self.mainEngine)
             self.widgetDict['openOutAssetMgtData'].saveUpToCsv()
 
-
     def createAction(self, actionName, function):
         """创建操作功能"""
         action = QAction(actionName, self)
@@ -315,7 +314,7 @@ class DateMainView(BasicFcView):
         # 设置数据键
         self.setDataKey('fcSymbol')
 
-        self.setEventType(EventType.EVENT_MAIN_COST)
+        self.eventType = EVENT_MAIN_COST
 
         # 设置字体
         # self.setFont(BASIC_FONT)
@@ -339,7 +338,6 @@ class DateMainView(BasicFcView):
 
     def refresh(self):
         self.initData()
-        print('DateMainView called...')
 
     def initData(self):
         """初始化数据"""
@@ -387,8 +385,6 @@ class FeeTotalView(BasicFcView):
 
     def refresh(self):
         self.initData()
-
-        print('FeeTotalView called...')
 
     def initData(self):
         """初始化数据"""
@@ -520,7 +516,7 @@ class TotalValuationMain(BasicFcView):
         # d['today_product_revenue'] = {'chinese': '当日产品收益', 'cellType': BasicCell}
         # d['fee_accual'] = {'chinese': '费用计提', 'cellType': BasicCell}
 
-        self.totalValuationView.eventType = EVENT_MAIN_VALUATION
+        self.eventType = EVENT_MAIN_VALUATION
         self.totalValuationView.setHeaderDict(d)
         self.totalValuationView.setFont(BASIC_FONT)
         self.totalValuationView.setSorting(True)

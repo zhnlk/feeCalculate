@@ -8,10 +8,10 @@ import re
 
 from PyQt5.QtWidgets import QLabel, QLineEdit, QPushButton, QMessageBox, QApplication, QHBoxLayout, QGridLayout
 
-from controller.EventEngine import Event
-from controller.EventType import EVENT_MAIN_VALUATION, EVENT_MAIN_FEE
-from controller.MainEngine import MainEngine
 from view.BasicWidget import BasicFcView, BASIC_FONT
+from controller.EventEngine import Event
+from controller.EventType import EVENT_MAIN_VALUATION, EVENT_MAIN_FEE, EVENT_MAIN_COST
+from controller.MainEngine import MainEngine
 
 
 class TodayCostInput(BasicFcView):
@@ -96,6 +96,7 @@ class TodayCostInput(BasicFcView):
 
         # 加入数据后，更新列表显示
         # self.mainEngine.eventEngine.put(Event(type_=EVENT_CASH))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_COST))
         self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_FEE))
         self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
         # self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_ASSERT_DETAIL))
