@@ -618,10 +618,19 @@ def get_total_management_statistic_by_id(cal_date=date.today(), asset_id=None):
 def get_total_management_statistic_by_date(cal_date=date.today()):
     total_purchase_amount = get_asset_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
                                                                      SV.ASSET_TYPE_PURCHASE)
+    yes_total_purchase_amount = get_asset_total_amount_by_class_and_type(cal_date - timedelta(days=1),
+                                                                         SV.ASSET_CLASS_MANAGEMENT,
+                                                                         SV.ASSET_TYPE_PURCHASE)
     total_redeem_amount = get_asset_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
                                                                    SV.ASSET_TYPE_REDEEM)
+    yes_total_redeem_amount = get_asset_total_amount_by_class_and_type(cal_date - timedelta(days=1),
+                                                                       SV.ASSET_CLASS_MANAGEMENT,
+                                                                       SV.ASSET_TYPE_REDEEM)
     total_ret_amount = get_asset_ret_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
                                                                     SV.RET_TYPE_INTEREST)
+    yes_total_ret_amount = get_asset_ret_total_amount_by_class_and_type(cal_date - timedelta(days=1),
+                                                                        SV.ASSET_CLASS_MANAGEMENT,
+                                                                        SV.RET_TYPE_INTEREST)
     total_ret_carry = get_asset_ret_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
                                                                    SV.RET_TYPE_CASH)
     total_fee_amount = get_asset_fee_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
@@ -641,8 +650,9 @@ def get_total_management_statistic_by_date(cal_date=date.today()):
     return {
         SV.ASSET_KEY_CAL_DATE: cal_date,
         SV.ASSET_KEY_MANAGEMENT_AMOUNT: total_amount,
-        SV.ASSET_KEY_PURCHASE_MANAGEMENT: total_purchase_amount - total_redeem_amount,
-        SV.ASSET_KEY_MANAGEMENT_RET: total_ret_amount - total_ret_carry
+        SV.ASSET_KEY_PURCHASE_MANAGEMENT: total_purchase_amount - yes_total_purchase_amount,
+        # - total_redeem_amount + yes_total_redeem_amount,
+        SV.ASSET_KEY_MANAGEMENT_RET: total_ret_amount - yes_total_ret_amount  # total_ret_carry - #
     }
 
 
