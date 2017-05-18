@@ -131,12 +131,12 @@ def cal_agreement_ret_of_asset(cal_date=date.today(), asset_id=None):
     )
 
     total_amount = purchase_amount + carry_amount - redeem_amount + init_asset_amount
-    asset = query_by_id(obj=AssetClass, obj_id=asset_id)
+    # asset = query_by_id(obj=AssetClass, obj_id=asset_id)
     rates = query_by_id(obj=AssetClass, obj_id=asset_id).asset_ret_rate_list
     rate = get_asset_rate_by_amount(rates=rates, amount=total_amount)
     add_asset_ret_with_asset_and_type(
         amount=total_amount * rate.ret_rate / 360,
-        asset_id=asset.id,
+        asset_id=asset_id,
         ret_type=SV.RET_TYPE_INTEREST,
         cal_date=cal_date
     ) if total_amount else None
