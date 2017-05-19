@@ -287,3 +287,11 @@ class MainEngine(object):
         :return: 
         """
         return AgreementService.get_total_agreement_statistic_by_period(start_date=start, end_date=end)
+
+    def clean_data_by_date(self, cal_date=datetime.date.today()):
+        """
+        清除本日数据
+        :param cal_date: 
+        :return: 
+        """
+        CommonService.clean_data_by_date(cal_date=cal_date)

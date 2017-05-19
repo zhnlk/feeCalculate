@@ -14,10 +14,12 @@ from PyQt5.QtWidgets import QDockWidget
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
-from view.miscView.TodayCostInput import TodayCostInput
 from utils.MoneyFormat import outputmoney
-from controller.EventType import EVENT_MAIN_VALUATION, EVENT_MAIN_ASSERT_DETAIL, EVENT_MAIN_FEE, EVENT_MAIN_COST
+from controller.EventType import EVENT_MAIN_VALUATION, EVENT_MAIN_ASSERT_DETAIL, EVENT_MAIN_FEE, EVENT_MAIN_COST, EVENT_CASH, EVENT_PD, EVENT_MF, \
+    EVENT_AM, EVENT_MF_INV, EVENT_MF_SUM, EVENT_ADJUST_VIEW
+from controller.EventEngine import Event
 from controller.MainEngine import MainEngine
+from view.miscView.TodayCostInput import TodayCostInput
 from view.BasicWidget import BasicCell, BasicFcView, NumCell, BASIC_FONT
 from view.assertmgtView.AssetMgtInput import AssetMgtInput
 from view.assertmgtView.AssetMgtMain import AssetMgtViewMain
@@ -73,6 +75,7 @@ class MainWindow(QMainWindow, BasicFcView):
         sysMenu = menubar.addMenu('系统')
         sysMenu.addAction(self.createAction('导出估值数据', self.openValuationDetail))
         sysMenu.addAction(self.createAction('输入今日资金成本', self.openAddTodayCost))
+        sysMenu.addAction(self.createAction('清除今日数据', self.openCleanTodayData))
         sysMenu.addAction(self.createAction('退出', self.close))
         sysMenu.addSeparator()
 
@@ -185,6 +188,32 @@ class MainWindow(QMainWindow, BasicFcView):
         except KeyError:
             self.widgetDict['openAddTodayCost'] = TodayCostInput(self.mainEngine)
             self.widgetDict['openAddTodayCost'].show()
+
+    def openCleanTodayData(self):
+        """清理本日数据"""
+        reply = QMessageBox.question(self, '确定', '确认清除本日数据?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            self.mainEngine.clean_data_by_date()
+            # 同步更新主界面
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_COST))
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_FEE))
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
+            # 更新现金界面
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_CASH))
+            # 更新货基
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_MF))
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_MF_INV))
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_MF_SUM))
+            # 更新协存
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_PD))
+            # 更新资管
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_AM))
+            # 调整界面
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_ADJUST_VIEW))
+
+        else:
+            pass
 
     def openAddProtocolDetail(self):
         """打开协存输入界面"""
