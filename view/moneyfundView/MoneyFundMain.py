@@ -8,7 +8,7 @@ from collections import OrderedDict
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox, \
     QFileDialog
 
-from controller.EventType import EVENT_MF
+from controller.EventType import EVENT_MF, EVENT_MF_INV, EVENT_MF_SUM
 from controller.MainEngine import MainEngine
 from utils import StaticValue as SV
 from utils.MoneyFormat import outputmoney
@@ -22,7 +22,7 @@ class MoneyFundMain(BasicFcView):
         super(MoneyFundMain, self).__init__()
         self.mainEngine = mainEngine
         self.setWindowTitle('货基界面')
-        self.setMinimumSize(1300, 600)
+        self.setMinimumSize(1300, 900)
         self.initMain()
 
     def initMain(self):
@@ -84,6 +84,49 @@ class MoneyFundMain(BasicFcView):
 
         self.moneyfundDetailMain.initTable()
         ##########################
+        # FilterBar2
+        ##########################
+        self.filterView2 = BasicFcView(self.mainEngine)
+
+        filterStartDate_Label = QLabel('开始时间')
+        self.filterView2.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterView2.filterStartDate_Edit.setMaximumWidth(80)
+        filterEndDate_Label = QLabel('结束时间')
+        self.filterView2.filterEndDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterView2.filterEndDate_Edit.setMaximumWidth(80)
+
+        filterBtn = QPushButton('筛选')
+        # outputBtn = QPushButton('导出')
+
+        filterBtn.clicked.connect(self.filterAction2)
+        # outputBtn.clicked.connect(self.outputAction)
+
+        filterHBox = QHBoxLayout()
+        filterHBox.addStretch()
+        filterHBox.addWidget(filterStartDate_Label)
+        filterHBox.addWidget(self.filterView2.filterStartDate_Edit)
+        filterHBox.addWidget(filterEndDate_Label)
+        filterHBox.addWidget(self.filterView2.filterEndDate_Edit)
+        filterHBox.addWidget(filterBtn)
+        # filterHBox.addWidget(outputBtn)
+
+        self.filterView2.setLayout(filterHBox)
+        self.filterView2.setMaximumHeight(50)
+        ##########################
+        # MoneyFundInventory
+        ##########################
+        self.moneyfundInventory = BasicFcView(self.mainEngine)
+        d = OrderedDict()
+        d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
+        d['total_amount'] = {'chinese': '货基总额', 'cellType': NumCell}
+        d['total_ret_amount'] = {'chinese': '货基总收益', 'cellType': NumCell}
+        self.moneyfundInventory.eventType = EVENT_MF_INV
+        self.moneyfundInventory.setHeaderDict(d)
+        self.moneyfundInventory.setWindowTitle('货基存量')
+        self.moneyfundInventory.setFont(BASIC_FONT)
+
+        self.moneyfundInventory.initTable()
+        ##########################
         # MoneyFundSummaryView
         ##########################
         self.moneyfundSummaryView = BasicFcView(self.mainEngine)
@@ -95,6 +138,7 @@ class MoneyFundMain(BasicFcView):
         d['total_purchase_amount'] = {'chinese': '申购总额', 'cellType': NumCell}
         d['total_redeem_amount'] = {'chinese': '赎回总额', 'cellType': NumCell}
 
+        self.moneyfundSummaryView.eventType = EVENT_MF_SUM
         self.moneyfundSummaryView.setHeaderDict(d)
         self.moneyfundSummaryView.setWindowTitle('货基汇总')
         self.moneyfundSummaryView.setFont(BASIC_FONT)
@@ -106,6 +150,8 @@ class MoneyFundMain(BasicFcView):
         vbox = QVBoxLayout()
         vbox.addWidget(self.filterView)
         vbox.addWidget(self.moneyfundDetailMain)
+        vbox.addWidget(self.filterView2)
+        vbox.addWidget(self.moneyfundInventory)
         vbox.addWidget(self.moneyfundSummaryView)
         self.setLayout(vbox)
         # 将信号接入
@@ -132,6 +178,24 @@ class MoneyFundMain(BasicFcView):
         print('filter Action', asset_id, start_date, end_date)
         self.filterRefresh(asset_id, start_date, end_date)
 
+    def filterAction2(self):
+        d = datetime.date.today()
+        filter_start_date = str(self.filterView2.filterStartDate_Edit.text()).split('-')
+        filter_end_date = str(self.filterView2.filterEndDate_Edit.text()).split('-')
+        if filter_start_date is None or filter_end_date is None:
+            start_date = datetime.date(d.year, d.month, d.day)
+            end_date = datetime.date(d.year, d.month, d.day)
+        else:
+            start_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[0])),
+                                       int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[1])),
+                                       int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[2])))
+            end_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[0])),
+                                     int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[1])),
+                                     int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[2])))
+
+        print('filter Action', start_date, end_date)
+        self.filterRefresh2(start_date, end_date)
+
     def outputAction(self):
         print('output Action')
 
@@ -146,8 +210,10 @@ class MoneyFundMain(BasicFcView):
         self.clearContents()
         self.setRowCount(0)
         self.showMoneyFundSummary()
-        result = self.mainEngine.get_fund_detail_by_days(7)
-        self.showMoneyFundListDetail(result)
+        result1 = self.mainEngine.get_total_agreement_statistic_by_days(7)
+        self.showMoneyFundInventory(result1)
+        result2 = self.mainEngine.get_fund_detail_by_days(7)
+        self.showMoneyFundListDetail(result2)
 
     def filterRefresh(self, asset_id, start, end):
         """过滤刷新"""
@@ -156,6 +222,14 @@ class MoneyFundMain(BasicFcView):
         self.setRowCount(0)
         result = self.mainEngine.get_single_fund_detail_by_period(asset_id=asset_id, start=start, end=end)
         self.showMoneyFundListDetail(result)
+
+    def filterRefresh2(self, start, end):
+        """过滤刷新"""
+        # self.menu.close()
+        self.clearContents()
+        self.setRowCount(0)
+        result = self.mainEngine.get_total_agreement_statistic_by_period(start=start, end=end)
+        self.showMoneyFundInventory(result)
 
     def showMoneyFundListDetail(self, result):
         """显示所有合约数据"""
@@ -179,6 +253,19 @@ class MoneyFundMain(BasicFcView):
                         cell = self.moneyfundDetailMain.headerDict[header]['cellType'](content)
                         self.moneyfundDetailMain.setItem(row, n, cell)
                     row = row + 1
+
+    def showMoneyFundInventory(self, result):
+        """显示货基的存量"""
+        print('show moneyfund inventory', result)
+        self.moneyfundInventory.setRowCount(len(result))
+        row = 0
+        for r in result:
+            for n, header in enumerate(self.moneyfundInventory.headerList):
+                content = r[header]
+                cellType = self.moneyfundInventory.headerDict[header]['cellType']
+                cell = cellType(content)
+                self.moneyfundInventory.setItem(row, n, cell)
+            row = row + 1
 
     def showMoneyFundSummary(self):
         """显示合约汇总数据"""

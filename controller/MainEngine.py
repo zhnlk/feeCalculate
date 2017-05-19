@@ -1,7 +1,7 @@
 # encoding: UTF-8
 import datetime
 
-from services import AssetService, CashService, CommonService
+from services import AssetService, CashService, CommonService, AgreementService
 from controller.EventEngine import *
 from utils import StaticValue as SV
 
@@ -268,3 +268,22 @@ class MainEngine(object):
         :return: 
         """
         AssetService.add_asset_fee_with_asset_and_type(amount, asset_id=None, fee_type=SV.FEE_TYPE_COST, cal_date=cal_date)
+
+    def get_total_agreement_statistic_by_days(self, days=0):
+        """
+        货基存量表
+        :param days: 
+        :return: 
+        """
+        end = datetime.date.today()
+        start = end - datetime.timedelta(days=days)
+        return AgreementService.get_total_agreement_statistic_by_period(start_date=start, end_date=end)
+
+    def get_total_agreement_statistic_by_period(self, start=datetime.date.today(), end=datetime.date.today()):
+        """
+        货基存量表
+        :param start: 
+        :param end: 
+        :return: 
+        """
+        return AgreementService.get_total_agreement_statistic_by_period(start_date=start, end_date=end)
