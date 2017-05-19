@@ -14,10 +14,12 @@ from PyQt5.QtWidgets import QDockWidget
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 
-from view.miscView.TodayCostInput import TodayCostInput
 from utils.MoneyFormat import outputmoney
-from controller.EventType import EVENT_MAIN_VALUATION, EVENT_MAIN_ASSERT_DETAIL, EVENT_MAIN_FEE, EVENT_MAIN_COST
+from controller.EventType import EVENT_MAIN_VALUATION, EVENT_MAIN_ASSERT_DETAIL, EVENT_MAIN_FEE, EVENT_MAIN_COST, EVENT_CASH, EVENT_PD, EVENT_MF, \
+    EVENT_AM, EVENT_MF_INV, EVENT_MF_SUM, EVENT_ADJUST_VIEW, EVENT_PD_INV
+from controller.EventEngine import Event
 from controller.MainEngine import MainEngine
+from view.miscView.TodayCostInput import TodayCostInput
 from view.BasicWidget import BasicCell, BasicFcView, NumCell, BASIC_FONT
 from view.assertmgtView.AssetMgtInput import AssetMgtInput
 from view.assertmgtView.AssetMgtMain import AssetMgtViewMain
@@ -73,6 +75,7 @@ class MainWindow(QMainWindow, BasicFcView):
         sysMenu = menubar.addMenu('系统')
         sysMenu.addAction(self.createAction('导出估值数据', self.openValuationDetail))
         sysMenu.addAction(self.createAction('输入今日资金成本', self.openAddTodayCost))
+        sysMenu.addAction(self.createAction('清除今日数据', self.openCleanTodayData))
         sysMenu.addAction(self.createAction('退出', self.close))
         sysMenu.addSeparator()
 
@@ -86,14 +89,16 @@ class MainWindow(QMainWindow, BasicFcView):
         protocolMenu.addAction(self.createAction('显示明细', self.openProtocolListDetail))
         protocolMenu.addAction(self.createAction('增加记录', self.openAddProtocolDetail))
         protocolMenu.addAction(self.createAction('增加协存类别', self.openAddProtocolCate))
-        protocolMenu.addAction(self.createAction('导出记录', self.openOutProtocolData))
+        protocolMenu.addAction(self.createAction('导出明细记录', self.openOutProtocolData))
+        protocolMenu.addAction(self.createAction('导出存量记录', self.openOutProtocolInvData))
         sysMenu.addSeparator()
         # 货基
         moneyFundMenu = menubar.addMenu('货基明细')
         moneyFundMenu.addAction(self.createAction('显示明细', self.openMoneyFundListDetail))
         moneyFundMenu.addAction(self.createAction('增加记录', self.openAddMoneyFundDetail))
         moneyFundMenu.addAction(self.createAction('增加货基类别', self.openAddMoneyFundCate))
-        moneyFundMenu.addAction(self.createAction('导出记录', self.openOutMoneFundData))
+        moneyFundMenu.addAction(self.createAction('导出明细记录', self.openOutMoneFundData))
+        moneyFundMenu.addAction(self.createAction('导出存量记录', self.openOutMoneFundInvData))
         sysMenu.addSeparator()
         # 资管
         assertMgtMenu = menubar.addMenu('资管明细')
@@ -186,6 +191,33 @@ class MainWindow(QMainWindow, BasicFcView):
             self.widgetDict['openAddTodayCost'] = TodayCostInput(self.mainEngine)
             self.widgetDict['openAddTodayCost'].show()
 
+    def openCleanTodayData(self):
+        """清理本日数据"""
+        reply = QMessageBox.question(self, '确定', '确认清除本日数据?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            self.mainEngine.clean_data_by_date()
+            # 同步更新主界面
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_COST))
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_FEE))
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
+            # 更新现金界面
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_CASH))
+            # 更新货基
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_MF))
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_MF_INV))
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_MF_SUM))
+            # 更新协存
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_PD))
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_PD_INV))
+            # 更新资管
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_AM))
+            # 调整界面
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_ADJUST_VIEW))
+
+        else:
+            pass
+
     def openAddProtocolDetail(self):
         """打开协存输入界面"""
         try:
@@ -218,6 +250,13 @@ class MainWindow(QMainWindow, BasicFcView):
             self.widgetDict['openOutProtocolData'] = ProtocolViewMain(self.mainEngine)
             self.widgetDict['openOutProtocolData'].saveToCsv()
 
+    def openOutProtocolInvData(self):
+        try:
+            self.widgetDict['openOutProtocolData'].saveToCsv2()
+        except KeyError:
+            self.widgetDict['openOutProtocolData'] = ProtocolViewMain(self.mainEngine)
+            self.widgetDict['openOutProtocolData'].saveToCsv2()
+
     def openAddMoneyFundDetail(self):
         """打开货基输入界面"""
         try:
@@ -239,6 +278,13 @@ class MainWindow(QMainWindow, BasicFcView):
         except KeyError:
             self.widgetDict['openOutMoneFundData'] = MoneyFundMain(self.mainEngine)
             self.widgetDict['openOutMoneFundData'].saveToCsv()
+
+    def openOutMoneFundInvData(self):
+        try:
+            self.widgetDict['openOutMoneFundData'].saveToCsv2()
+        except KeyError:
+            self.widgetDict['openOutMoneFundData'] = MoneyFundMain(self.mainEngine)
+            self.widgetDict['openOutMoneFundData'].saveToCsv2()
 
     def openOutAssetMgtData(self):
         try:

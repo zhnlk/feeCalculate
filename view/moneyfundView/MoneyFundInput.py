@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 
 from controller.EventEngine import Event
-from controller.EventType import EVENT_MF, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION, EVENT_MF_INPUT
+from controller.EventType import EVENT_MF, EVENT_MAIN_FEE, EVENT_MAIN_VALUATION, EVENT_MF_INPUT, EVENT_MF_INV, EVENT_MF_SUM
 from controller.MainEngine import MainEngine
 from view.BasicWidget import BASIC_FONT, BasicFcView
 from utils import StaticValue as SV
@@ -128,6 +128,8 @@ class MoneyFundInput(BasicFcView):
 
         # 加入数据后，更新列表显示
         self.mainEngine.eventEngine.put(Event(type_=EVENT_MF))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MF_INV))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MF_SUM))
         self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_FEE))
         self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
         # self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_ASSERT_DETAIL))
