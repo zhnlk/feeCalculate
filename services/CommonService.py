@@ -585,11 +585,14 @@ def get_all_ret_daily(cal_date=date.today(), **kwargs):
 
 
 @session_deco
-def get_asset_date(days=0, **kwargs):
+def get_asset_date(days=0, asset_class=SV.ASSET_CLASS_AGREEMENT, **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
     # dates = session.query(AssetTrade.date).filter(AssetTrade.is_active, AssetTrade.date <= date.today()).distinct()
-    dates = session.query(AssetTradeRet.date).filter(AssetTradeRet.is_active,
-                                                     AssetTradeRet.date <= date.today()).distinct()
+    dates = session.query(AssetTradeRet.date).filter(
+        AssetTradeRet.is_active,
+        AssetTradeRet.date <= date.today(),
+        AssetTradeRet.asset_class_obj.has(AssetClass.type == asset_class)
+    ).distinct()
     dates = sorted(map(lambda x: x.date, dates))
     if days:
         return dates[-days:]

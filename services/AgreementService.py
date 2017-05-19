@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from datetime import date, timedelta
 
 from services.CommonService import get_asset_total_amount_by_class_and_type, \
-    get_asset_ret_total_amount_by_class_and_type
+    get_asset_ret_total_amount_by_class_and_type, get_asset_date
 from utils import StaticValue as SV
 
 
@@ -48,3 +48,16 @@ def get_total_agreement_statistic_by_period(start_date=date.today(), end_date=da
         ret.append(get_total_agreement_statistic_by_date(start_date))
         start_date += timedelta(days=1)
     return ret
+
+
+def get_total_agreement_statistic_by_days(days=0):
+    dates = get_asset_date(days, SV.ASSET_CLASS_AGREEMENT)
+    ret = list()
+    if not dates:
+        dates = [date.today()]
+    for dat in dates:
+        ret.append(get_total_agreement_statistic_by_date(dat))
+    return ret
+
+
+print(get_total_agreement_statistic_by_days())
