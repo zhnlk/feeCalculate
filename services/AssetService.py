@@ -902,6 +902,8 @@ def get_management_fee_by_id(cal_date=date.today(), asset_id=None):
 
 def get_asset_rate_by_amount(rates=AssetClass().asset_ret_rate_list, amount=10000):
     rate = AssetRetRate(ret_rate=0.0)
+    if amount < 0:
+        amount = 0
     if len(rates) >= 1:
         rate = list(filter(lambda x: x.threshold <= amount, rates))[-1]
     return rate
