@@ -665,7 +665,7 @@ def get_total_management_statistic_period(start_date=date.today(), end_date=date
 
 
 def get_total_management_statistic_by_days(days=0):
-    dates = CommonService.get_asset_date(days)
+    dates = CommonService.get_asset_date(days, SV.ASSET_CLASS_MANAGEMENT)
     ret = list()
     for cal_date in dates:
         ret.append(get_total_management_statistic_by_date(cal_date))
