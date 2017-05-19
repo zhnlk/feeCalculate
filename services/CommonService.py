@@ -666,6 +666,7 @@ def get_total_evaluate_detail_by_date(cal_date=date.today()):
     for key in fees.keys():
         ret.update({key: ret.get(SV.ASSET_KEY_ALL_VALUE) * fees[key]['rate'] / (fees[key]['days'] * 100)})
         ret['fee4'] -= ret[key]
+    ret['fee4'] -= ret.get('cost')
 
     # ret['fee1'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.02 / 36000
     # ret['fee2'] = ret.get(SV.ASSET_KEY_ALL_VALUE) * 0.03 / 36000
