@@ -58,6 +58,3 @@ def get_total_agreement_statistic_by_days(days=0):
     for dat in dates:
         ret.append(get_total_agreement_statistic_by_date(dat))
     return ret
-
-
-print(get_total_agreement_statistic_by_days())
