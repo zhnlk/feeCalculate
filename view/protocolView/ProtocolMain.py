@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLa
 from PyQt5.QtWidgets import QApplication
 
 from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
-from controller.EventType import EVENT_PD
+from controller.EventType import EVENT_PD, EVENT_PD_INV
 from controller.MainEngine import MainEngine
 from utils.MoneyFormat import outputmoney
 from utils import StaticValue as SV
@@ -85,11 +85,57 @@ class ProtocolViewMain(BasicFcView):
 
         self.protocolListView.initTable()
         ##########################
+        # FilterBar2
+        ##########################
+        self.filterView2 = BasicFcView(self.mainEngine)
+
+        filterStartDate_Label = QLabel('开始时间')
+        self.filterView2.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterView2.filterStartDate_Edit.setMaximumWidth(80)
+        filterEndDate_Label = QLabel('结束时间')
+        self.filterView2.filterEndDate_Edit = QLineEdit(str(datetime.date.today()))
+        self.filterView2.filterEndDate_Edit.setMaximumWidth(80)
+
+        filterBtn = QPushButton('筛选')
+        # outputBtn = QPushButton('导出')
+
+        filterBtn.clicked.connect(self.filterAction2)
+        # outputBtn.clicked.connect(self.outputAction)
+
+        filterHBox = QHBoxLayout()
+        filterHBox.addStretch()
+        filterHBox.addWidget(filterStartDate_Label)
+        filterHBox.addWidget(self.filterView2.filterStartDate_Edit)
+        filterHBox.addWidget(filterEndDate_Label)
+        filterHBox.addWidget(self.filterView2.filterEndDate_Edit)
+        filterHBox.addWidget(filterBtn)
+        # filterHBox.addWidget(outputBtn)
+
+        self.filterView2.setLayout(filterHBox)
+        self.filterView2.setMaximumHeight(50)
+        ##########################
+        # protocolInventory
+        ##########################
+        self.protocolInventory = BasicFcView(self.mainEngine)
+        d = OrderedDict()
+        d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
+        d['total_amount'] = {'chinese': '协存总额', 'cellType': NumCell}
+        d['total_ret_amount'] = {'chinese': '协存总收益', 'cellType': NumCell}
+        self.protocolInventory.eventType = EVENT_PD_INV
+        self.protocolInventory.setHeaderDict(d)
+        self.protocolInventory.setWindowTitle('协存存量')
+        self.protocolInventory.setFont(BASIC_FONT)
+
+        self.protocolInventory.initTable()
+
+        ##########################
         # 界面整合
         ##########################
         vbox = QVBoxLayout()
         vbox.addWidget(self.filterView)
         vbox.addWidget(self.protocolListView)
+        vbox.addWidget(self.filterView2)
+        vbox.addWidget(self.protocolInventory)
         self.setLayout(vbox)
         # 将信号连接到refresh函数
         self.signal.connect(self.refresh)
@@ -114,6 +160,24 @@ class ProtocolViewMain(BasicFcView):
 
         print('filter Action', start_date, end_date)
         self.filterRefresh(asset_id, start_date, end_date)
+
+    def filterAction2(self):
+        d = datetime.date.today()
+        filter_start_date = str(self.filterView2.filterStartDate_Edit.text()).split('-')
+        filter_end_date = str(self.filterView2.filterEndDate_Edit.text()).split('-')
+        if filter_start_date is None or filter_end_date is None:
+            start_date = datetime.date(d.year, d.month, d.day)
+            end_date = datetime.date(d.year, d.month, d.day)
+        else:
+            start_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[0])),
+                                       int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[1])),
+                                       int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_start_date[2])))
+            end_date = datetime.date(int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[0])),
+                                     int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[1])),
+                                     int(re.sub(r"\b0*([1-9][0-9]*|0)", r"\1", filter_end_date[2])))
+
+        print('filter Action', start_date, end_date)
+        self.filterRefresh2(start_date, end_date)
 
     def outputAction(self):
         print('output Action')
@@ -145,13 +209,29 @@ class ProtocolViewMain(BasicFcView):
                         self.protocolListView.setItem(row, n, cell)
                     row = row + 1
 
+    def showProtocolInventory(self, result):
+        """显示货基的存量"""
+        print('show moneyfund inventory', result)
+        self.protocolInventory.setRowCount(len(result))
+        row = 0
+        for r in result:
+            for n, header in enumerate(self.protocolInventory.headerList):
+                content = r[header]
+                cellType = self.protocolInventory.headerDict[header]['cellType']
+                cell = cellType(content)
+                self.protocolInventory.setItem(row, n, cell)
+            row = row + 1
+
+
     def refresh(self):
         """默认刷新"""
         # self.menu.close()  # 关闭菜单
         self.clearContents()
         self.setRowCount(0)
-        result = self.mainEngine.get_agreement_detail_by_days(7)
-        self.showProtocolListDetail(result)
+        result1 = self.mainEngine.get_agreement_detail_by_days(7)
+        self.showProtocolListDetail(result1)
+        result2 = self.mainEngine.get_total_agreement_statistic_by_days(7)
+        self.showProtocolInventory(result2)
 
     def filterRefresh(self, asset_id, start, end):
         """过滤刷新"""
@@ -159,6 +239,13 @@ class ProtocolViewMain(BasicFcView):
         self.setRowCount(0)
         result = self.mainEngine.get_single_agreement_detail_by_period(asset_id, start=start, end=end)
         self.showProtocolListDetail(result)
+
+    def filterRefresh2(self, start, end):
+        """过滤刷新"""
+        self.clearContents()
+        self.setRowCount(0)
+        result = self.mainEngine.get_total_agreement_statistic_by_period(start=start, end=end)
+        self.showProtocolInventory(result)
 
     def prepareCateData(self):
         result = self.mainEngine.get_all_asset_ids_by_type(SV.ASSET_CLASS_AGREEMENT)
@@ -204,7 +291,40 @@ class ProtocolViewMain(BasicFcView):
 
         except IOError as e:
             pass
+    def saveToCsv2(self):
 
+        # 先隐藏右键菜单
+        # self.menu.close()
+
+        csvContent = list()
+        labels = [d['chinese'] for d in self.protocolInventory.headerDict.values()]
+        print('labels:', labels)
+        csvContent.append(labels)
+        content = self.mainEngine.get_total_agreement_statistic_by_days()
+        print('content:', content)
+
+        for r in content:
+            row = list()
+            for n, header in enumerate(self.protocolInventory.headerList):
+                if header is not 'cal_date':
+                    row.append(outputmoney(r[header]))
+                else:
+                    row.append(r[header])
+            csvContent.append(row)
+
+        # 获取想要保存的文件名
+        path = QFileDialog.getSaveFileName(self, '保存数据', '', 'CSV(*.csv)')
+
+        try:
+            if path[0]:
+                print(path[0])
+                with codecs.open(path[0], 'w', 'utf_8_sig') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(csvContent)
+                f.close()
+
+        except IOError as e:
+            pass
 
 if __name__ == '__main__':
     import sys
