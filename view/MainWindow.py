@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import QMessageBox
 
 from utils.MoneyFormat import outputmoney
 from controller.EventType import EVENT_MAIN_VALUATION, EVENT_MAIN_ASSERT_DETAIL, EVENT_MAIN_FEE, EVENT_MAIN_COST, EVENT_CASH, EVENT_PD, EVENT_MF, \
-    EVENT_AM, EVENT_MF_INV, EVENT_MF_SUM, EVENT_ADJUST_VIEW
+    EVENT_AM, EVENT_MF_INV, EVENT_MF_SUM, EVENT_ADJUST_VIEW, EVENT_PD_INV
 from controller.EventEngine import Event
 from controller.MainEngine import MainEngine
 from view.miscView.TodayCostInput import TodayCostInput
@@ -89,14 +89,16 @@ class MainWindow(QMainWindow, BasicFcView):
         protocolMenu.addAction(self.createAction('显示明细', self.openProtocolListDetail))
         protocolMenu.addAction(self.createAction('增加记录', self.openAddProtocolDetail))
         protocolMenu.addAction(self.createAction('增加协存类别', self.openAddProtocolCate))
-        protocolMenu.addAction(self.createAction('导出记录', self.openOutProtocolData))
+        protocolMenu.addAction(self.createAction('导出明细记录', self.openOutProtocolData))
+        protocolMenu.addAction(self.createAction('导出存量记录', self.openOutProtocolInvData))
         sysMenu.addSeparator()
         # 货基
         moneyFundMenu = menubar.addMenu('货基明细')
         moneyFundMenu.addAction(self.createAction('显示明细', self.openMoneyFundListDetail))
         moneyFundMenu.addAction(self.createAction('增加记录', self.openAddMoneyFundDetail))
         moneyFundMenu.addAction(self.createAction('增加货基类别', self.openAddMoneyFundCate))
-        moneyFundMenu.addAction(self.createAction('导出记录', self.openOutMoneFundData))
+        moneyFundMenu.addAction(self.createAction('导出明细记录', self.openOutMoneFundData))
+        moneyFundMenu.addAction(self.createAction('导出存量记录', self.openOutMoneFundInvData))
         sysMenu.addSeparator()
         # 资管
         assertMgtMenu = menubar.addMenu('资管明细')
@@ -207,6 +209,7 @@ class MainWindow(QMainWindow, BasicFcView):
             self.mainEngine.eventEngine.put(Event(type_=EVENT_MF_SUM))
             # 更新协存
             self.mainEngine.eventEngine.put(Event(type_=EVENT_PD))
+            self.mainEngine.eventEngine.put(Event(type_=EVENT_PD_INV))
             # 更新资管
             self.mainEngine.eventEngine.put(Event(type_=EVENT_AM))
             # 调整界面
@@ -247,6 +250,13 @@ class MainWindow(QMainWindow, BasicFcView):
             self.widgetDict['openOutProtocolData'] = ProtocolViewMain(self.mainEngine)
             self.widgetDict['openOutProtocolData'].saveToCsv()
 
+    def openOutProtocolInvData(self):
+        try:
+            self.widgetDict['openOutProtocolData'].saveToCsv2()
+        except KeyError:
+            self.widgetDict['openOutProtocolData'] = ProtocolViewMain(self.mainEngine)
+            self.widgetDict['openOutProtocolData'].saveToCsv2()
+
     def openAddMoneyFundDetail(self):
         """打开货基输入界面"""
         try:
@@ -268,6 +278,13 @@ class MainWindow(QMainWindow, BasicFcView):
         except KeyError:
             self.widgetDict['openOutMoneFundData'] = MoneyFundMain(self.mainEngine)
             self.widgetDict['openOutMoneFundData'].saveToCsv()
+
+    def openOutMoneFundInvData(self):
+        try:
+            self.widgetDict['openOutMoneFundData'].saveToCsv2()
+        except KeyError:
+            self.widgetDict['openOutMoneFundData'] = MoneyFundMain(self.mainEngine)
+            self.widgetDict['openOutMoneFundData'].saveToCsv2()
 
     def openOutAssetMgtData(self):
         try:

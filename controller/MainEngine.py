@@ -1,7 +1,7 @@
 # encoding: UTF-8
 import datetime
 
-from services import AssetService, CashService, CommonService, AgreementService
+from services import AssetService, CashService, CommonService, AgreementService, FundService
 from controller.EventEngine import *
 from utils import StaticValue as SV
 
@@ -271,22 +271,37 @@ class MainEngine(object):
 
     def get_total_agreement_statistic_by_days(self, days=0):
         """
+        协存存量表
+        :param days: 
+        :return: 
+        """
+        return AgreementService.get_total_agreement_statistic_by_days(days=days)
+
+    def get_total_agreement_statistic_by_period(self, start=datetime.date.today(), end=datetime.date.today()):
+        """
+        协存存量表
+        :param start: 
+        :param end: 
+        :return: 
+        """
+        return AgreementService.get_total_agreement_statistic_by_period(start_date=start, end_date=end)
+
+    def get_total_fund_statistic_by_days(self, days=0):
+        """
         货基存量表
         :param days: 
         :return: 
         """
-        end = datetime.date.today()
-        start = end - datetime.timedelta(days=days)
-        return AgreementService.get_total_agreement_statistic_by_period(start_date=start, end_date=end)
+        return FundService.get_total_fund_statistic_by_days(days=days)
 
-    def get_total_agreement_statistic_by_period(self, start=datetime.date.today(), end=datetime.date.today()):
+    def get_total_fund_statistic_by_period(self, start=datetime.date.today(), end=datetime.date.today()):
         """
         货基存量表
         :param start: 
         :param end: 
         :return: 
         """
-        return AgreementService.get_total_agreement_statistic_by_period(start_date=start, end_date=end)
+        return FundService.get_total_fund_statistic_by_period(start_date=start, end_date=end)
 
     def clean_data_by_date(self, cal_date=datetime.date.today()):
         """

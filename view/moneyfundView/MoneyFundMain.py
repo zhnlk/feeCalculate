@@ -210,7 +210,7 @@ class MoneyFundMain(BasicFcView):
         self.clearContents()
         self.setRowCount(0)
         self.showMoneyFundSummary()
-        result1 = self.mainEngine.get_total_agreement_statistic_by_days(7)
+        result1 = self.mainEngine.get_total_fund_statistic_by_days(7)
         self.showMoneyFundInventory(result1)
         result2 = self.mainEngine.get_fund_detail_by_days(7)
         self.showMoneyFundListDetail(result2)
@@ -228,7 +228,7 @@ class MoneyFundMain(BasicFcView):
         # self.menu.close()
         self.clearContents()
         self.setRowCount(0)
-        result = self.mainEngine.get_total_agreement_statistic_by_period(start=start, end=end)
+        result = self.mainEngine.get_total_fund_statistic_by_period(start=start, end=end)
         self.showMoneyFundInventory(result)
 
     def showMoneyFundListDetail(self, result):
@@ -314,6 +314,41 @@ class MoneyFundMain(BasicFcView):
                         else:
                             row.append(c[header])
                     csvContent.append(row)
+
+        # 获取想要保存的文件名
+        path = QFileDialog.getSaveFileName(self, '保存数据', '', 'CSV(*.csv)')
+
+        try:
+            if path[0]:
+                print(path[0])
+                with codecs.open(path[0], 'w', 'utf_8_sig') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(csvContent)
+                f.close()
+
+        except IOError as e:
+            pass
+
+    def saveToCsv2(self):
+
+        # 先隐藏右键菜单
+        # self.menu.close()
+
+        csvContent = list()
+        labels = [d['chinese'] for d in self.moneyfundInventory.headerDict.values()]
+        print('labels:', labels)
+        csvContent.append(labels)
+        content = self.mainEngine.get_total_fund_statistic_by_days()
+        print('content:', content)
+
+        for r in content:
+            row = list()
+            for n, header in enumerate(self.moneyfundInventory.headerList):
+                if header is not 'cal_date':
+                    row.append(outputmoney(r[header]))
+                else:
+                    row.append(r[header])
+            csvContent.append(row)
 
         # 获取想要保存的文件名
         path = QFileDialog.getSaveFileName(self, '保存数据', '', 'CSV(*.csv)')

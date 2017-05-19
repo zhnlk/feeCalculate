@@ -25,6 +25,7 @@ EVENT_MAIN_VALUATION = 'eMainValuation'  # 主界面总估值表
 EVENT_CASH = 'eCash'  # 现金的相关事件
 EVENT_PD = 'ePd'  # 协存的相关事件
 EVENT_PD_INPUT = 'ePdInput'  # 协存输入的下拉框事件
+EVENT_PD_INV = 'ePdInv' # 协存存量的相关事件
 EVENT_MF = 'eMf'  # 货基的相关事件
 EVENT_MF_INV = 'eMfInv' # 货基存量的相关事件
 EVENT_MF_SUM = 'eMfSum' # 货基汇总的相关事件
