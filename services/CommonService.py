@@ -3,12 +3,14 @@
 from __future__ import unicode_literals
 
 from datetime import date, timedelta
+from time import mktime
 
 from sqlalchemy import and_, func, or_
 
 from models.AssetClassModel import AssetClass
 from models.AssetFeeModel import AssetFee
 from models.AssetFeeRateModel import AssetFeeRate
+from models.AssetRetRateModel import AssetRetRate
 from models.AssetTradeModel import AssetTrade
 from models.AssetTradeRetModel import AssetTradeRet
 from models.CashModel import Cash
@@ -245,7 +247,7 @@ def save(obj=None, **kwargs):
 def delete(obj=None, key=None, **kwargs):
     session = kwargs[SV.SESSION_KEY]
     del_obj = session.query(obj).filter(obj.id == key)
-    del_obj.update({obj.is_active: False})
+    del_obj.update({obj.is_active: False}, synchronize_session='fetch')
 
 
 # 查询记录
@@ -769,8 +771,82 @@ def get_asset_fee_by_date_and_type(cal_date=date.today(), fee_type=SV.FEE_TYPE_C
     return fee if fee.count() else None
 
 
+@session_deco
+def clean_cash_by_date(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    session.query(Cash).filter(
+        Cash.is_active,
+        Cash.time >= mktime(cal_date.timetuple())
+    ).update({Cash.is_active: False}, synchronize_session='fetch')
+
+
+@session_deco
+def clean_trade_by_date(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    session.query(AssetTrade).filter(
+        AssetTrade.is_active,
+        AssetTrade.time >= mktime(cal_date.timetuple())
+    ).update({AssetTrade.is_active: False}, synchronize_session='fetch')
+
+
+@session_deco
+def clean_ret_by_date(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    session.query(AssetTradeRet).filter(
+        AssetTradeRet.is_active,
+        AssetTradeRet.time >= mktime(cal_date.timetuple())
+    ).update({AssetTradeRet.is_active: False}, synchronize_session='fetch')
+
+
+@session_deco
+def clean_fee_by_date(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    session.query(AssetFee).filter(
+        AssetFee.is_active,
+        AssetFee.time >= mktime(cal_date.timetuple())
+    ).update({AssetFee.is_active: False}, synchronize_session='fetch')
+
+
+@session_deco
+def clean_asset_class_by_date(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    session.query(AssetClass).filter(
+        AssetClass.is_active,
+        AssetClass.time >= mktime(cal_date.timetuple())
+    ).update({AssetFee.is_active: False}, synchronize_session='fetch')
+
+
+@session_deco
+def clean_asset_trade_ret_rate_by_date(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    session.query(AssetRetRate).filter(
+        AssetRetRate.is_active,
+        AssetRetRate.time >= mktime(cal_date.timetuple())
+    ).update({AssetRetRate.is_active: False}, synchronize_session='fetch')
+
+
+@session_deco
+def clean_asset_fee_rate_by_date(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    session.query(AssetFeeRate).filter(
+        AssetFeeRate.is_active,
+        AssetFeeRate.time >= mktime(cal_date.timetuple())
+    ).update({AssetFeeRate.is_active: False}, synchronize_session='fetch')
+
+
+def clean_data_by_date(cal_date=date.today()):
+    clean_cash_by_date(cal_date)
+    clean_asset_class_by_date(cal_date)
+    clean_asset_fee_rate_by_date(cal_date)
+    clean_ret_by_date(cal_date)
+    clean_fee_by_date(cal_date)
+    clean_trade_by_date(cal_date)
+    clean_asset_trade_ret_rate_by_date(cal_date)
+
+
 if __name__ == '__main__':
-    print(get_total_evaluate_detail())
+    clean_data_by_date()
+    # print(get_total_evaluate_detail())
     # print(get_asset_fee_by_date_and_type(date(2017, 5, 17), SV.FEE_TYPE_COST))
     # print(get_asset_ret_last_date_before_cal_date(cal_date=date.today(), asset_id='c96d0e9aaf924d398cb85095fd0a95cc'))
     # print(get_all_cash())
