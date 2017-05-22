@@ -96,7 +96,9 @@ def add_agreement_daily_data(cal_date=date.today(), asset_id=None, ret_carry_ass
 
 def cal_agreement_ret(cal_date=date.today(), asset_id=None):
     init_date = get_asset_ret_last_date_before_cal_date(cal_date, asset_id)
-    while init_date <= cal_date:
+    if cal_date < init_date:
+        init_date = cal_date
+    while init_date <= date.today():
         cal_agreement_ret_of_asset(cal_date=init_date, asset_id=asset_id)
         init_date += timedelta(days=1)
 
@@ -135,10 +137,14 @@ def cal_agreement_ret_of_asset(cal_date=date.today(), asset_id=None):
     rates = query_by_id(obj=AssetClass, obj_id=asset_id).asset_ret_rate_list
     rate = get_asset_rate_by_amount(rates=rates, amount=total_amount)
     add_asset_ret_with_asset_and_type(
-        amount=total_amount * rate.ret_rate / 360,
-        asset_id=asset_id,
-        ret_type=SV.RET_TYPE_INTEREST,
-        cal_date=cal_date
+        total_amount * rate.ret_rate / 360,
+        asset_id,
+        SV.RET_TYPE_INTEREST,
+        cal_date
+        # amount=total_amount * rate.ret_rate / 360,
+        # asset_id=asset_id,
+        # ret_type=SV.RET_TYPE_INTEREST,
+        # cal_date=cal_date
     ) if total_amount else None
 
 
