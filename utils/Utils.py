@@ -7,6 +7,8 @@ import json
 import os
 from functools import wraps
 
+from utils.StaticValue import CASH_TYPE_TO_KEY_DIC
+
 BASE_DIR = os.path.dirname(__file__)
 
 FEE_CONFIG_FILE = os.path.join(BASE_DIR, '../fee.config')
@@ -28,3 +30,11 @@ def timer(func):
 def get_fee_config_dic(file_name=FEE_CONFIG_FILE):
     with open(file_name) as fp:
         return json.load(fp)
+
+
+def get_value_by_key(dic=dict(), key=None):
+    return dic.get(key)
+
+
+if __name__ == '__main__':
+    print(get_value_by_key(CASH_TYPE_TO_KEY_DIC, 5))

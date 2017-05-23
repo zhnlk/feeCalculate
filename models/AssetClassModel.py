@@ -38,5 +38,10 @@ class AssetClass(MixinBase):
     def __repr__(self):
         return '<AssetClass id=%s, name=%s, type=%s>' % (self.id, self.name, self.type)
 
+    def to_dict(self):
+        return {
+
+        }
+
         # def cal_principal(self):
         #     pass

@@ -5,8 +5,11 @@ from __future__ import unicode_literals
 from datetime import date, timedelta
 
 from models.CashModel import Cash
-from services.CommonService import query, add_cash_with_type, get_cash_total_amount_by_type
+from services.CommonService import query, add_cash_with_type, get_cash_total_amount_by_type, \
+    get_cash_input_detail_by_date, update_cash_input_by_id
 from utils import StaticValue as SV
+from utils.StaticValue import CASH_KEY_TO_TYPE_DIC
+from utils.Utils import get_value_by_key
 
 
 def get_key_by_cash_type(cash_type=SV.CASH_TYPE_DEPOSIT):
@@ -129,7 +132,22 @@ def get_cash_detail_by_days(days=0):
     return list(map(lambda x: get_cash_daily_detail(cal_date=x), get_cash_date(days=days)))
 
 
+def get_cash_input_detail_by_date_dic(cal_date=date.today()):
+    cashes = get_cash_input_detail_by_date(cal_date)
+    ret = list()
+    for cash in cashes:
+        ret.append(cash.to_dict())
+    return ret
+
+
+def update_cash_input_by_id_type(cash_id, amount, cash_type_key, cal_date):
+    update_cash_input_by_id(cash_id, amount, get_value_by_key(CASH_KEY_TO_TYPE_DIC, cash_type_key), cal_date)
+
+
 if __name__ == '__main__':
+    update_cash_input_by_id('981cb6165748426aa4bd246878a75aa3', 2000000, SV.CASH_TYPE_DEPOSIT, date(2017, 3, 1))
+
+    # print(get_cash_input_detail_by_date_dic(date(2017, 3, 1)))
     # print((get_cash_last_total_amount_by_type(cash_type=SV.CASH_TYPE_DEPOSIT)))
     # # print(get_last_total_amount_by_type(cash_type=SV.CASH_TYPE_PURCHASE))
     # add_cash_daily_data(cal_date=date.today() - timedelta(days=9), draw_amount=10001, draw_fee=10.01,
@@ -137,7 +155,7 @@ if __name__ == '__main__':
     #                     ret_amount=4000)
     # print(get_cash_date())
 
-    print(get_cash_detail_by_period(date.today() - timedelta(days=9)))
+    # print(get_cash_detail_by_period(date.today() - timedelta(days=9)))
     # print(get_cash_detail_by_days(days=3))
     # import time
     #

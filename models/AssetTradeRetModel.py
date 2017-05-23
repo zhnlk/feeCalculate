@@ -26,3 +26,11 @@ class AssetTradeRet(MixinTotalBase):
 
     def __repr__(self):
         return '<TradeRet id=%s, amount=%s, type=%s>' % (self.id, self.amount, self.type)
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'date': self.date,
+            'type': self.type,
+            'amount': self.amount
+        }

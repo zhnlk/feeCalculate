@@ -40,11 +40,36 @@ CASH_KEY_DRAW_FEE = 'cash_draw_fee'
 CASH_KEY_CAL_DATE = 'cal_date'
 CASH_KEY_CASH_TOTAL = 'total_amount'
 
+CASH_TYPE_TO_KEY_DIC = {
+    CASH_TYPE_DEPOSIT: CASH_KEY_INVESTOR_DEPOSIT,
+    CASH_TYPE_DRAW: CASH_KEY_INVESTOR_DRAW,
+    CASH_TYPE_RET: CASH_KEY_RET,
+    CASH_TYPE_FEE: CASH_KEY_DRAW_FEE
+}
+
+CASH_KEY_TO_TYPE_DIC = {
+    CASH_KEY_INVESTOR_DEPOSIT: CASH_TYPE_DEPOSIT,
+    CASH_KEY_INVESTOR_DRAW: CASH_TYPE_DRAW,
+    CASH_KEY_RET: CASH_TYPE_RET,
+    CASH_KEY_DRAW_FEE: CASH_TYPE_FEE
+}
 # 资产变化类型
 ASSET_TYPE_PURCHASE = 1  # 申购资产
 ASSET_TYPE_REDEEM = -1  # 赎回资产
 ASSET_TYPE_RET_CARRY = 2  # 收益结转
 ASSET_TYPE_INIT = 0  # 初始化
+
+ASSET_TYPE_TO_KEY_DIC = {
+    ASSET_TYPE_PURCHASE: 'purchase',
+    ASSET_TYPE_REDEEM: 'redeem',
+    ASSET_TYPE_RET_CARRY: 'ret_carry'
+}
+
+ASSET_KEY_TO_TYPE_DIC = {
+    'purchase': ASSET_TYPE_PURCHASE,
+    'redeem': ASSET_TYPE_REDEEM,
+    'ret_carry': ASSET_TYPE_RET_CARRY
+}
 
 ASSET_KEY_NAME = 'asset_name'
 ASSET_KEY_CAL_DATE = CASH_KEY_CAL_DATE
@@ -131,11 +156,11 @@ DB_FILENAME = 'data-beta.db'
 
 
 def resource_path(relative):
-    if hasattr(sys, "_MEIPASS"):
+    if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, relative)
     return os.path.join(relative)
 
 
 path = os.path.dirname(__file__)
 ICON_FILENAME = resource_path(os.path.join(path, ICON_FILENAME))
-SQLALCHEMY_DATABASE_URI = "sqlite:///" + resource_path(os.path.join(path, DB_FILENAME))
+SQLALCHEMY_DATABASE_URI = 'sqlite:///' + resource_path(os.path.join(path, DB_FILENAME))

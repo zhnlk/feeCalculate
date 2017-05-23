@@ -25,3 +25,13 @@ class Cash(MixinTotalBase):
 
     def __repr__(self):
         return '<Cash id=%s, amount=%s, type=%s>' % (self.id, self.amount, self.type)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'amount': self.amount,
+            'type': self.type,  # get_value_by_key(SV.CASH_TYPE_TO_KEY_DIC, self.type),
+            'asset_class': self.asset_class,
+            'date': self.date
+
+        }

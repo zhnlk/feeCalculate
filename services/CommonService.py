@@ -16,6 +16,7 @@ from models.AssetTradeRetModel import AssetTradeRet
 from models.CashModel import Cash
 from models.CommonModel import session_deco
 from models.DailyFeeModel import DailyFee
+# from services import AssetService
 from utils import StaticValue as SV
 ##### Cash
 from utils.Utils import get_fee_config_dic
@@ -848,18 +849,228 @@ def clean_data_by_date(cal_date=date.today()):
     clean_asset_trade_ret_rate_by_date(cal_date)
 
 
+@session_deco
+def get_cash_input_detail_by_date(cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    cashes = session.query(Cash).filter(
+        Cash.is_active,
+        Cash.date == cal_date,
+        or_(
+            Cash.type == SV.CASH_TYPE_DEPOSIT,
+            Cash.type == SV.CASH_TYPE_RET,
+            Cash.type == SV.CASH_TYPE_DRAW,
+            Cash.type == SV.CASH_TYPE_FEE
+        )
+    )
+    return cashes
+
+
+@session_deco
+def update_cash_input_by_id(cash_id=None, amount=0, cash_type=SV.CASH_TYPE_DEPOSIT, cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    cash = session.query(Cash).filter(
+        Cash.is_active,
+        Cash.id == cash_id
+    )
+    if cash.count():
+        cash.update({Cash.is_active: False}, synchronize_session='fetch')
+        session.add(
+            Cash(None, cash_type, amount, get_cash_last_total_amount_by_type(cal_date, cash_type) + amount, cal_date)
+        )
+
+
+@session_deco
+def get_agreement_input_detail_by_id_date(agreement_id=None, cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    agreements = session.query(AssetTrade).filter(
+        AssetTrade.is_active,
+        AssetTrade.asset_class == agreement_id,
+        AssetTrade.date == cal_date,
+        or_(
+            AssetTrade.type == SV.ASSET_TYPE_PURCHASE,
+            AssetTrade.type == SV.ASSET_TYPE_REDEEM,
+            AssetTrade.type == SV.ASSET_TYPE_RET_CARRY
+        )
+    )
+
+    return agreements
+
+
+@session_deco
+def get_asset_trade_by_id(asset_id=None, **kwargs):
+    asset_trade = kwargs.get(SV.SESSION_KEY).query(AssetTrade).filter(AssetTrade.is_active,
+                                                                      AssetTrade.id == asset_id)
+    if asset_trade.count():
+        return asset_trade.one()
+    else:
+        return None
+
+
+@session_deco
+def update_agreement_input_purchase_or_redeem_by_id(agreement_trade_id=None, amount=0, cal_date=date.today(),
+                                                    trade_type=SV.ASSET_TYPE_PURCHASE, **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    agreement_trade = session.query(AssetTrade).filter(
+        AssetTrade.is_active,
+        AssetTrade.id == agreement_trade_id
+    )
+
+    if agreement_trade.count():
+        tmp_trade = agreement_trade.one()
+        cash_type = SV.CASH_TYPE_PURCHASE_AGREEMENT if trade_type == SV.ASSET_TYPE_PURCHASE else SV.CASH_TYPE_REDEEM_AGREEMENT
+        cash = session.query(Cash).filter(
+            Cash.is_active,
+            Cash.type == cash_type,
+            Cash.date == cal_date,
+            Cash.amount == tmp_trade.amount,
+            Cash.asset_class == tmp_trade.asset_class
+        )
+        agreement_trade.update({AssetTrade.is_active: False}, synchronize_session='fetch')
+        session.query(Cash).filter(Cash.is_active, Cash.id == cash.first().id).update({Cash.is_active: False},
+                                                                                      synchronize_session='fetch')
+        session.add(
+            AssetTrade(
+
+                tmp_trade.asset_class,
+                amount,
+                trade_type,
+                get_asset_last_total_amount_by_asset_and_type(
+                    cal_date,
+                    tmp_trade.asset_class,
+                    trade_type) + amount,
+                cal_date
+            )
+        )
+
+        session.add(
+            Cash(
+                tmp_trade.asset_class,
+                cash_type,
+                amount,
+                get_cash_last_total_amount_by_type(cal_date, cash_type) + amount,
+                cal_date
+            )
+        )
+
+
+@session_deco
+def update_agreement_input_ret_carry_by_id(agreement_trade_id=None, amount=0, cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    agreement_trade = session.query(AssetTrade).filter(
+        AssetTrade.is_active,
+        AssetTrade.id == agreement_trade_id
+    )
+
+    if agreement_trade.count():
+        tmp_trade = agreement_trade.one()
+        ret_type = SV.RET_TYPE_PRINCIPAL
+        ret_carry = session.query(AssetTradeRet).filter(
+            AssetTradeRet.is_active,
+            AssetTradeRet.type == ret_type,
+            AssetTradeRet.date == cal_date,
+            AssetTradeRet.amount == tmp_trade.amount,
+            AssetTradeRet.asset_class == tmp_trade.asset_class
+        )
+        agreement_trade.update({AssetTrade.is_active: False}, synchronize_session='fetch')
+        session.query(AssetTradeRet).filter(AssetTradeRet.is_active, AssetTradeRet.id == ret_carry.first().id).update(
+            {AssetTradeRet.is_active: False},
+            synchronize_session='fetch')
+        session.add(
+            AssetTrade(
+
+                tmp_trade.asset_class,
+                amount,
+                SV.ASSET_TYPE_RET_CARRY,
+                get_asset_last_total_amount_by_asset_and_type(cal_date, tmp_trade.asset_class,
+                                                              SV.ASSET_TYPE_RET_CARRY) + amount,
+                cal_date))
+
+        session.add(
+            AssetTradeRet(
+                tmp_trade.asset_class,
+                amount,
+                ret_type,
+                get_asset_ret_last_total_amount_by_asset_and_type(cal_date, tmp_trade.asset_class, ret_type) + amount,
+                cal_date
+            )
+        )
+
+
+def update_agreement_input_by_id_type(agreement_id=None, amount=0, agreement_type=SV.ASSET_TYPE_RET_CARRY,
+                                      cal_date=date.today()):
+    if agreement_type == SV.ASSET_TYPE_RET_CARRY:
+        update_agreement_input_ret_carry_by_id(agreement_id, amount, cal_date)
+    else:
+        update_agreement_input_purchase_or_redeem_by_id(agreement_id, amount, cal_date, agreement_type)
+
+
+# @session_deco
+# def update_agreement_input_by_id(agreement_id=None, amount=0, agreement_type=SV.ASSET_TYPE_PURCHASE,
+#                                  cal_date=date.today(), **kwargs):
+#     session = kwargs.get(SV.SESSION_KEY)
+#
+#     agreement_trade = session.query(AssetTrade).filter(
+#         AssetTrade.is_active,
+#         AssetTrade.id == agreement_id,
+#         AssetTrade.type == agreement_type
+#     )
+#
+#     if agreement_trade.count():
+#         agreement = agreement_trade[-1]
+#         agreement_trade.update({AssetTrade.is_active: False}, synchronize_session='fetch')
+#
+#         if agreement_type == SV.ASSET_TYPE_PURCHASE:
+#             cash = session.query(Cash).filter(
+#                 Cash.is_active,
+#                 Cash.date == cal_date,
+#                 Cash.type == SV.CASH_TYPE_PURCHASE_AGREEMENT,
+#                 Cash.amount == agreement.amount
+#             )
+#             cash.update({Cash.is_active: False}, synchronize_session='fetch')
+#             purchase(query_by_id(AssetClass, agreement.asset_class), amount, cal_date) if amount else None
+#
+#         elif agreement_type == SV.ASSET_TYPE_REDEEM:
+#             cash = session.query(Cash).filter(
+#                 Cash.is_active,
+#                 Cash.date == cal_date,
+#                 Cash.type == SV.CASH_TYPE_REDEEM_AGREEMENT,
+#                 Cash.amount == agreement.amount
+#             )
+#             cash.update({Cash.is_active: False}, synchronize_session='fetch')
+#             redeem(query_by_id(AssetClass, agreement.asset_class), amount, cal_date) if amount else None
+#         elif agreement_type == SV.ASSET_TYPE_RET_CARRY:
+#             ret_carry = session.query(AssetTradeRet).filter(
+#                 AssetTradeRet.is_active,
+#                 AssetTradeRet.date == cal_date,
+#                 AssetTradeRet.type == SV.RET_TYPE_PRINCIPAL,
+#                 AssetTradeRet.amount == agreement.amount
+#             )
+#             ret_carry.update({AssetTradeRet.is_active: False}, synchronize_session='fetch')
+#
+#             add_asset_trade_with_asset_and_type(amount, SV.ASSET_TYPE_RET_CARRY, agreement.asset_class,
+#                                                 cal_date) if amount else None
+#             add_asset_ret_with_asset_and_type(amount, agreement.asset_class, SV.RET_TYPE_PRINCIPAL,
+#                                               cal_date) if amount else None
+
+
 if __name__ == '__main__':
-    clean_data_by_date()
-    # print(get_total_evaluate_detail())
-    # print(get_asset_fee_by_date_and_type(date(2017, 5, 17), SV.FEE_TYPE_COST))
-    # print(get_asset_ret_last_date_before_cal_date(cal_date=date.today(), asset_id='c96d0e9aaf924d398cb85095fd0a95cc'))
-    # print(get_all_cash())
-    # print(get_asset_total_amount_by_class_and_type(cal_date=date.today(), asset_class=SV.ASSET_CLASS_FUND,
-    #                                                asset_type=SV.ASSET_TYPE_INIT))
-    # print(get_total_evaluate_detail_by_date())
-    # print(is_date_has_ret(cal_date=date(2017, 5, 2), asset_id='3e8a5c5e23104beda418ea4a30df0acd'))
-    # print(get_all_cash())
-    # get_all_fund()
-    # get_today_fees()
-    # add_fee_with_date(cal_date=date.today(), amount=10000)
-    # print(get_total_evaluate_detail())
+    update_agreement_input_by_id_type('0508674d66b64f7db289e66d72539cc2', 20001, SV.ASSET_TYPE_PURCHASE,
+                                      date(2017, 5, 23))
+    # print(get_asset_trade_by_id('3fc3cbac3e8445cbae0c0dc144842686'))
+    # update_agreement_input_purchase_by_id('3fc3cbac3e8445cbae0c0dc144842686', 60000001, date(2017, 5, 22))
+    # update_agreement_input_by_id('2f6b12f9229244b9a6d6e9a30f286f28', 20000, SV.ASSET_TYPE_RET_CARRY, date(2017, 5, 23))
+    # print(get_cash_input_detail_by_date(date(2017, 3, 1)))
+# print(get_agreement_input_detail_by_id_date('15cb6beea2f3459ca37d7bcbc4828e0a', date(2017, 3, 1))[2])
+# print(get_total_evaluate_detail())
+# print(get_asset_fee_by_date_and_type(date(2017, 5, 17), SV.FEE_TYPE_COST))
+# print(get_asset_ret_last_date_before_cal_date(cal_date=date.today(), asset_id='c96d0e9aaf924d398cb85095fd0a95cc'))
+# print(get_all_cash())
+# print(get_asset_total_amount_by_class_and_type(cal_date=date.today(), asset_class=SV.ASSET_CLASS_FUND,
+#                                                asset_type=SV.ASSET_TYPE_INIT))
+# print(get_total_evaluate_detail_by_date())
+# print(is_date_has_ret(cal_date=date(2017, 5, 2), asset_id='3e8a5c5e23104beda418ea4a30df0acd'))
+# print(get_all_cash())
+# get_all_fund()
+# get_today_fees()
+# add_fee_with_date(cal_date=date.today(), amount=10000)
+# print(get_total_evaluate_detail())

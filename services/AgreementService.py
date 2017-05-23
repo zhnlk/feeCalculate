@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from datetime import date, timedelta
 
 from services.CommonService import get_asset_total_amount_by_class_and_type, \
-    get_asset_ret_total_amount_by_class_and_type, get_asset_date
+    get_asset_ret_total_amount_by_class_and_type, get_asset_date, get_agreement_input_detail_by_id_date
 from utils import StaticValue as SV
 
 
@@ -58,3 +58,19 @@ def get_total_agreement_statistic_by_days(days=0):
     for dat in dates:
         ret.append(get_total_agreement_statistic_by_date(dat))
     return ret
+
+
+def get_agreement_input_detail_by_id_date_dic(agreement_id=None, cal_date=date.today()):
+    ret = list()
+    for agreement in get_agreement_input_detail_by_id_date(agreement_id, cal_date):
+        ret.append(agreement.to_dict())
+    return ret
+
+
+
+
+print(get_agreement_input_detail_by_id_date_dic('15cb6beea2f3459ca37d7bcbc4828e0a', date(2017, 5, 23)))
+
+#
+# print(get_total_agreement_statistic_by_days(7))
+# print(get_total_agreement_statistic_by_period(date.today() - timedelta(days=6)))

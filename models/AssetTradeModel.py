@@ -27,3 +27,11 @@ class AssetTrade(MixinTotalBase):
     def __repr__(self):
         return '<AssetTrade id=%s, asset_class=%s, amount=%s, type=%s>' % (
             self.id, self.asset_class, self.amount, self.type)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "amount": self.amount,
+            "type": self.type,
+            "date": self.date
+        }
