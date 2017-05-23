@@ -996,12 +996,6 @@ def update_agreement_input_ret_carry_by_id(agreement_trade_id=None, amount=0, ca
         )
 
 
-def update_agreement_input_by_id_type(agreement_id=None, amount=0, agreement_type=SV.ASSET_TYPE_RET_CARRY,
-                                      cal_date=date.today()):
-    if agreement_type == SV.ASSET_TYPE_RET_CARRY:
-        update_agreement_input_ret_carry_by_id(agreement_id, amount, cal_date)
-    else:
-        update_agreement_input_purchase_or_redeem_by_id(agreement_id, amount, cal_date, agreement_type)
 
 
 # @session_deco

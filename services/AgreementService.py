@@ -5,7 +5,8 @@ from __future__ import unicode_literals
 from datetime import date, timedelta
 
 from services.CommonService import get_asset_total_amount_by_class_and_type, \
-    get_asset_ret_total_amount_by_class_and_type, get_asset_date, get_agreement_input_detail_by_id_date
+    get_asset_ret_total_amount_by_class_and_type, get_asset_date, get_agreement_input_detail_by_id_date, \
+    update_agreement_input_ret_carry_by_id, update_agreement_input_purchase_or_redeem_by_id
 from utils import StaticValue as SV
 
 
@@ -67,10 +68,9 @@ def get_agreement_input_detail_by_id_date_dic(agreement_id=None, cal_date=date.t
     return ret
 
 
-
-
-print(get_agreement_input_detail_by_id_date_dic('15cb6beea2f3459ca37d7bcbc4828e0a', date(2017, 5, 23)))
-
-#
-# print(get_total_agreement_statistic_by_days(7))
-# print(get_total_agreement_statistic_by_period(date.today() - timedelta(days=6)))
+def update_agreement_input_by_id_type(agreement_id=None, amount=0, agreement_type=SV.ASSET_TYPE_RET_CARRY,
+                                      cal_date=date.today()):
+    if agreement_type == SV.ASSET_TYPE_RET_CARRY:
+        update_agreement_input_ret_carry_by_id(agreement_id, amount, cal_date)
+    else:
+        update_agreement_input_purchase_or_redeem_by_id(agreement_id, amount, cal_date, agreement_type)
