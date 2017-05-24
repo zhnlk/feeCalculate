@@ -4,9 +4,11 @@ from __future__ import unicode_literals
 
 from datetime import date, timedelta
 
+from models.AssetTradeRetModel import AssetTradeRet
 from services.CommonService import get_asset_total_amount_by_class_and_type, \
     get_asset_ret_total_amount_by_class_and_type, get_asset_date, get_fund_princinal_input_by_id_date, \
-    get_fund_ret_input_by_id_date, update_fund_asset_input_by_id, update_fund_ret_input_by_id
+    get_fund_ret_input_by_id_date, update_fund_asset_input_by_id, update_fund_ret_input_by_id, query_by_id, \
+    cal_fund_ret_period
 from utils import StaticValue as SV
 
 
@@ -79,8 +81,10 @@ def update_fund_input_by_id_date(fund_trade_id=None, cal_date=date.today(), amou
     if is_asset:
         update_fund_asset_input_by_id(fund_trade_id, amount, cal_date)
     else:
+        asset_id = query_by_id(AssetTradeRet, fund_trade_id).asset_class
         update_fund_ret_input_by_id(fund_trade_id, amount, cal_date)
+        cal_fund_ret_period(asset_id, cal_date + timedelta(days=1), date.today())
 
 
 # print(get_fund_input_by_id_date_dic('6a9091d40a2d4a7583454d500b46c04b', date(2017, 5, 22)))
-update_fund_input_by_id_date('ca54a3c60e974c98aad788fee4b7026f', date(2017, 5, 21), 20000, True)
+update_fund_input_by_id_date('145aceb111e748dba0ad8b7b3b2c8eeb', date(2017, 5, 21), 300, False)

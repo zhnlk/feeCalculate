@@ -4,9 +4,11 @@ from __future__ import unicode_literals
 
 from datetime import date, timedelta
 
+from models.AssetTradeModel import AssetTrade
+from services.AssetService import cal_agreement_ret
 from services.CommonService import get_asset_total_amount_by_class_and_type, \
     get_asset_ret_total_amount_by_class_and_type, get_asset_date, get_agreement_input_detail_by_id_date, \
-    update_agreement_input_ret_carry_by_id, update_agreement_input_purchase_or_redeem_by_id
+    update_agreement_input_ret_carry_by_id, update_agreement_input_purchase_or_redeem_by_id, query_by_id
 from utils import StaticValue as SV
 
 
@@ -70,7 +72,14 @@ def get_agreement_input_detail_by_id_date_dic(agreement_id=None, cal_date=date.t
 
 def update_agreement_input_by_id_type(agreement_id=None, amount=0, agreement_type=SV.ASSET_TYPE_RET_CARRY,
                                       cal_date=date.today()):
+    asset_id = query_by_id(AssetTrade, agreement_id).asset_class
     if agreement_type == SV.ASSET_TYPE_RET_CARRY:
         update_agreement_input_ret_carry_by_id(agreement_id, amount, cal_date)
     else:
         update_agreement_input_purchase_or_redeem_by_id(agreement_id, amount, cal_date, agreement_type)
+
+    cal_agreement_ret(cal_date, asset_id)
+
+
+update_agreement_input_by_id_type('d6fd8e989de54f9db9243ece441da3ad', 200000000, SV.ASSET_TYPE_PURCHASE,
+                                  date(2017, 5, 22))
