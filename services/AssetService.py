@@ -825,7 +825,7 @@ def cal_all_mangement_ret_and_fee(cal_date=date.today()):
 
 def draw_management_by_asset(asset_id=None):
     asset = query_by_id(obj=AssetClass, obj_id=asset_id)
-    amount = asset.asset_trade_list[0].amount if asset.asset_trade_list else 0.0
+    amount = query_by_id(obj=AssetClass, obj_id=asset_id).asset_trade_list[0].amount if asset.asset_trade_list else 0.0
     redeem(asset=asset, amount=amount, cal_date=asset.expiry_date)
 
 
@@ -837,7 +837,8 @@ def draw_management_ret_by_asset(asset_id=None, ret_method=SV.RET_TYPE_CASH_CUT_
     else:
         asset_ret_carry_to_cash(cal_date=asset.expiry_date, asset=asset, amount=total_ret)
 
-    add_cash_with_type(cal_date=asset.expiry_date, cash_type=SV.CASH_TYPE_CARRY, amount=-get_all_mangement_fee(asset))
+    add_cash_with_type(cal_date=asset.expiry_date, asset_id=asset.id, cash_type=SV.CASH_TYPE_CARRY,
+                       amount=-get_all_mangement_fee(asset))
     add_asset_fee_with_asset_and_type(cal_date=asset.expiry_date, asset_id=asset.id, fee_type=SV.FEE_TYPE_ADJUST_BANK,
                                       amount=-get_all_mangement_fee(asset))
 

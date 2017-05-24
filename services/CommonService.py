@@ -16,7 +16,6 @@ from models.AssetTradeRetModel import AssetTradeRet
 from models.CashModel import Cash
 from models.CommonModel import session_deco
 from models.DailyFeeModel import DailyFee
-# from services import AssetService
 from utils import StaticValue as SV
 ##### Cash
 from utils.Utils import get_fee_config_dic
@@ -1144,16 +1143,37 @@ def update_fund_ret_input_by_id(fund_ret_id=None, amount=0, cal_date=date.today(
             )
 
 
+@session_deco
+def clean_management_record_by_id(management_id=None, **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    session.query(AssetTrade).filter(AssetTrade.is_active, AssetTrade.asset_class == management_id).update(
+        {AssetTrade.is_active: False}, synchronize_session='fetch')
+    session.query(AssetTradeRet).filter(AssetTradeRet.is_active, AssetTradeRet.asset_class == management_id).update(
+        {AssetTradeRet.is_active: False}, synchronize_session='fetch')
+
+    session.query(AssetFee).filter(AssetFee.is_active, AssetFee.asset_class == management_id).update(
+        {AssetFee.is_active: False}, synchronize_session='fetch')
+    session.query(Cash).filter(Cash.is_active, Cash.asset_class == management_id).update({Cash.is_active: False},
+                                                                                         synchronize_session='fetch')
+    session.query(AssetFeeRate).filter(AssetFeeRate.is_active, AssetFeeRate.asset_class == management_id).update(
+        {AssetFeeRate.is_active: False}, synchronize_session='fetch')
+    session.query(AssetRetRate).filter(AssetRetRate.is_active, AssetRetRate.asset_class == management_id).update(
+        {AssetRetRate.is_active: False}, synchronize_session='fetch')
+    session.query(AssetClass).filter(AssetClass.is_active, AssetClass.id == management_id).update(
+        {AssetClass.is_active: False}, synchronize_session='fetch')
+
+
 if __name__ == '__main__':
-    update_fund_ret_input_by_id('aa81c50eb364410ab489d1e3c3a3c8f7', 3000, date(2017, 5, 22))
-    # update_fund_asset_input_by_id('1df88aaae6844bb5b80de556d816ea9e', 10003, date.today())
-    # print(get_fund_ret_input_by_id_date('6a9091d40a2d4a7583454d500b46c04b', date(2017, 5, 24))[0].to_dict())
-    # update_agreement_input_by_id_type('0508674d66b64f7db289e66d72539cc2', 20001, SV.ASSET_TYPE_PURCHASE,
-    #                                   date(2017, 5, 23))
-    # print(get_asset_trade_by_id('3fc3cbac3e8445cbae0c0dc144842686'))
-    # update_agreement_input_purchase_by_id('3fc3cbac3e8445cbae0c0dc144842686', 60000001, date(2017, 5, 22))
-    # update_agreement_input_by_id('2f6b12f9229244b9a6d6e9a30f286f28', 20000, SV.ASSET_TYPE_RET_CARRY, date(2017, 5, 23))
-    # print(get_cash_input_detail_by_date(date(2017, 3, 1)))
+    clean_management_record_by_id('f80cf665734241cc853447e4e2dba890')
+# update_fund_ret_input_by_id('aa81c50eb364410ab489d1e3c3a3c8f7', 3000, date(2017, 5, 22))
+# update_fund_asset_input_by_id('1df88aaae6844bb5b80de556d816ea9e', 10003, date.today())
+# print(get_fund_ret_input_by_id_date('6a9091d40a2d4a7583454d500b46c04b', date(2017, 5, 24))[0].to_dict())
+# update_agreement_input_by_id_type('0508674d66b64f7db289e66d72539cc2', 20001, SV.ASSET_TYPE_PURCHASE,
+#                                   date(2017, 5, 23))
+# print(get_asset_trade_by_id('3fc3cbac3e8445cbae0c0dc144842686'))
+# update_agreement_input_purchase_by_id('3fc3cbac3e8445cbae0c0dc144842686', 60000001, date(2017, 5, 22))
+# update_agreement_input_by_id('2f6b12f9229244b9a6d6e9a30f286f28', 20000, SV.ASSET_TYPE_RET_CARRY, date(2017, 5, 23))
+# print(get_cash_input_detail_by_date(date(2017, 3, 1)))
 # print(get_agreement_input_detail_by_id_date('15cb6beea2f3459ca37d7bcbc4828e0a', date(2017, 3, 1))[2])
 # print(get_total_evaluate_detail())
 # print(get_asset_fee_by_date_and_type(date(2017, 5, 17), SV.FEE_TYPE_COST))
