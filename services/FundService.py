@@ -5,7 +5,8 @@ from __future__ import unicode_literals
 from datetime import date, timedelta
 
 from services.CommonService import get_asset_total_amount_by_class_and_type, \
-    get_asset_ret_total_amount_by_class_and_type, get_asset_date
+    get_asset_ret_total_amount_by_class_and_type, get_asset_date, get_fund_princinal_input_by_id_date, \
+    get_fund_ret_input_by_id_date, update_fund_asset_input_by_id, update_fund_ret_input_by_id
 from utils import StaticValue as SV
 
 
@@ -57,3 +58,29 @@ def get_total_fund_statistic_by_period(start_date=date.today(), end_date=date.to
         ret.append(get_total_fund_statistic_by_date(start_date))
         start_date += timedelta(days=1)
     return ret
+
+
+def get_fund_input_by_id_date_dic(fund_id=None, cal_date=date.today()):
+    ret = list()
+    for fund in get_fund_princinal_input_by_id_date(fund_id, cal_date):
+        fund_dic = fund.to_dict()
+        fund_dic.update({'is_asset': True})
+        ret.append(fund_dic)
+
+    for fund_ret in get_fund_ret_input_by_id_date(fund_id, cal_date):
+        ret_dic = fund_ret.to_dict()
+        ret_dic.update({'is_asset': False})
+        ret.append(ret_dic)
+
+    return ret
+
+
+def update_fund_input_by_id_date(fund_trade_id=None, cal_date=date.today(), amount=0, is_asset=True):
+    if is_asset:
+        update_fund_asset_input_by_id(fund_trade_id, amount, cal_date)
+    else:
+        update_fund_ret_input_by_id(fund_trade_id, amount, cal_date)
+
+
+# print(get_fund_input_by_id_date_dic('6a9091d40a2d4a7583454d500b46c04b', date(2017, 5, 22)))
+update_fund_input_by_id_date('c90a797e40664b8d8232e2f8be7f26a9', date(2017, 5, 22), 2500, False)

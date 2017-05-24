@@ -18,7 +18,8 @@ from services.CommonService import (
     get_all_mamangement_ids, get_all_asset_ids_by_type, get_expiry_management, get_management_fees_by_id,
     is_date_has_ret, is_date_has_fee, get_asset_total_amount_by_asset_and_type, get_asset_date_by_id,
     get_asset_ret_last_date_before_cal_date, get_asset_total_amount_by_class_and_type,
-    get_asset_ret_total_amount_by_class_and_type, get_asset_fee_total_amount_by_class_and_type)
+    get_asset_ret_total_amount_by_class_and_type, get_asset_fee_total_amount_by_class_and_type,
+    update_fund_ret_total_amount_not_carry_ret)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
 
@@ -319,9 +320,11 @@ def add_fund_daily_data(cal_date=date.today(), asset_id=None, ret_carry_amount=0
     :param ret_carry_cash_amount:收益结转现金
     :param purchase_amount:申购金额
     :param redeem_amount:赎回金额
-    :param ret_amount:收益
+    :param ret_amount:未结转金额
     :return:None
     '''
+
+    not_carry_amount = ret_amount
 
     ret_init = get_asset_ret_total_amount_by_asset_and_type(
         cal_date,
@@ -345,9 +348,11 @@ def add_fund_daily_data(cal_date=date.today(), asset_id=None, ret_carry_amount=0
     add_daily_asset_data(
         cal_date=cal_date, asset_id=asset_id,
         purchase_amount=purchase_amount,
-        redeem_amount=redeem_amount, ret_amount=ret_amount,
+        redeem_amount=redeem_amount,
+        ret_amount=ret_amount,
         ret_carry_asset_amount=ret_carry_amount
     )
+    update_fund_ret_total_amount_not_carry_ret(asset_id, cal_date, ret_amount, not_carry_amount)
 
 
 def get_total_fund_statistic_by_id(cal_date=date.today(), asset_id=None):
@@ -657,8 +662,7 @@ def get_total_management_statistic_by_date(cal_date=date.today()):
         SV.ASSET_KEY_CAL_DATE: cal_date,
         SV.ASSET_KEY_MANAGEMENT_AMOUNT: total_amount,
         SV.ASSET_KEY_PURCHASE_MANAGEMENT: total_purchase_amount - yes_total_purchase_amount,
-        # - total_redeem_amount + yes_total_redeem_amount,
-        SV.ASSET_KEY_MANAGEMENT_RET: total_ret_amount - yes_total_ret_amount  # total_ret_carry - #
+        SV.ASSET_KEY_MANAGEMENT_RET: total_ret_amount - yes_total_ret_amount
     }
 
 
@@ -927,14 +931,12 @@ def add_trade_ret(cal_date=date.today(), ret_amount=0, asset=AssetClass()):
 def add_daily_asset_data(cal_date=date.today(), asset_id=None, ret_carry_asset_amount=0,
                          purchase_amount=0,
                          redeem_amount=0, ret_amount=0):
-    asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
+    asset = query_by_id(AssetClass, asset_id)
     asset_ret_carry_to_principal(cal_date=cal_date, asset=asset,
                                  amount=ret_carry_asset_amount) if ret_carry_asset_amount else None
     purchase(asset=asset, amount=purchase_amount, cal_date=cal_date) if purchase_amount else None
     redeem(asset=asset, amount=redeem_amount, cal_date=cal_date) if redeem_amount else None
     add_trade_ret(cal_date=cal_date, ret_amount=ret_amount, asset=asset) if ret_amount else None
-    # asset_ret_carry_to_cash(cal_date=cal_date, asset=asset,
-    #                         amount=ret_carry_cash_amount) if ret_carry_cash_amount else None
     asset = query(AssetClass).filter(AssetClass.id == asset_id).one()
     cal_agreement_ret(cal_date=cal_date, asset_id=asset.id) if asset.type == SV.ASSET_CLASS_AGREEMENT else None
 

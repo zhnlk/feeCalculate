@@ -996,60 +996,135 @@ def update_agreement_input_ret_carry_by_id(agreement_trade_id=None, amount=0, ca
         )
 
 
+@session_deco
+def get_fund_princinal_input_by_id_date(fund_id=None, cal_date=date.today(), **kwargs):
+    return kwargs.get(SV.SESSION_KEY).query(AssetTrade).filter(
+        AssetTrade.is_active,
+        AssetTrade.asset_class == fund_id,
+        or_(
+            AssetTrade.type == SV.ASSET_TYPE_PURCHASE,
+            AssetTrade.type == SV.ASSET_TYPE_REDEEM
+        ),
+        AssetTrade.date == cal_date
+    )
 
 
-# @session_deco
-# def update_agreement_input_by_id(agreement_id=None, amount=0, agreement_type=SV.ASSET_TYPE_PURCHASE,
-#                                  cal_date=date.today(), **kwargs):
-#     session = kwargs.get(SV.SESSION_KEY)
-#
-#     agreement_trade = session.query(AssetTrade).filter(
-#         AssetTrade.is_active,
-#         AssetTrade.id == agreement_id,
-#         AssetTrade.type == agreement_type
-#     )
-#
-#     if agreement_trade.count():
-#         agreement = agreement_trade[-1]
-#         agreement_trade.update({AssetTrade.is_active: False}, synchronize_session='fetch')
-#
-#         if agreement_type == SV.ASSET_TYPE_PURCHASE:
-#             cash = session.query(Cash).filter(
-#                 Cash.is_active,
-#                 Cash.date == cal_date,
-#                 Cash.type == SV.CASH_TYPE_PURCHASE_AGREEMENT,
-#                 Cash.amount == agreement.amount
-#             )
-#             cash.update({Cash.is_active: False}, synchronize_session='fetch')
-#             purchase(query_by_id(AssetClass, agreement.asset_class), amount, cal_date) if amount else None
-#
-#         elif agreement_type == SV.ASSET_TYPE_REDEEM:
-#             cash = session.query(Cash).filter(
-#                 Cash.is_active,
-#                 Cash.date == cal_date,
-#                 Cash.type == SV.CASH_TYPE_REDEEM_AGREEMENT,
-#                 Cash.amount == agreement.amount
-#             )
-#             cash.update({Cash.is_active: False}, synchronize_session='fetch')
-#             redeem(query_by_id(AssetClass, agreement.asset_class), amount, cal_date) if amount else None
-#         elif agreement_type == SV.ASSET_TYPE_RET_CARRY:
-#             ret_carry = session.query(AssetTradeRet).filter(
-#                 AssetTradeRet.is_active,
-#                 AssetTradeRet.date == cal_date,
-#                 AssetTradeRet.type == SV.RET_TYPE_PRINCIPAL,
-#                 AssetTradeRet.amount == agreement.amount
-#             )
-#             ret_carry.update({AssetTradeRet.is_active: False}, synchronize_session='fetch')
-#
-#             add_asset_trade_with_asset_and_type(amount, SV.ASSET_TYPE_RET_CARRY, agreement.asset_class,
-#                                                 cal_date) if amount else None
-#             add_asset_ret_with_asset_and_type(amount, agreement.asset_class, SV.RET_TYPE_PRINCIPAL,
-#                                               cal_date) if amount else None
+@session_deco
+def get_fund_ret_input_by_id_date(fund_id=None, cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+
+    ret_carry = session.query(AssetTradeRet).filter(
+        AssetTradeRet.is_active,
+        AssetTradeRet.date == cal_date,
+        AssetTradeRet.asset_class == fund_id,
+        or_(
+            AssetTradeRet.type == SV.RET_TYPE_PRINCIPAL,
+            AssetTradeRet.type == SV.RET_TYPE_INTEREST
+        )
+    )
+
+    return ret_carry
+
+
+@session_deco
+def update_fund_ret_total_amount_not_carry_ret(fund_id=None, cal_date=date.today(), amount=0, not_carry_amount=0,
+                                               **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    session.query(AssetTradeRet).filter(
+        AssetTradeRet.is_active,
+        AssetTradeRet.asset_class == fund_id,
+        AssetTradeRet.date == cal_date,
+        AssetTradeRet.amount == amount
+    ).update({AssetTradeRet.total_amount: not_carry_amount}, synchronize_session='fetch')
+
+
+@session_deco
+def update_fund_asset_input_by_id(fund_trade_id=None, amount=0, cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+
+    fund_trade = session.query(AssetTrade).filter(
+        AssetTrade.is_active,
+        AssetTrade.id == fund_trade_id
+    )
+
+    if fund_trade.count():
+        fund_trade_obj = fund_trade.one()
+        fund_trade.update({AssetTrade.is_active: False}, synchronize_session='fetch')
+        session.add(
+            AssetTrade(
+                fund_trade_obj.asset_class, amount,
+                fund_trade_obj.type,
+                get_asset_total_amount_by_asset_and_type(
+                    cal_date - timedelta(days=1),
+                    fund_trade_obj.asset_class,
+                    fund_trade_obj.type
+                ) + amount,
+                cal_date
+            )
+        )
+
+
+@session_deco
+def update_fund_ret_input_by_id(fund_ret_id=None, amount=0, cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    fund_ret = session.query(AssetTradeRet).filter(
+        AssetTradeRet.is_active,
+        AssetTradeRet.id == fund_ret_id
+    )
+    if fund_ret.count():
+        fund_ret_obj = fund_ret.one()
+
+        fund_ret.update({AssetTradeRet.is_active: False}, synchronize_session='fetch')
+        if fund_ret_obj.type == SV.RET_TYPE_PRINCIPAL:
+            session.add(
+                AssetTradeRet(
+                    fund_ret_obj.asset_class,
+                    amount,
+                    fund_ret_obj.type,
+                    get_asset_ret_total_amount_by_asset_and_type(
+                        cal_date - timedelta(days=1),
+                        fund_ret_obj.asset_class,
+                        fund_ret_obj.type
+                    ) + amount,
+                    cal_date
+                )
+            )
+        else:
+            yes_not_carry = session.query(AssetTradeRet).filter(
+                AssetTradeRet.is_active,
+                AssetTradeRet.asset_class == fund_ret_obj.asset_class,
+                AssetTradeRet.date == cal_date - timedelta(days=1),
+                AssetTradeRet.type == SV.RET_TYPE_INTEREST
+            )
+
+            yes_not_carry_amount = yes_not_carry.one().total_amount if yes_not_carry.count() else 0.0
+
+            yes_carry = session.query(AssetTradeRet).filter(
+                AssetTradeRet.is_active,
+                AssetTradeRet.asset_class == fund_ret_obj.asset_class,
+                AssetTradeRet.date == cal_date - timedelta(days=1),
+                AssetTradeRet.type == SV.RET_TYPE_PRINCIPAL
+            )
+
+            yes_carry_amount = yes_carry.one().amount if yes_carry.count() else 0.0
+
+            session.add(
+                AssetTradeRet(
+                    fund_ret_obj.asset_class,
+                    amount - yes_not_carry_amount + yes_carry_amount,
+                    fund_ret_obj.type,
+                    amount,
+                    cal_date
+                )
+            )
 
 
 if __name__ == '__main__':
-    update_agreement_input_by_id_type('0508674d66b64f7db289e66d72539cc2', 20001, SV.ASSET_TYPE_PURCHASE,
-                                      date(2017, 5, 23))
+    update_fund_ret_input_by_id('aa81c50eb364410ab489d1e3c3a3c8f7', 3000, date(2017, 5, 22))
+    # update_fund_asset_input_by_id('1df88aaae6844bb5b80de556d816ea9e', 10003, date.today())
+    # print(get_fund_ret_input_by_id_date('6a9091d40a2d4a7583454d500b46c04b', date(2017, 5, 24))[0].to_dict())
+    # update_agreement_input_by_id_type('0508674d66b64f7db289e66d72539cc2', 20001, SV.ASSET_TYPE_PURCHASE,
+    #                                   date(2017, 5, 23))
     # print(get_asset_trade_by_id('3fc3cbac3e8445cbae0c0dc144842686'))
     # update_agreement_input_purchase_by_id('3fc3cbac3e8445cbae0c0dc144842686', 60000001, date(2017, 5, 22))
     # update_agreement_input_by_id('2f6b12f9229244b9a6d6e9a30f286f28', 20000, SV.ASSET_TYPE_RET_CARRY, date(2017, 5, 23))
