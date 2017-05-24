@@ -83,4 +83,4 @@ def update_fund_input_by_id_date(fund_trade_id=None, cal_date=date.today(), amou
 
 
 # print(get_fund_input_by_id_date_dic('6a9091d40a2d4a7583454d500b46c04b', date(2017, 5, 22)))
-update_fund_input_by_id_date('c90a797e40664b8d8232e2f8be7f26a9', date(2017, 5, 22), 2500, False)
+update_fund_input_by_id_date('ca54a3c60e974c98aad788fee4b7026f', date(2017, 5, 21), 20000, True)
