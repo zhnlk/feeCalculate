@@ -207,6 +207,24 @@ def add_asset_fee_with_asset_and_type(amount=0, asset_id=None, fee_type=SV.FEE_T
     )
 
 
+@session_deco
+def delete_daily_fee_by_date(cal_date=date.today(), fee_type=SV.FEE_TYPE_COST, **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    fee = session.query(AssetFee).filter(
+        AssetFee.is_active,
+        AssetFee.date == cal_date,
+        AssetFee.type == fee_type
+    )
+
+    fee.update({AssetFee.is_active: False}, synchronize_session='fetch') if fee.count() else None
+
+
+def add_daily_fee(cal_date=date.today(), amount=0):
+    if amount:
+        delete_daily_fee_by_date(cal_date, SV.FEE_TYPE_COST)
+        add_asset_fee_with_asset_and_type(amount, None, SV.FEE_TYPE_COST, cal_date)
+
+
 # Management
 
 

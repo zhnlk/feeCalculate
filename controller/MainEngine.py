@@ -1,9 +1,8 @@
 # encoding: UTF-8
 import datetime
 
-from services import AssetService, CashService, CommonService, AgreementService, FundService
 from controller.EventEngine import *
-from utils import StaticValue as SV
+from services import AssetService, CashService, CommonService, AgreementService, FundService
 
 
 class MainEngine(object):
@@ -156,7 +155,8 @@ class MainEngine(object):
         """
         return AssetService.get_agreement_detail_by_days(days)
 
-    def get_single_agreement_detail_by_period(self, asset_id=None, start=datetime.date.today(), end=datetime.date.today()):
+    def get_single_agreement_detail_by_period(self, asset_id=None, start=datetime.date.today(),
+                                              end=datetime.date.today()):
         """
         获取过滤后的协存明细记录
         :param asset_id: 
@@ -267,7 +267,7 @@ class MainEngine(object):
         :param cal_date: 
         :return: 
         """
-        AssetService.add_asset_fee_with_asset_and_type(amount, asset_id=None, fee_type=SV.FEE_TYPE_COST, cal_date=cal_date)
+        CommonService.add_daily_fee(cal_date, amount)
 
     def get_total_agreement_statistic_by_days(self, days=0):
         """
