@@ -8,8 +8,6 @@ from models.CashModel import Cash
 from services.CommonService import query, add_cash_with_type, get_cash_total_amount_by_type, \
     get_cash_input_detail_by_date, update_cash_input_by_id
 from utils import StaticValue as SV
-from utils.StaticValue import CASH_KEY_TO_TYPE_DIC
-from utils.Utils import get_value_by_key
 
 
 def get_key_by_cash_type(cash_type=SV.CASH_TYPE_DEPOSIT):
@@ -140,8 +138,8 @@ def get_cash_input_detail_by_date_dic(cal_date=date.today()):
     return ret
 
 
-def update_cash_input_by_id_type(cash_id, amount, cash_type_key, cal_date):
-    update_cash_input_by_id(cash_id, amount, get_value_by_key(CASH_KEY_TO_TYPE_DIC, cash_type_key), cal_date)
+def update_cash_input_by_id_type(cash_id, amount, cash_type, cal_date):
+    update_cash_input_by_id(cash_id, amount, cash_type, cal_date)
 
 
 if __name__ == '__main__':
