@@ -588,11 +588,17 @@ def get_all_ret_daily(cal_date=date.today(), **kwargs):
 def get_asset_date(days=0, asset_class=SV.ASSET_CLASS_AGREEMENT, **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
     # dates = session.query(AssetTrade.date).filter(AssetTrade.is_active, AssetTrade.date <= date.today()).distinct()
-    dates = session.query(AssetTradeRet.date).filter(
-        AssetTradeRet.is_active,
-        AssetTradeRet.date <= date.today(),
-        AssetTradeRet.asset_class_obj.has(AssetClass.type == asset_class)
-    ).distinct()
+    if asset_class:
+        dates = session.query(AssetTradeRet.date).filter(
+            AssetTradeRet.is_active,
+            AssetTradeRet.date <= date.today(),
+            AssetTradeRet.asset_class_obj.has(AssetClass.type == asset_class)
+        ).distinct()
+    else:
+        dates = session.query(AssetTradeRet.date).filter(
+            AssetTradeRet.is_active,
+            AssetTradeRet.date <= date.today()
+        ).distinct()
     dates = sorted(map(lambda x: x.date, dates))
     if days:
         return dates[-days:]
@@ -678,7 +684,7 @@ def get_total_evaluate_detail_by_date(cal_date=date.today()):
 
 def get_total_evaluate_detail(days=0):
     ret = list()
-    for cal_date in get_asset_date(days=days):
+    for cal_date in get_asset_date(days=days, asset_class=None):
         ret.append(get_total_evaluate_detail_by_date(cal_date=cal_date))
 
     if not ret:
@@ -1199,6 +1205,17 @@ def cal_fund_ret_period(fund_id=None, start_date=date.today(), end_date=date.tod
     while start_date <= end_date:
         cal_fund_ret(start_date, fund_id)
         start_date += timedelta(days=1)
+
+
+@session_deco
+def check_fund_ret_by_date(cal_date=date.today(), asset_id=None, **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    fund_ret = session.query(AssetTradeRet).filter(
+        AssetTradeRet.is_active,
+        AssetTradeRet.date == cal_date,
+        AssetTradeRet.asset_class == asset_id
+    )
+    return True if fund_ret.count() else False
 
 
 if __name__ == '__main__':

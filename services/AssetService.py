@@ -19,7 +19,7 @@ from services.CommonService import (
     is_date_has_ret, is_date_has_fee, get_asset_total_amount_by_asset_and_type, get_asset_date_by_id,
     get_asset_ret_last_date_before_cal_date, get_asset_total_amount_by_class_and_type,
     get_asset_ret_total_amount_by_class_and_type, get_asset_fee_total_amount_by_class_and_type,
-    update_fund_ret_total_amount_not_carry_ret)
+    update_fund_ret_total_amount_not_carry_ret, check_fund_ret_by_date)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
 
@@ -345,6 +345,11 @@ def add_fund_daily_data(cal_date=date.today(), asset_id=None, ret_carry_amount=0
         ret_type=SV.RET_TYPE_PRINCIPAL
     )  # 结转基金收益
     ret_amount -= (fund_total_ret_amount - fund_carry_ret_amount)  # 输入未结转收益-当日未结转收益 = 当日收益
+
+    fund_flag = check_fund_ret_by_date(cal_date, asset_id)
+    if fund_flag:
+        ret_amount = 0
+        ret_carry_amount = 0
     add_daily_asset_data(
         cal_date=cal_date, asset_id=asset_id,
         purchase_amount=purchase_amount,
@@ -352,7 +357,8 @@ def add_fund_daily_data(cal_date=date.today(), asset_id=None, ret_carry_amount=0
         ret_amount=ret_amount,
         ret_carry_asset_amount=ret_carry_amount
     )
-    update_fund_ret_total_amount_not_carry_ret(asset_id, cal_date, ret_amount, not_carry_amount)
+    update_fund_ret_total_amount_not_carry_ret(asset_id, cal_date, ret_amount,
+                                               not_carry_amount) if not fund_flag else None
 
 
 def get_total_fund_statistic_by_id(cal_date=date.today(), asset_id=None):
