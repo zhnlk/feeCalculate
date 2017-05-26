@@ -8,6 +8,8 @@ import os
 from _datetime import datetime, date
 from functools import wraps
 
+from utils import StaticValue as SV
+
 BASE_DIR = os.path.dirname(__file__)
 
 FEE_CONFIG_FILE = os.path.join(BASE_DIR, '../fee.config')
@@ -37,6 +39,30 @@ def get_value_by_key(dic=dict(), key=None):
 
 def get_fund_value_by_key(dic=dict(), is_asset=True, key=None):
     return dic[is_asset][key]
+
+
+def cash_key_to_type(key=None):
+    return SV.CASH_KEY_TO_TYPE_DIC.get(key)
+
+
+def cash_type_to_key(cash_type=1):
+    return SV.CASH_TYPE_TO_KEY_DIC.get(cash_type)
+
+
+def agreement_key_to_type(key=None):
+    return SV.AGREEMENT_KEY_TO_TYPE_DIC.get(key)
+
+
+def agreement_type_to_key(agreement_type=1):
+    return SV.AGREEMENT_TYPE_TO_KEY_DIC.get(agreement_type)
+
+
+def fund_key_to_type(is_asset=True, key=None):
+    return get_fund_value_by_key(SV.FUND_KEY_TO_TYPE_DIC, is_asset, key)
+
+
+def fund_type_to_key(is_asset=True, fund_type=None):
+    return get_fund_value_by_key(SV.FUND_TYPE_TO_KEY_DIC, is_asset, fund_type)
 
 
 def strToDate(dateStr=None):
