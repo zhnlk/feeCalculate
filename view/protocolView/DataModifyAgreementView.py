@@ -12,7 +12,7 @@ from view.BasicWidget import BasicFcView, BasicCell, NumCell, BASIC_FONT
 from controller.EventEngine import Event
 from controller.EventType import EVENT_MODIFY_PD_VIEW, EVENT_MAIN_VALUATION, EVENT_PD
 from controller.MainEngine import MainEngine
-from utils.Utils import strToDate
+from utils.Utils import strToDate, agreement_key_to_type, agreement_type_to_key
 
 
 class AgreementDataModifyView(BasicFcView):
@@ -62,7 +62,8 @@ class AgreementDataModifyView(BasicFcView):
             # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
                 content = r[header]
-
+                if header is 'type':
+                    content = agreement_type_to_key(content)
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
                 if self.saveData and header is 'amount':
@@ -126,7 +127,7 @@ class ModifyInput(BasicFcView):
 
         self.modify_date_Edit = QLineEdit(str(self.data[1]))
         self.modify_date_Edit.setReadOnly(True)
-        self.modify_type_Edit = QLineEdit(str(self.data[2]))
+        self.modify_type_Edit = QLineEdit(str(agreement_type_to_key(self.data[2])))
         self.modify_type_Edit.setReadOnly(True)
         self.modify_amount_Edit = QLineEdit(str(self.data[3]))
 
@@ -164,7 +165,7 @@ class ModifyInput(BasicFcView):
 
             self.mainEngine.update_agreement_input_by_id_type(agreement_id=self.data[0],
                                                               amount=float(modify_amount),
-                                                              agreement_type=modify_type,
+                                                              agreement_type=agreement_key_to_type(modify_type),
                                                               cal_date=strToDate(modify_date))
         except ValueError:
             self.showError()

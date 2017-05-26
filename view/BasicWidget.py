@@ -10,13 +10,12 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QAction, QMessageBox
-from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtWidgets import QMenu
 from PyQt5.QtWidgets import QTableWidget
 from PyQt5.QtWidgets import QTableWidgetItem
 
-from utils.MoneyFormat import outputmoney
+from utils.MoneyFormat import outputmoney, outputmoneydown
 from controller.EventEngine import Event
 
 
@@ -77,6 +76,7 @@ class BasicFcView(QTableWidget):
         self.sorting = True
         # 初始化右键菜单
         self.initPopMenu()
+
     def connectSignal(self):
         """连接信号"""
         # 双击单元格撤单
@@ -263,8 +263,8 @@ class BasicFcView(QTableWidget):
     def contextMenuEvent(self, event):
         """右键点击事件"""
         self.menu.popup(QCursor.pos())
-        print('QCursor.__dict__',QCursor.__dict__)
-        print('event.__dict__',event.__dict__)
+        print('QCursor.__dict__', QCursor.__dict__)
+        print('event.__dict__', event.__dict__)
 
 
 ########################################################################
@@ -301,7 +301,25 @@ class NumCell(QTableWidgetItem):
     def setContent(self, text):
         """设置内容"""
         try:
-            self.setData(Qt.DisplayRole, outputmoney(round(text,2)))
+            self.setData(Qt.DisplayRole, outputmoney(round(text, 2)))
+        except ValueError:
+            self.setText(text)
+
+
+class Num2Cell(QTableWidgetItem):
+    """用来显示数字的单元格"""
+
+    def __init__(self, text=None, mainEngine=None):
+        """Constructor"""
+        super(NumCell, self).__init__()
+        self.data = None
+        if text is not None:
+            self.setContent(text)
+
+    def setContent(self, text):
+        """设置内容"""
+        try:
+            self.setData(Qt.DisplayRole, outputmoneydown(round(text, 2)))
         except ValueError:
             self.setText(text)
 

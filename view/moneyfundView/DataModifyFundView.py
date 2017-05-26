@@ -13,7 +13,7 @@ from view.BasicWidget import BasicFcView, BasicCell, NumCell, BASIC_FONT
 from controller.EventEngine import Event
 from controller.EventType import EVENT_MAIN_VALUATION, EVENT_MF, EVENT_MODIFY_MF_VIEW
 from controller.MainEngine import MainEngine
-from utils.Utils import strToDate
+from utils.Utils import strToDate, fund_type_to_key, fund_key_to_type
 
 
 class FundDataModifyView(BasicFcView):
@@ -64,6 +64,8 @@ class FundDataModifyView(BasicFcView):
             # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
                 content = r[header]
+                if header is 'type':
+                    content = fund_type_to_key(r['is_asset'],content)
                 if header is 'amount':
                     if r['type'] is 1 and r['is_asset'] is False:
                         content = r['not_carry_amount']
@@ -131,7 +133,7 @@ class ModifyInput(BasicFcView):
 
         self.modify_date_Edit = QLineEdit(str(self.data[1]))
         self.modify_date_Edit.setReadOnly(True)
-        self.modify_type_Edit = QLineEdit(str(self.data[3]))
+        self.modify_type_Edit = QLineEdit(str(fund_type_to_key(self.data[4],self.data[3])))
         self.modify_type_Edit.setReadOnly(True)
         self.modify_amount_Edit = QLineEdit(str(self.data[2]))
 

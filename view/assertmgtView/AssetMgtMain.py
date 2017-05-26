@@ -11,7 +11,7 @@ from controller.EventEngine import Event
 from controller.EventType import EVENT_AM
 from controller.MainEngine import MainEngine
 from utils.MoneyFormat import outputmoney
-from view.BasicWidget import BasicFcView, BasicCell, NumCell, BASIC_FONT
+from view.BasicWidget import BasicFcView, BasicCell, NumCell, BASIC_FONT, Num2Cell
 from view.assertmgtView.AdjustValuationView import AdjustValuationView
 from view.assertmgtView.AssetMgtAdjustInput import AdjustValuationInput
 
@@ -87,7 +87,7 @@ class AssetMgtViewMain(BasicFcView):
         # d['committee_interest'] = {'chinese': '委贷利息', 'cellType': BasicCell}
         d['bank_fee'] = {'chinese': '委贷银行费用', 'cellType': NumCell}
         d['manage_fee'] = {'chinese': '资管计划费用', 'cellType': NumCell}
-        d['asset_ret'] = {'chinese': '资管计划总收益', 'cellType': NumCell}
+        d['asset_ret'] = {'chinese': '资管计划总收益', 'cellType': Num2Cell}
         d['mamangement_daily_ret'] = {'chinese': '资管计划每日收益', 'cellType': NumCell}
         # d['asset_plan_daily_valuation'] = {'chinese': '正常情况资管计划\n每日收益估值', 'cellType': BasicCell}
         d['uuid_view'] = {'chinese': '调整查看', 'cellType': BasicCell}
