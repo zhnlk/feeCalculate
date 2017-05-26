@@ -348,7 +348,7 @@ class AgreementListViewWidget(BasicFcView):
         try:
             self.widgetDict['showDataModifyView'].show(cell.data)
         except KeyError:
-            self.widgetDict['showDataModifyView'] = AgreementDataModifyView(self.mainEngine,
+            self.widgetDict['showDataModifyView'] = AgreementDataModifyView(mainEngine=self.mainEngine,
                                                                             data=cell.data)
             self.widgetDict['showDataModifyView'].show()
 

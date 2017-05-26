@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QLabel, QAction, QLineEdit, QPushButton, QHBoxLayout
 
 from view.BasicWidget import BasicFcView, BasicCell, NumCell, BASIC_FONT
 from controller.EventEngine import Event
-from controller.EventType import EVENT_MODIFY_CASH_VIEW, EVENT_MODIFY_PD_VIEW, EVENT_CASH, EVENT_MAIN_VALUATION, EVENT_PD
+from controller.EventType import EVENT_MODIFY_PD_VIEW, EVENT_MAIN_VALUATION, EVENT_PD
 from controller.MainEngine import MainEngine
 from utils.Utils import strToDate
 
@@ -24,7 +24,7 @@ class AgreementDataModifyView(BasicFcView):
         super(AgreementDataModifyView, self).__init__(parent=parent)
 
         self.mainEngine = mainEngine
-        # self.dateToModified = strToDate(dateToModified)
+        print('data', data)
         self.asset_id = data[0]
         self.dateToModified = data[1]
 
@@ -33,7 +33,6 @@ class AgreementDataModifyView(BasicFcView):
         d['date'] = {'chinese': '日期', 'cellType': BasicCell}
         d['type'] = {'chinese': '类型', 'cellType': BasicCell}
         d['amount'] = {'chinese': '金额', 'cellType': NumCell}
-        # d['pd_pd_to_cash'] = {'chinese': '调整结果', 'cellType': NumCell}
 
         self.setHeaderDict(d)
 
@@ -47,7 +46,6 @@ class AgreementDataModifyView(BasicFcView):
         self.setFont(BASIC_FONT)
         self.initTable()
         self.verticalHeader().setVisible(True)
-        # self.addMenuAction()
         self.saveData = True
         self.connectSignal()
         self.signal.connect(self.refresh)
@@ -87,19 +85,11 @@ class AgreementDataModifyView(BasicFcView):
         self.widgetDict['showModifyInput'] = ModifyInput(self.mainEngine, data=data)
         self.widgetDict['showModifyInput'].show()
 
-    def refresh(self, data=None):
+    def refresh(self):
         """带参数刷新"""
         self.clearContents()
         self.setRowCount(0)
-        self.showModifyListDetail(self.asset_id if data is None else data[0],
-                                  self.dateToModified if data is None else data[1])
-
-    def addMenuAction(self):
-        """增加右键菜单内容"""
-        refreshAction = QAction('刷新', self)
-        refreshAction.triggered.connect(self.refresh)
-
-        # self.menu.addAction(refreshAction)
+        self.showModifyListDetail(self.asset_id, self.dateToModified)
 
     def closeEvent(self, event):
         for widget in self.widgetDict.values():
@@ -111,7 +101,10 @@ class AgreementDataModifyView(BasicFcView):
     def show(self, data=None):
         """显示"""
         super(AgreementDataModifyView, self).show()
-        self.refresh(data)
+        if data is not None:
+            self.asset_id = data[0]
+            self.dateToModified = data[1]
+        self.refresh()
 
 
 class ModifyInput(BasicFcView):
@@ -165,6 +158,7 @@ class ModifyInput(BasicFcView):
         modify_date = self.modify_date_Edit.text()
         modify_type = self.modify_type_Edit.text()
         modify_amount = self.modify_amount_Edit.text()
+        print(self.data[0],modify_date, modify_type, modify_amount)
 
         try:
 
@@ -188,6 +182,6 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    plv = AgreementDataModifyView(mainEngine=mainEngine, dateToModified=datetime.date(2017, 5, 25))
+    plv = AgreementDataModifyView(mainEngine=mainEngine)
     plv.show()
     sys.exit(app.exec_())

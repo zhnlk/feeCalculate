@@ -198,7 +198,7 @@ class CashListViewWidget(BasicFcView):
         try:
             self.widgetDict['showDataModifyView'].show(cell.data)
         except KeyError:
-            self.widgetDict['showDataModifyView'] = CashDataModifyView(self.mainEngine, cell.data)
+            self.widgetDict['showDataModifyView'] = CashDataModifyView(mainEngine=self.mainEngine, data=cell.data)
             self.widgetDict['showDataModifyView'].show()
 
     def closeEvent(self, event):
