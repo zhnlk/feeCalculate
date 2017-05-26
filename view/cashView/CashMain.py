@@ -195,11 +195,8 @@ class CashListViewWidget(BasicFcView):
 
     def doubleClickTrigger(self, cell):
         """根据单元格的数据撤单"""
-        try:
-            self.widgetDict['showDataModifyView'].show()
-        except KeyError:
-            self.widgetDict['showDataModifyView'] = CashDataModifyView(self.mainEngine,cell.data)
-            self.widgetDict['showDataModifyView'].show()
+        self.widgetDict['showDataModifyView'] = CashDataModifyView(self.mainEngine,cell.data)
+        self.widgetDict['showDataModifyView'].show()
 
 
 if __name__ == '__main__':
