@@ -19,7 +19,7 @@ from PyQt5.QtWidgets import QApplication
 from utils.Utils import strToDate
 from controller.EventEngine import Event
 from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
-from controller.EventType import EVENT_PD, EVENT_ADJUST_VIEW, EVENT_MODIFY_CASH_VIEW
+from controller.EventType import EVENT_PD, EVENT_ADJUST_VIEW, EVENT_MODIFY_CASH_VIEW, EVENT_MAIN_VALUATION, EVENT_CASH
 from controller.MainEngine import MainEngine
 
 
@@ -181,6 +181,8 @@ class ModifyInput(BasicFcView):
 
         ### 发送修改后的触发信号
         self.mainEngine.eventEngine.put(Event(type_=EVENT_MODIFY_CASH_VIEW))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_CASH))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
 
         self.showInfo()
 
