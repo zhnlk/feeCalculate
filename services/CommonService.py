@@ -1077,19 +1077,7 @@ def update_fund_asset_input_by_id(fund_trade_id=None, amount=0, cal_date=date.to
 
     if fund_trade.count():
         fund_trade_obj = fund_trade.one()
-        fund_trade.update({AssetTrade.is_active: False}, synchronize_session='fetch')
-        session.add(
-            AssetTrade(
-                fund_trade_obj.asset_class, amount,
-                fund_trade_obj.type,
-                get_asset_total_amount_by_asset_and_type(
-                    cal_date - timedelta(days=1),
-                    fund_trade_obj.asset_class,
-                    fund_trade_obj.type
-                ) + amount,
-                cal_date
-            )
-        )
+
         cash_type = SV.CASH_TYPE_PURCHASE_FUND if fund_trade_obj.type == SV.ASSET_TYPE_PURCHASE else SV.CASH_TYPE_REDEEM_FUND
 
         cash = session.query(Cash).filter(
@@ -1103,18 +1091,32 @@ def update_fund_asset_input_by_id(fund_trade_id=None, amount=0, cal_date=date.to
         if cash.count():
             session.query(Cash).filter(Cash.is_active, Cash.id == cash[-1].id).update({Cash.is_active: False},
                                                                                       synchronize_session='fetch')
-        session.add(
-            Cash(
-                fund_trade_obj.asset_class,
-                cash_type,
-                amount,
-                get_cash_total_amount_by_type(
-                    cal_date - timedelta(days=1),
-                    cash_type
-                ) + amount,
-                cal_date
+            fund_trade.update({AssetTrade.is_active: False}, synchronize_session='fetch')
+
+            session.add(
+                AssetTrade(
+                    fund_trade_obj.asset_class, amount,
+                    fund_trade_obj.type,
+                    get_asset_total_amount_by_asset_and_type(
+                        cal_date - timedelta(days=1),
+                        fund_trade_obj.asset_class,
+                        fund_trade_obj.type
+                    ) + amount,
+                    cal_date
+                )
             )
-        )
+            session.add(
+                Cash(
+                    fund_trade_obj.asset_class,
+                    cash_type,
+                    amount,
+                    get_cash_total_amount_by_type(
+                        cal_date - timedelta(days=1),
+                        cash_type
+                    ) + amount,
+                    cal_date
+                )
+            )
 
 
 @session_deco

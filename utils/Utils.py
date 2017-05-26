@@ -35,6 +35,10 @@ def get_value_by_key(dic=dict(), key=None):
     return dic.get(key)
 
 
+def get_fund_value_by_key(dic=dict(), is_asset=True, key=None):
+    return dic[is_asset][key]
+
+
 def strToDate(dateStr=None):
     """
     yyyy-MM-dd parse to date(yyyy,MM,dd)

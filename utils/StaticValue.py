@@ -40,36 +40,11 @@ CASH_KEY_DRAW_FEE = 'cash_draw_fee'
 CASH_KEY_CAL_DATE = 'cal_date'
 CASH_KEY_CASH_TOTAL = 'total_amount'
 
-CASH_TYPE_TO_KEY_DIC = {
-    CASH_TYPE_DEPOSIT: CASH_KEY_INVESTOR_DEPOSIT,
-    CASH_TYPE_DRAW: CASH_KEY_INVESTOR_DRAW,
-    CASH_TYPE_RET: CASH_KEY_RET,
-    CASH_TYPE_FEE: CASH_KEY_DRAW_FEE
-}
-
-CASH_KEY_TO_TYPE_DIC = {
-    CASH_KEY_INVESTOR_DEPOSIT: CASH_TYPE_DEPOSIT,
-    CASH_KEY_INVESTOR_DRAW: CASH_TYPE_DRAW,
-    CASH_KEY_RET: CASH_TYPE_RET,
-    CASH_KEY_DRAW_FEE: CASH_TYPE_FEE
-}
 # 资产变化类型
 ASSET_TYPE_PURCHASE = 1  # 申购资产
 ASSET_TYPE_REDEEM = -1  # 赎回资产
 ASSET_TYPE_RET_CARRY = 2  # 收益结转
 ASSET_TYPE_INIT = 0  # 初始化
-
-ASSET_TYPE_TO_KEY_DIC = {
-    ASSET_TYPE_PURCHASE: 'purchase',
-    ASSET_TYPE_REDEEM: 'redeem',
-    ASSET_TYPE_RET_CARRY: 'ret_carry'
-}
-
-ASSET_KEY_TO_TYPE_DIC = {
-    'purchase': ASSET_TYPE_PURCHASE,
-    'redeem': ASSET_TYPE_REDEEM,
-    'ret_carry': ASSET_TYPE_RET_CARRY
-}
 
 ASSET_KEY_NAME = 'asset_name'
 ASSET_KEY_CAL_DATE = CASH_KEY_CAL_DATE
@@ -165,3 +140,51 @@ def resource_path(relative):
 path = os.path.dirname(__file__)
 ICON_FILENAME = resource_path(os.path.join(path, ICON_FILENAME))
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + resource_path(os.path.join(path, DB_FILENAME))
+
+CASH_TYPE_TO_KEY_DIC = {
+    CASH_TYPE_DEPOSIT: "现金->兑付投资人",
+    CASH_TYPE_DRAW: "投资人->现金",
+    CASH_TYPE_RET: "现金收入",
+    CASH_TYPE_FEE: "提出费用"
+}
+
+CASH_KEY_TO_TYPE_DIC = {
+    "现金->兑付投资人": CASH_TYPE_DEPOSIT,
+    "投资人->现金": CASH_TYPE_DRAW,
+    "现金收入": CASH_TYPE_RET,
+    "提出费用": CASH_TYPE_FEE
+}
+
+AGREEMENT_TYPE_TO_KEY_DIC = {
+    ASSET_TYPE_PURCHASE: '现金->协存',
+    ASSET_TYPE_REDEEM: '协存->现金',
+    ASSET_TYPE_RET_CARRY: '利息结转本金'
+}
+
+AGREEMENT_KEY_TO_TYPE_DIC = {
+    '现金->协存': ASSET_TYPE_PURCHASE,
+    '协存->现金': ASSET_TYPE_REDEEM,
+    '利息结转本金': ASSET_TYPE_RET_CARRY
+}
+
+FUND_TYPE_TO_KEY_DIC = {
+    True: {
+        ASSET_TYPE_PURCHASE: "申购(现金)",
+        ASSET_TYPE_REDEEM: "赎回",
+    },
+    False: {
+        RET_TYPE_PRINCIPAL: "结转金额",
+        RET_TYPE_INTEREST: "未结转金额"
+    }
+}
+
+FUND_KEY_TO_TYPE_DIC = {
+    True: {
+        "申购(现金)": ASSET_TYPE_PURCHASE,
+        "赎回": ASSET_TYPE_REDEEM,
+    },
+    False: {
+        "结转金额": RET_TYPE_PRINCIPAL,
+        "未结转金额": RET_TYPE_INTEREST
+    }
+}

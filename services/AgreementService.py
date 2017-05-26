@@ -70,8 +70,11 @@ def get_agreement_input_detail_by_id_date_dic(agreement_id=None, cal_date=date.t
     return ret
 
 
-def update_agreement_input_by_id_type(agreement_id=None, amount=0, agreement_type=SV.ASSET_TYPE_RET_CARRY,
-                                      cal_date=date.today()):
+def update_agreement_input_by_id_type(
+        agreement_id=None,
+        amount=0,
+        agreement_type=SV.ASSET_TYPE_RET_CARRY,
+        cal_date=date.today()):
     asset_id = query_by_id(AssetTrade, agreement_id).asset_class
     if agreement_type == SV.ASSET_TYPE_RET_CARRY:
         update_agreement_input_ret_carry_by_id(agreement_id, amount, cal_date)
@@ -79,3 +82,8 @@ def update_agreement_input_by_id_type(agreement_id=None, amount=0, agreement_typ
         update_agreement_input_purchase_or_redeem_by_id(agreement_id, amount, cal_date, agreement_type)
 
     cal_agreement_ret(cal_date, asset_id)
+
+
+# print(get_agreement_input_detail_by_id_date_dic('629b9a140ef6475e950a09804fa05ec9', date(2017, 5, 24)))
+
+# update_agreement_input_by_id_type('8f48ad65d76847ccb075943edffd5b95', 5000, SV.ASSET_TYPE_RET_CARRY, date(2017, 5, 24))
