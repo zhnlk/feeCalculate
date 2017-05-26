@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QLineEdit, QPushB
 
 from controller.EventType import EVENT_MF, EVENT_MF_INV, EVENT_MF_SUM
 from controller.MainEngine import MainEngine
-from moneyfundView.DataModifyFundView import FundDataModifyView
+from view.moneyfundView.DataModifyFundView import FundDataModifyView
 from utils import StaticValue as SV
 from utils.MoneyFormat import outputmoney
 from view.BasicWidget import BasicFcView, BasicCell, NumCell, BASIC_FONT
@@ -246,7 +246,6 @@ class MoneyFundMain(BasicFcView):
         for d in result:
             for v in d.values():
                 count = count + len(v)
-        print('showMoneyFundListDetail:count:', count)
         self.moneyfundDetailMain.setRowCount(count)
         row = 0
         # 遍历资产类型
@@ -259,9 +258,8 @@ class MoneyFundMain(BasicFcView):
                     for n, header in enumerate(self.moneyfundDetailMain.headerList):
                         content = c[header]
                         cell = self.moneyfundDetailMain.headerDict[header]['cellType'](content)
-                        if self.moneyfundDetailMain.saveData and header is 'cal_date':
+                        if self.moneyfundDetailMain.saveData :
                             cell.data = (asset_id, c['cal_date'])
-                            print(cell.data)
                         self.moneyfundDetailMain.setItem(row, n, cell)
                     row = row + 1
 
