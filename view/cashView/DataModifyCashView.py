@@ -90,7 +90,7 @@ class CashDataModifyView(BasicFcView):
         """带参数刷新"""
         self.clearContents()
         self.setRowCount(0)
-        self.showModifyListDetail(self.dateToModified if data is None else self.dateToModified)
+        self.showModifyListDetail(self.dateToModified if data is None else data)
 
     def addMenuAction(self):
         """增加右键菜单内容"""
