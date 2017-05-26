@@ -10,7 +10,7 @@ from collections import OrderedDict
 from PyQt5.QtWidgets import QAction, QLabel, QLineEdit, QPushButton, QHBoxLayout, QGridLayout
 from PyQt5.QtWidgets import QApplication
 
-from utils.Utils import strToDate
+from utils.Utils import strToDate, cash_type_to_key, cash_key_to_type
 from controller.EventEngine import Event
 from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 from controller.EventType import EVENT_PD, EVENT_ADJUST_VIEW, EVENT_MODIFY_CASH_VIEW, EVENT_MAIN_VALUATION, EVENT_CASH
@@ -63,6 +63,8 @@ class CashDataModifyView(BasicFcView):
                 content = r[header]
 
                 cellType = self.headerDict[header]['cellType']
+                if header is 'type':
+                    content = cash_type_to_key(content)
                 cell = cellType(content)
                 if self.saveData and header is 'amount':
                     cell.data = (r['id'], r['date'], r['type'], r['amount'])
@@ -127,7 +129,7 @@ class ModifyInput(BasicFcView):
 
         self.modify_date_Edit = QLineEdit(str(self.data[1]))
         self.modify_date_Edit.setReadOnly(True)
-        self.modify_type_Edit = QLineEdit(str(self.data[2]))
+        self.modify_type_Edit = QLineEdit(str(cash_type_to_key(self.data[2])))
         self.modify_type_Edit.setReadOnly(True)
         self.modify_amount_Edit = QLineEdit(str(self.data[3]))
 
@@ -164,7 +166,7 @@ class ModifyInput(BasicFcView):
 
             self.mainEngine.update_cash_input_by_id_type(cash_id=self.data[0],
                                                          amount=float(modify_amount),
-                                                         cash_type=modify_type,
+                                                         cash_type=cash_key_to_type(modify_type),
                                                          cal_date=strToDate(modify_date))
         except ValueError:
             self.showError()
