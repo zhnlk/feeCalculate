@@ -92,8 +92,7 @@ class FundDataModifyView(BasicFcView):
         """带参数刷新"""
         self.clearContents()
         self.setRowCount(0)
-        self.showModifyListDetail(self.asset_id if data is None else data[0],
-                                  self.dateToModified if data is None else data[1])
+        self.showModifyListDetail(self.asset_id, self.dateToModified)
 
     def closeEvent(self, event):
         for widget in self.widgetDict.values():
@@ -105,7 +104,10 @@ class FundDataModifyView(BasicFcView):
     def show(self, data=None):
         """显示"""
         super(FundDataModifyView, self).show()
-        self.refresh(data)
+        if data is not None:
+            self.asset_id = data[0]
+            self.dateToModified = data[1]
+        self.refresh()
 
 
 class ModifyInput(BasicFcView):

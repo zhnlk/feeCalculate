@@ -21,19 +21,17 @@ class CashDataModifyView(BasicFcView):
     """协存详情"""
 
     # ----------------------------------------------------------------------
-    def __init__(self, mainEngine, dateToModified, parent=None):
+    def __init__(self, mainEngine, data, parent=None):
         """Constructor"""
         super(CashDataModifyView, self).__init__(parent=parent)
 
         self.mainEngine = mainEngine
-        # self.dateToModified = strToDate(dateToModified)
-        self.dateToModified = dateToModified
+        self.dateToModified = data
         self.widgetDict = {}  # 保存子窗口
         d = OrderedDict()
         d['date'] = {'chinese': '日期', 'cellType': BasicCell}
         d['type'] = {'chinese': '类型', 'cellType': BasicCell}
         d['amount'] = {'chinese': '金额', 'cellType': NumCell}
-        # d['pd_pd_to_cash'] = {'chinese': '调整结果', 'cellType': NumCell}
 
         self.setHeaderDict(d)
 
@@ -53,9 +51,9 @@ class CashDataModifyView(BasicFcView):
         self.signal.connect(self.refresh)
         self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
 
-    def showModifyListDetail(self, dateToModified):
+    def showModifyListDetail(self, data):
         """显示所有合约数据"""
-        result = self.mainEngine.get_cash_input_detail_by_date_dic(dateToModified)
+        result = self.mainEngine.get_cash_input_detail_by_date_dic(data)
         self.setRowCount(len(result))
         row = 0
 
@@ -86,18 +84,16 @@ class CashDataModifyView(BasicFcView):
         self.widgetDict['showModifyInput'] = ModifyInput(self.mainEngine, data=data)
         self.widgetDict['showModifyInput'].show()
 
-    def refresh(self, data=None):
+    def refresh(self):
         """带参数刷新"""
         self.clearContents()
         self.setRowCount(0)
-        self.showModifyListDetail(self.dateToModified if data is None else data)
+        self.showModifyListDetail(self.dateToModified)
 
     def addMenuAction(self):
         """增加右键菜单内容"""
         refreshAction = QAction('刷新', self)
         refreshAction.triggered.connect(self.refresh)
-
-        # self.menu.addAction(refreshAction)
 
     def closeEvent(self, event):
         for widget in self.widgetDict.values():
@@ -109,7 +105,8 @@ class CashDataModifyView(BasicFcView):
     def show(self, data=None):
         """显示"""
         super(CashDataModifyView, self).show()
-        self.refresh(data)
+        self.dateToModified = data
+        self.refresh()
 
 class ModifyInput(BasicFcView):
     def __init__(self, mainEngine, data, parent=None):
