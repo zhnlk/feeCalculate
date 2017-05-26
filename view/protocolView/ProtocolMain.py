@@ -8,6 +8,7 @@ import re
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox, QFileDialog
 from PyQt5.QtWidgets import QApplication
 
+from view.protocolView.DataModifyAgreementView import AgreementDataModifyView
 from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 from controller.EventType import EVENT_PD, EVENT_PD_INV
 from controller.MainEngine import MainEngine
@@ -64,7 +65,7 @@ class ProtocolViewMain(BasicFcView):
         ################################
         # ProtocolListView
         ###############################
-        self.protocolListView = BasicFcView(self.mainEngine)
+        self.protocolListView = AgreementListViewWidget(self.mainEngine)
         d = OrderedDict()
         d['asset_name'] = {'chinese': '协存项目名称', 'cellType': BasicCell}
         d['rate'] = {'chinese': '协存项目利率', 'cellType': BasicCell}
@@ -81,6 +82,8 @@ class ProtocolViewMain(BasicFcView):
         self.protocolListView.eventType = EVENT_PD
         self.protocolListView.setHeaderDict(d)
         self.protocolListView.setWindowTitle('协存明细')
+        self.protocolListView.saveData = True
+
         self.protocolListView.setFont(BASIC_FONT)
 
         self.protocolListView.initTable()
@@ -138,8 +141,13 @@ class ProtocolViewMain(BasicFcView):
         vbox.addWidget(self.protocolInventory)
         self.setLayout(vbox)
         # 将信号连接到refresh函数
+
+        self.connectSignal()
         self.signal.connect(self.refresh)
         self.mainEngine.eventEngine.register(self.protocolListView.eventType, self.signal.emit)
+
+    def connectSignal(self):
+        self.protocolListView.itemDoubleClicked.connect(self.protocolListView.doubleClickTrigger)
 
     def filterAction(self):
         d = datetime.date.today()
@@ -201,11 +209,15 @@ class ProtocolViewMain(BasicFcView):
         for r in result:
             # 遍历对应资产的记录
             for col in r.values():
+                asset_id = list(r.keys())[0]
                 for c in col:
                     # 按照定义的表头，进行数据填充
                     for n, header in enumerate(self.protocolListView.headerList):
                         content = c[header]
                         cell = self.protocolListView.headerDict[header]['cellType'](content)
+                        if self.protocolListView.saveData and header is 'cal_date':
+                            cell.data = (asset_id, c['cal_date'])
+                            # print(cell.data)
                         self.protocolListView.setItem(row, n, cell)
                     row = row + 1
 
@@ -221,7 +233,6 @@ class ProtocolViewMain(BasicFcView):
                 cell = cellType(content)
                 self.protocolInventory.setItem(row, n, cell)
             row = row + 1
-
 
     def refresh(self):
         """默认刷新"""
@@ -291,6 +302,7 @@ class ProtocolViewMain(BasicFcView):
 
         except IOError as e:
             pass
+
     def saveToCsv2(self):
 
         # 先隐藏右键菜单
@@ -325,6 +337,29 @@ class ProtocolViewMain(BasicFcView):
 
         except IOError as e:
             pass
+
+
+class AgreementListViewWidget(BasicFcView):
+    def __init__(self, mainEngine):
+        super(AgreementListViewWidget, self).__init__()
+        self.mainEngine = mainEngine
+        self.widgetDict = {}
+
+    def doubleClickTrigger(self, cell):
+        """根据单元格的数据撤单"""
+        try:
+            self.widgetDict['showDataModifyView'].show(cell.data)
+        except KeyError:
+            self.widgetDict['showDataModifyView'] = AgreementDataModifyView(self.mainEngine,
+                                                                            data=cell.data)
+            self.widgetDict['showDataModifyView'].show()
+
+    def closeEvent(self, event):
+        for widget in self.widgetDict.values():
+            widget.close()
+
+        event.accept()
+
 
 if __name__ == '__main__':
     import sys

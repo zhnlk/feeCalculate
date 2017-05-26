@@ -39,6 +39,7 @@ EVENT_ADJUST_INPUT = 'eAdjustInput'  # 调整记录输入
 
 # 修改数据
 EVENT_MODIFY_CASH_VIEW = 'eModifyCashView'# 现金明细修改
+EVENT_MODIFY_PD_VIEW = 'eModifyCashView'# 协存明细修改
 
 EVENT_ERROR = 'eError.'  # 错误回报事件
 

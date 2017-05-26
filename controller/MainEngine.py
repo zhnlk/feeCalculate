@@ -329,3 +329,25 @@ class MainEngine(object):
         :return: 
         """
         CashService.update_cash_input_by_id_type(cash_id, amount, cash_type, cal_date)
+
+    def get_agreement_input_detail_by_id_date_dic(self, agreement_id=None, cal_date=datetime.date.today()):
+        """
+        修改时获取协存的明细
+        :param agreement_id: 
+        :param cal_date: 
+        :return: 
+        """
+        return AgreementService.get_agreement_input_detail_by_id_date_dic(agreement_id=agreement_id, cal_date=cal_date)
+
+    def update_agreement_input_by_id_type(self, agreement_id=None, amount=0, agreement_type=SV.ASSET_TYPE_RET_CARRY,
+                                          cal_date=datetime.date.today()):
+        """
+        对协存进行修改
+        :param agreement_id: 
+        :param amount: 
+        :param agreement_type: 
+        :param cal_date: 
+        :return: 
+        """
+        AgreementService.update_agreement_input_by_id_type(agreement_id=agreement_id, amount=amount,
+                                                           agreement_type=agreement_type, cal_date=cal_date)
