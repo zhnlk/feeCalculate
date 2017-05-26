@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QLineEdit, QPushB
 
 from controller.EventType import EVENT_MF, EVENT_MF_INV, EVENT_MF_SUM
 from controller.MainEngine import MainEngine
+from view.moneyfundView.DataModifyFundView import FundDataModifyView
 from utils import StaticValue as SV
 from utils.MoneyFormat import outputmoney
 from view.BasicWidget import BasicFcView, BasicCell, NumCell, BASIC_FONT
@@ -66,7 +67,7 @@ class MoneyFundMain(BasicFcView):
         ##########################
         # MoneyFundDetailMain
         ##########################
-        self.moneyfundDetailMain = BasicFcView(self.mainEngine)
+        self.moneyfundDetailMain = FundListViewWidget(self.mainEngine)
         d = OrderedDict()
         d['asset_name'] = {'chinese': '货基项目名称', 'cellType': BasicCell}
         d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
@@ -80,6 +81,7 @@ class MoneyFundMain(BasicFcView):
         self.moneyfundDetailMain.eventType = EVENT_MF
         self.moneyfundDetailMain.setHeaderDict(d)
         self.moneyfundDetailMain.setWindowTitle('货基明细')
+        self.moneyfundDetailMain.saveData = True
         self.moneyfundDetailMain.setFont(BASIC_FONT)
 
         self.moneyfundDetailMain.initTable()
@@ -155,8 +157,13 @@ class MoneyFundMain(BasicFcView):
         vbox.addWidget(self.moneyfundSummaryView)
         self.setLayout(vbox)
         # 将信号接入
+
+        self.connectSignal()
         self.signal.connect(self.refresh)
         self.mainEngine.eventEngine.register(self.moneyfundDetailMain.eventType, self.signal.emit)
+
+    def connectSignal(self):
+        self.moneyfundDetailMain.itemDoubleClicked.connect(self.moneyfundDetailMain.doubleClickTrigger)
 
     def filterAction(self):
         d = datetime.date.today()
@@ -239,18 +246,20 @@ class MoneyFundMain(BasicFcView):
         for d in result:
             for v in d.values():
                 count = count + len(v)
-        print('showMoneyFundListDetail:count:', count)
         self.moneyfundDetailMain.setRowCount(count)
         row = 0
         # 遍历资产类型
         for r in result:
             # 遍历对应资产的记录
             for col in r.values():
+                asset_id = list(r.keys())[0]
                 for c in col:
                     # 按照定义的表头，进行数据填充
                     for n, header in enumerate(self.moneyfundDetailMain.headerList):
                         content = c[header]
                         cell = self.moneyfundDetailMain.headerDict[header]['cellType'](content)
+                        if self.moneyfundDetailMain.saveData :
+                            cell.data = (asset_id, c['cal_date'])
                         self.moneyfundDetailMain.setItem(row, n, cell)
                     row = row + 1
 
@@ -363,6 +372,28 @@ class MoneyFundMain(BasicFcView):
 
         except IOError as e:
             pass
+
+
+class FundListViewWidget(BasicFcView):
+    def __init__(self, mainEngine):
+        super(FundListViewWidget, self).__init__()
+        self.mainEngine = mainEngine
+        self.widgetDict = {}
+
+    def doubleClickTrigger(self, cell):
+        """根据单元格的数据撤单"""
+        try:
+            self.widgetDict['showDataModifyView'].show(cell.data)
+        except KeyError:
+            self.widgetDict['showDataModifyView'] = FundDataModifyView(self.mainEngine,
+                                                                       data=cell.data)
+            self.widgetDict['showDataModifyView'].show()
+
+    def closeEvent(self, event):
+        for widget in self.widgetDict.values():
+            widget.close()
+
+        event.accept()
 
 
 if __name__ == '__main__':

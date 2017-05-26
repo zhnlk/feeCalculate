@@ -202,7 +202,6 @@ class ProtocolViewMain(BasicFcView):
         for d in result:
             for v in d.values():
                 count = count + len(v)
-        print('showProtocolListDetail:count:', count)
         self.protocolListView.setRowCount(count)
         row = 0
         # 遍历资产类型
@@ -215,9 +214,8 @@ class ProtocolViewMain(BasicFcView):
                     for n, header in enumerate(self.protocolListView.headerList):
                         content = c[header]
                         cell = self.protocolListView.headerDict[header]['cellType'](content)
-                        if self.protocolListView.saveData and header is 'cal_date':
+                        if self.protocolListView.saveData:
                             cell.data = (asset_id, c['cal_date'])
-                            # print(cell.data)
                         self.protocolListView.setItem(row, n, cell)
                     row = row + 1
 

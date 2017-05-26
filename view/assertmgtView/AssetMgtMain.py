@@ -5,8 +5,9 @@ import datetime
 from collections import OrderedDict
 
 import re
-from PyQt5.QtWidgets import QApplication, QVBoxLayout, QFileDialog, QLabel, QLineEdit, QPushButton, QHBoxLayout
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QFileDialog, QLabel, QLineEdit, QPushButton, QHBoxLayout, QMessageBox
 
+from controller.EventEngine import Event
 from controller.EventType import EVENT_AM
 from controller.MainEngine import MainEngine
 from utils.MoneyFormat import outputmoney
@@ -91,6 +92,7 @@ class AssetMgtViewMain(BasicFcView):
         # d['asset_plan_daily_valuation'] = {'chinese': '正常情况资管计划\n每日收益估值', 'cellType': BasicCell}
         d['uuid_view'] = {'chinese': '调整查看', 'cellType': BasicCell}
         d['uuid_input'] = {'chinese': '估值调整', 'cellType': BasicCell}
+        d['uuid_del'] = {'chinese': '估值删除', 'cellType': BasicCell}
 
         self.commiteeDetailMain.eventType = EVENT_AM
         self.commiteeDetailMain.setHeaderDict(d)
@@ -144,14 +146,13 @@ class AssetMgtViewMain(BasicFcView):
             op = cell.data[0]
             op_uuid = cell.data[1]
             if op is 'uuid_input':
-                # print('uuid input hhhhhhhhhhhhhhhhhh')
                 self.showValuationInput(uuid=op_uuid)
             elif op is 'uuid_view':
-                # print('uuid view hhhhhhhhhhhhhhhhhh')
                 self.showValuationView(uuid=op_uuid)
+            elif op is 'uuid_del':
+                self.delValuationItem(uuid=op_uuid)
         except TypeError:
             pass
-
 
     def refresh(self):
         """刷新"""
@@ -200,24 +201,17 @@ class AssetMgtViewMain(BasicFcView):
                     content = '查看'
                 elif header is 'uuid_input':
                     content = '调整'
+                elif header is 'uuid_del':
+                    content = '删除'
                 else:
                     content = r[header]
                 cellType = self.commiteeDetailMain.headerDict[header]['cellType']
                 cell = cellType(content)
                 if self.commiteeDetailMain.saveData:
-                    if header in ['uuid_view', 'uuid_input']:
+                    if header in ['uuid_view', 'uuid_input', 'uuid_del']:
                         cell.data = (header, r['uuid'])
                 self.commiteeDetailMain.setItem(row, n, cell)
             row = row + 1
-
-    def setDoubleClickEvent(self, n):
-        for r in self.commiteeDetailMain.eventDict.keys():
-            # self.commiteeDetailMain.itemDoubleClicked(self.item(r, n)).connect(self.showValuationView(self.eventDict[r])).emit()
-            self.commiteeDetailMain.cellDoubleClicked(r, n).connect(self.showValuationView(self.eventDict[r]))
-            print('set view item double clicked called', r, n, self.eventDict[r])
-            # self.itemDoubleClicked(self.item(r, n + 1)).connect(self.showValuationInput(self.eventDict[r])).emit()
-            # self.cellDoubleClicked(r, n + 1).connect(self.showValuationInput(self.eventDict[r]))
-            print('set input item double clicked called', r, n + 1, self.eventDict[r])
 
     def showValuationInput(self, uuid):
         """打开估值调整的子窗口"""
@@ -235,6 +229,15 @@ class AssetMgtViewMain(BasicFcView):
         except KeyError:
             self.widgetDict['adjustValuationView'] = AdjustValuationView(self.mainEngine, uuid=uuid)
             self.widgetDict['adjustValuationView'].show()
+
+    def delValuationItem(self, uuid):
+        """删除资管明细"""
+        reply = QMessageBox.question(self, '确定', '确认清除本条数据?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.mainEngine.clean_management_record_by_id(uuid=uuid)
+        else:
+            pass
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_AM))
 
     def closeEvent(self, event):
         """资管主界面的关闭事件"""
