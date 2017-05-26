@@ -552,7 +552,7 @@ class TotalValuationMain(BasicFcView):
         d['agreement'] = {'chinese': '协存', 'cellType': NumCell}
         d['fund'] = {'chinese': '货币基金', 'cellType': NumCell}
         d['management'] = {'chinese': '资管', 'cellType': NumCell}
-        # d['liquid_assert_ratio'] = {'chinese': '流动资产比例', 'cellType': BasicCell}
+        d['curr_rate'] = {'chinese': '流动资产比例', 'cellType': NumCell}
         d['all_ret'] = {'chinese': '当日总收益', 'cellType': NumCell}
         d['fee1'] = {'chinese': '费用1', 'cellType': NumCell}
         d['fee2'] = {'chinese': '费用2', 'cellType': NumCell}
