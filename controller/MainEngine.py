@@ -3,7 +3,7 @@ import datetime
 
 from controller.EventEngine import *
 from services import AssetService, CashService, CommonService, AgreementService, FundService
-
+from utils import StaticValue as SV
 
 class MainEngine(object):
     """主引擎"""
