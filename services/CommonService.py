@@ -948,32 +948,34 @@ def update_agreement_input_purchase_or_redeem_by_id(agreement_trade_id=None, amo
             Cash.amount == tmp_trade.amount,
             Cash.asset_class == tmp_trade.asset_class
         )
-        agreement_trade.update({AssetTrade.is_active: False}, synchronize_session='fetch')
-        session.query(Cash).filter(Cash.is_active, Cash.id == cash[-1].id).update({Cash.is_active: False},
-                                                                                  synchronize_session='fetch') if cash.count() else None
-        session.add(
-            AssetTrade(
+        if cash.count():
+            agreement_trade.update({AssetTrade.is_active: False}, synchronize_session='fetch')
+            cash_id = cash[-1].id
+            session.query(Cash).filter(Cash.is_active, Cash.id == cash_id).update({Cash.is_active: False},
+                                                                                  synchronize_session='fetch')
+            session.add(
+                AssetTrade(
 
-                tmp_trade.asset_class,
-                amount,
-                trade_type,
-                get_asset_last_total_amount_by_asset_and_type(
-                    cal_date,
                     tmp_trade.asset_class,
-                    trade_type) + amount,
-                cal_date
+                    amount,
+                    trade_type,
+                    get_asset_last_total_amount_by_asset_and_type(
+                        cal_date,
+                        tmp_trade.asset_class,
+                        trade_type) + amount,
+                    cal_date
+                )
             )
-        )
 
-        session.add(
-            Cash(
-                tmp_trade.asset_class,
-                cash_type,
-                amount,
-                get_cash_last_total_amount_by_type(cal_date, cash_type) + amount,
-                cal_date
+            session.add(
+                Cash(
+                    tmp_trade.asset_class,
+                    cash_type,
+                    amount,
+                    get_cash_last_total_amount_by_type(cal_date, cash_type) + amount,
+                    cal_date
+                )
             )
-        )
 
 
 @session_deco
@@ -994,29 +996,32 @@ def update_agreement_input_ret_carry_by_id(agreement_trade_id=None, amount=0, ca
             AssetTradeRet.amount == tmp_trade.amount,
             AssetTradeRet.asset_class == tmp_trade.asset_class
         )
-        agreement_trade.update({AssetTrade.is_active: False}, synchronize_session='fetch')
-        session.query(AssetTradeRet).filter(AssetTradeRet.is_active, AssetTradeRet.id == ret_carry[-1].id).update(
-            {AssetTradeRet.is_active: False},
-            synchronize_session='fetch') if ret_carry.count() else None
-        session.add(
-            AssetTrade(
+        if ret_carry.count():
+            agreement_trade.update({AssetTrade.is_active: False}, synchronize_session='fetch')
+            asset_ret_id = ret_carry[-1].id
+            session.query(AssetTradeRet).filter(AssetTradeRet.is_active, AssetTradeRet.id == asset_ret_id).update(
+                {AssetTradeRet.is_active: False},
+                synchronize_session='fetch')
+            session.add(
+                AssetTrade(
 
-                tmp_trade.asset_class,
-                amount,
-                SV.ASSET_TYPE_RET_CARRY,
-                get_asset_last_total_amount_by_asset_and_type(cal_date, tmp_trade.asset_class,
-                                                              SV.ASSET_TYPE_RET_CARRY) + amount,
-                cal_date))
+                    tmp_trade.asset_class,
+                    amount,
+                    SV.ASSET_TYPE_RET_CARRY,
+                    get_asset_last_total_amount_by_asset_and_type(cal_date, tmp_trade.asset_class,
+                                                                  SV.ASSET_TYPE_RET_CARRY) + amount,
+                    cal_date))
 
-        session.add(
-            AssetTradeRet(
-                tmp_trade.asset_class,
-                amount,
-                ret_type,
-                get_asset_ret_last_total_amount_by_asset_and_type(cal_date, tmp_trade.asset_class, ret_type) + amount,
-                cal_date
+            session.add(
+                AssetTradeRet(
+                    tmp_trade.asset_class,
+                    amount,
+                    ret_type,
+                    get_asset_ret_last_total_amount_by_asset_and_type(cal_date, tmp_trade.asset_class,
+                                                                      ret_type) + amount,
+                    cal_date
+                )
             )
-        )
 
 
 @session_deco
