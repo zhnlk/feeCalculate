@@ -3,7 +3,7 @@ import datetime
 
 from controller.EventEngine import *
 from services import AssetService, CashService, CommonService, AgreementService, FundService
-
+from utils import StaticValue as SV
 
 class MainEngine(object):
     """主引擎"""
@@ -337,7 +337,8 @@ class MainEngine(object):
         :param cal_date: 
         :return: 
         """
-        return AgreementService.get_agreement_input_detail_by_id_date_dic(agreement_id=agreement_id, cal_date=cal_date)
+        return AgreementService.get_agreement_input_detail_by_id_date_dic(agreement_id=agreement_id,
+                                                                          cal_date=cal_date)
 
     def update_agreement_input_by_id_type(self, agreement_id=None, amount=0, agreement_type=SV.ASSET_TYPE_RET_CARRY,
                                           cal_date=datetime.date.today()):
@@ -351,3 +352,25 @@ class MainEngine(object):
         """
         AgreementService.update_agreement_input_by_id_type(agreement_id=agreement_id, amount=amount,
                                                            agreement_type=agreement_type, cal_date=cal_date)
+
+    def get_fund_input_by_id_date_dic(self, fund_id=None, cal_date=datetime.date.today()):
+        """
+        修改时获取货基的明细
+        :param cal_date: 
+        :return: 
+        """
+        return FundService.get_fund_input_by_id_date_dic(fund_id=fund_id,
+                                                         cal_date=cal_date)
+
+    def update_fund_input_by_id_date(self, fund_trade_id=None, cal_date=datetime.date.today(), amount=0, is_asset=True):
+        """
+        对货基进行修改
+        :param cal_date: 
+        :param amount: 
+        :param is_asset: 
+        :return: 
+        """
+        FundService.update_fund_input_by_id_date(fund_trade_id=fund_trade_id,
+                                                 cal_date=cal_date,
+                                                 amount=amount,
+                                                 is_asset=is_asset)
