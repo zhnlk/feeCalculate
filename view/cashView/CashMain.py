@@ -133,8 +133,8 @@ class CashViewMain(BasicFcView):
                 content = r[header]
                 cellType = self.cashListView.headerDict[header]['cellType']
                 cell = cellType(content)
-                if self.cashListView.saveData  and header is 'cal_date':
-                    cell.data = r[header]
+                if self.cashListView.saveData:
+                    cell.data = r['cal_date']
                 self.cashListView.setItem(row, n, cell)
             row = row + 1
 
@@ -195,11 +195,8 @@ class CashListViewWidget(BasicFcView):
 
     def doubleClickTrigger(self, cell):
         """根据单元格的数据撤单"""
-        try:
-            self.widgetDict['showDataModifyView'].show()
-        except KeyError:
-            self.widgetDict['showDataModifyView'] = CashDataModifyView(self.mainEngine,cell.data)
-            self.widgetDict['showDataModifyView'].show()
+        self.widgetDict['showDataModifyView'] = CashDataModifyView(self.mainEngine, cell.data)
+        self.widgetDict['showDataModifyView'].show()
 
 
 if __name__ == '__main__':
