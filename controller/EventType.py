@@ -37,6 +37,9 @@ EVENT_AM_INPUT = 'eAmInput'  # 存管相关事件
 EVENT_ADJUST_VIEW = 'eAdjustView'  # 调整记录查看
 EVENT_ADJUST_INPUT = 'eAdjustInput'  # 调整记录输入
 
+# 修改数据
+EVENT_MODIFY_CASH_VIEW = 'eModifyCashView'# 现金明细修改
+
 EVENT_ERROR = 'eError.'  # 错误回报事件
 
 

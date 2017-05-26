@@ -143,9 +143,9 @@ def update_cash_input_by_id_type(cash_id, amount, cash_type, cal_date):
 
 
 if __name__ == '__main__':
-    update_cash_input_by_id('981cb6165748426aa4bd246878a75aa3', 2000000, SV.CASH_TYPE_DEPOSIT, date(2017, 3, 1))
+    # update_cash_input_by_id('981cb6165748426aa4bd246878a75aa3', 2000000, SV.CASH_TYPE_DEPOSIT, date(2017, 3, 1))
 
-    # print(get_cash_input_detail_by_date_dic(date(2017, 3, 1)))
+    print(get_cash_input_detail_by_date_dic(date(2017, 5, 25)))
     # print((get_cash_last_total_amount_by_type(cash_type=SV.CASH_TYPE_DEPOSIT)))
     # # print(get_last_total_amount_by_type(cash_type=SV.CASH_TYPE_PURCHASE))
     # add_cash_daily_data(cal_date=date.today() - timedelta(days=9), draw_amount=10001, draw_fee=10.01,
