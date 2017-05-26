@@ -57,7 +57,6 @@ class FundDataModifyView(BasicFcView):
         """显示所有合约数据"""
         result = self.mainEngine.get_fund_input_by_id_date_dic(fund_id=asset_id,
                                                                cal_date=dateToModified)
-        print(result)
         self.setRowCount(len(result))
         row = 0
 
@@ -65,11 +64,15 @@ class FundDataModifyView(BasicFcView):
             # 按照定义的表头，进行数据填充
             for n, header in enumerate(self.headerList):
                 content = r[header]
-
+                if header is 'amount':
+                    if r['type'] is 1 and r['is_asset'] is False:
+                        content = r['not_carry_amount']
+                    else:
+                        content = r['amount']
                 cellType = self.headerDict[header]['cellType']
                 cell = cellType(content)
-                if self.saveData and header is 'amount':
-                    cell.data = (r['id'], r['date'], r['amount'], r['type'], r['is_asset'])
+                if self.saveData:
+                    cell.data = (r['id'], r['date'], content, r['type'], r['is_asset'])
                 self.setItem(row, n, cell)
 
             row = row + 1
@@ -125,7 +128,6 @@ class ModifyInput(BasicFcView):
         modify_type_Label = QLabel("类型")
         modify_amount_Label = QLabel("金额")
         print('init Input ', self.data)
-        # cash_id, date,type,amount = self.data
 
         self.modify_date_Edit = QLineEdit(str(self.data[1]))
         self.modify_date_Edit.setReadOnly(True)
