@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QLabel, QLineEdit, QPushButton, QHBoxLayout, QVBoxLa
 
 from controller.EventType import EVENT_CASH
 from controller.MainEngine import MainEngine
-from view.miscView.DataModifyView import CashDataModifyView
+from view.miscView.DataModifyCashView import CashDataModifyView
 from utils.MoneyFormat import outputmoney
 from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 
