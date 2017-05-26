@@ -76,7 +76,7 @@ class BasicFcView(QTableWidget):
         # 默认不允许根据表头进行排序，需要的组件可以开启
         self.sorting = True
         # 初始化右键菜单
-        # self.initPopMenu()
+        self.initPopMenu()
     def connectSignal(self):
         """连接信号"""
         # 双击单元格撤单
@@ -221,49 +221,50 @@ class BasicFcView(QTableWidget):
     def saveToCsv(self):
         """保存表格内容到CSV文件"""
         # 先隐藏右键菜单
-        # self.menu.close()
-
+        self.menu.close()
+        print('pop menu trigger called')
         # 获取想要保存的文件名
-        path = QFileDialog.getSaveFileName(self, '保存数据', '', 'CSV(*.csv)')
-        try:
-            if path[0]:
-                print(path[0])
-                with open(path[0], 'w') as f:
-                    writer = csv.writer(f)
+        # path = QFileDialog.getSaveFileName(self, '保存数据', '', 'CSV(*.csv)')
+        # try:
+        #     if path[0]:
+        #         print(path[0])
+        #         with open(path[0], 'w') as f:
+        #             writer = csv.writer(f)
+        #
+        #             # 保存中文标签
+        #             headers = [d['chinese'] for d in self.headerDict.values()]
+        #             # headers = [header for header in self.headerDict]
+        #             print(headers)
+        #             writer.writerow(headers)
+        #
+        #             # 保存每行内容
+        #             for row in range(self.rowCount()):
+        #                 rowdata = []
+        #                 for column in range(self.columnCount()):
+        #                     item = self.item(row, column)
+        #                     if item is not None:
+        #                         rowdata.append(
+        #                             item.text())
+        #                     else:
+        #                         rowdata.append('')
+        #                 writer.writerow(rowdata)
+        # except IOError as e:
+        #     pass
 
-                    # 保存中文标签
-                    headers = [d['chinese'] for d in self.headerDict.values()]
-                    # headers = [header for header in self.headerDict]
-                    print(headers)
-                    writer.writerow(headers)
+    def initPopMenu(self):
+        """初始化右键菜单"""
+        self.menu = QMenu(self)
 
-                    # 保存每行内容
-                    for row in range(self.rowCount()):
-                        rowdata = []
-                        for column in range(self.columnCount()):
-                            item = self.item(row, column)
-                            if item is not None:
-                                rowdata.append(
-                                    item.text())
-                            else:
-                                rowdata.append('')
-                        writer.writerow(rowdata)
-        except IOError as e:
-            pass
+        saveAction = QAction('保存内容', self)
+        saveAction.triggered.connect(self.saveToCsv)
 
-    # def initPopMenu(self):
-    #     """初始化右键菜单"""
-    #     pass
-    #     self.menu = QMenu(self)
-    #
-    #     saveAction = QAction('保存内容', self)
-    #     saveAction.triggered.connect(self.saveToCsv)
-    #
-    #     self.menu.addAction(saveAction)
+        self.menu.addAction(saveAction)
 
-    # def contextMenuEvent(self, event):
-    #     """右键点击事件"""
-    #     self.menu.popup(QCursor.pos())
+    def contextMenuEvent(self, event):
+        """右键点击事件"""
+        self.menu.popup(QCursor.pos())
+        print('QCursor.__dict__',QCursor.__dict__)
+        print('event.__dict__',event.__dict__)
 
 
 ########################################################################

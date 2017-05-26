@@ -5,11 +5,12 @@ import datetime
 import re
 from collections import OrderedDict
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QAction, QMenu
 from PyQt5.QtWidgets import QLabel, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QFileDialog
 
 from controller.EventType import EVENT_CASH
 from controller.MainEngine import MainEngine
+from view.miscView.DataModifyView import CashDataModifyView
 from utils.MoneyFormat import outputmoney
 from view.BasicWidget import BASIC_FONT, BasicFcView, BasicCell, NumCell
 
@@ -55,7 +56,7 @@ class CashViewMain(BasicFcView):
         #############################
         # CashListView
         ############################
-        self.cashListView = BasicFcView(self.mainEngine)
+        self.cashListView = CashListViewWidget(self.mainEngine)
 
         d = OrderedDict()
         d['cal_date'] = {'chinese': '计算日', 'cellType': BasicCell}
@@ -75,8 +76,10 @@ class CashViewMain(BasicFcView):
         self.cashListView.setHeaderDict(d)
         self.cashListView.setWindowTitle('现金明细')
         self.cashListView.setFont(BASIC_FONT)
+        self.cashListView.saveData = True
 
         self.cashListView.initTable()
+        self.cashListView.connectSignal()
         #####################
         # 界面整合合
         ####################
@@ -85,6 +88,7 @@ class CashViewMain(BasicFcView):
         vbox.addWidget(self.cashListView)
         self.setLayout(vbox)
         # 将信号连接到refresh函数
+
         self.signal.connect(self.refresh)
         self.mainEngine.eventEngine.register(self.cashListView.eventType, self.signal.emit)
 
@@ -109,6 +113,9 @@ class CashViewMain(BasicFcView):
     def outputAction(self):
         print('output Action')
 
+    def connectSignal(self):
+        self.cashListView.itemDoubleClicked.connect(self.cashListView.doubleClickTrigger)
+
     def show(self):
         """显示"""
         super(CashViewMain, self).show()
@@ -126,6 +133,8 @@ class CashViewMain(BasicFcView):
                 content = r[header]
                 cellType = self.cashListView.headerDict[header]['cellType']
                 cell = cellType(content)
+                if self.cashListView.saveData  and header is 'cal_date':
+                    cell.data = r[header]
                 self.cashListView.setItem(row, n, cell)
             row = row + 1
 
@@ -152,10 +161,8 @@ class CashViewMain(BasicFcView):
 
         csvContent = list()
         labels = [d['chinese'] for d in self.cashListView.headerDict.values()]
-        print('labels:', labels)
         csvContent.append(labels)
         content = self.mainEngine.get_cash_detail_by_days()
-        print('content:', content)
         for c in content:
             row = list()
             for n, header in enumerate(self.cashListView.headerDict.keys()):
@@ -178,6 +185,21 @@ class CashViewMain(BasicFcView):
 
         except IOError as e:
             pass
+
+
+class CashListViewWidget(BasicFcView):
+    def __init__(self, mainEngine):
+        super(CashListViewWidget, self).__init__()
+        self.mainEngine = mainEngine
+        self.widgetDict = {}
+
+    def doubleClickTrigger(self, cell):
+        """根据单元格的数据撤单"""
+        try:
+            self.widgetDict['showDataModifyView'].show()
+        except KeyError:
+            self.widgetDict['showDataModifyView'] = CashDataModifyView(self.mainEngine,cell.data)
+            self.widgetDict['showDataModifyView'].show()
 
 
 if __name__ == '__main__':

@@ -310,3 +310,22 @@ class MainEngine(object):
         :return: 
         """
         CommonService.clean_data_by_date(cal_date=cal_date)
+
+    def get_cash_input_detail_by_date_dic(self, cal_date=datetime.date.today()):
+        """
+        修改时获取现金的明细
+        :param cal_date: 
+        :return: 
+        """
+        return CashService.get_cash_input_detail_by_date_dic(cal_date)
+
+    def update_cash_input_by_id_type(self, cash_id, amount, cash_type, cal_date):
+        """
+        对现金进行修改
+        :param cash_id: 
+        :param amount: 
+        :param cash_type: 
+        :param cal_date: 
+        :return: 
+        """
+        CashService.update_cash_input_by_id_type(cash_id, amount, cash_type, cal_date)
