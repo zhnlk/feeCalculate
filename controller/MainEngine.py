@@ -5,6 +5,7 @@ from controller.EventEngine import *
 from services import AssetService, CashService, CommonService, AgreementService, FundService
 from utils import StaticValue as SV
 
+
 class MainEngine(object):
     """主引擎"""
 
@@ -374,3 +375,11 @@ class MainEngine(object):
                                                  cal_date=cal_date,
                                                  amount=amount,
                                                  is_asset=is_asset)
+
+    def clean_management_record_by_id(self, uuid=None):
+        """
+        删除资管明细
+        :param uuid: 
+        :return: 
+        """
+        CommonService.clean_management_record_by_id(management_id=uuid)
