@@ -4,15 +4,9 @@
 # @Email: dG9tbGVhZGVyMDgyOEBnbWFpbC5jb20=  
 # @Github:github/zhnlk
 
-# -*- coding: utf-8 -*-
-# @Author:zhnlk
-# @Date:  2017/4/25
-# @Email: dG9tbGVhZGVyMDgyOEBnbWFpbC5jb20=
-# @Github:github/zhnlk
 import datetime
 from collections import OrderedDict
 
-import re
 from PyQt5.QtWidgets import QAction, QLabel, QLineEdit, QPushButton, QHBoxLayout, QGridLayout
 from PyQt5.QtWidgets import QApplication
 
@@ -27,7 +21,7 @@ class CashDataModifyView(BasicFcView):
     """协存详情"""
 
     # ----------------------------------------------------------------------
-    def __init__(self, mainEngine, dateToModified,parent=None):
+    def __init__(self, mainEngine, dateToModified, parent=None):
         """Constructor"""
         super(CashDataModifyView, self).__init__(parent=parent)
 
@@ -59,7 +53,7 @@ class CashDataModifyView(BasicFcView):
         self.signal.connect(self.refresh)
         self.mainEngine.eventEngine.register(self.eventType, self.signal.emit)
 
-    def showModifyListDetail(self,dateToModified):
+    def showModifyListDetail(self, dateToModified):
         """显示所有合约数据"""
         result = self.mainEngine.get_cash_input_detail_by_date_dic(dateToModified)
         self.setRowCount(len(result))
@@ -92,12 +86,11 @@ class CashDataModifyView(BasicFcView):
         self.widgetDict['showModifyInput'] = ModifyInput(self.mainEngine, data=data)
         self.widgetDict['showModifyInput'].show()
 
-    def refresh(self):
-        """刷新"""
-        # self.menu.close()  # 关闭菜单
+    def refresh(self, data=None):
+        """带参数刷新"""
         self.clearContents()
         self.setRowCount(0)
-        self.showModifyListDetail(self.dateToModified)
+        self.showModifyListDetail(self.dateToModified if data is None else self.dateToModified)
 
     def addMenuAction(self):
         """增加右键菜单内容"""
@@ -111,12 +104,12 @@ class CashDataModifyView(BasicFcView):
             widget.close()
 
         event.accept()
+        self.close()
 
-    def show(self):
+    def show(self, data=None):
         """显示"""
         super(CashDataModifyView, self).show()
-        self.refresh()
-
+        self.refresh(data)
 
 class ModifyInput(BasicFcView):
     def __init__(self, mainEngine, data, parent=None):
@@ -132,7 +125,7 @@ class ModifyInput(BasicFcView):
         modify_date_Label = QLabel("日期")
         modify_type_Label = QLabel("类型")
         modify_amount_Label = QLabel("金额")
-        print('init Input ',self.data)
+        print('init Input ', self.data)
         # cash_id, date,type,amount = self.data
 
         self.modify_date_Edit = QLineEdit(str(self.data[1]))
@@ -192,6 +185,6 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     mainEngine = MainEngine()
-    plv = CashDataModifyView(mainEngine,datetime.date(2017, 5, 25))
+    plv = CashDataModifyView(mainEngine, datetime.date(2017, 5, 25))
     plv.show()
     sys.exit(app.exec_())

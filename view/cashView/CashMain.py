@@ -195,8 +195,17 @@ class CashListViewWidget(BasicFcView):
 
     def doubleClickTrigger(self, cell):
         """根据单元格的数据撤单"""
-        self.widgetDict['showDataModifyView'] = CashDataModifyView(self.mainEngine, cell.data)
-        self.widgetDict['showDataModifyView'].show()
+        try:
+            self.widgetDict['showDataModifyView'].show(cell.data)
+        except KeyError:
+            self.widgetDict['showDataModifyView'] = CashDataModifyView(self.mainEngine, cell.data)
+            self.widgetDict['showDataModifyView'].show()
+
+    def closeEvent(self, event):
+        for widget in self.widgetDict.values():
+            widget.close()
+
+        event.accept()
 
 
 if __name__ == '__main__':
