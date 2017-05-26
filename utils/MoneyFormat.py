@@ -16,6 +16,16 @@ def outputmoney(number):
         return outputdollars(math.floor(number)) + outputcents(number)
 
 
+def outputmoneydown(number):
+    if number is None or number == '':
+        return ""
+
+    if number < 0:
+        return '-' + outputdollars(math.floor(abs(number))) + outputcentsdown(abs(number))
+    else:
+        return outputdollars(math.floor(number)) + outputcentsdown(number)
+
+
 # 格式化金额
 def outputdollars(number):
     """
@@ -35,6 +45,7 @@ def outputdollars(number):
                 output += ',' + str(number)[mod + 3 * i:mod + 3 * i + 3]
         return str(output)
 
+
 def outputcents(amount):
     """
     处理小数点后的数字
@@ -46,8 +57,31 @@ def outputcents(amount):
     return '.0' + str(amount) if amount < 10 else '.' + str(amount)
 
 
+def outputcentsdown(amount):
+    """
+    处理小数点后的数字
+    :param amount: 
+    :return: 
+    """
+    a = math.floor(amount)
+    amount = round((amount - a) * 100 - 1)
+    return '.0' + str(amount) if amount < 10 else '.' + str(amount)
+
+
 if __name__ == '__main__':
-    a = 11111324424.10
-    print(outputmoney(a))
+    a1 = 24424.100
+    a2 = 24424.154
+    a3 = 24424.155
+    a4 = 24424.156
+    print(outputmoney(a1))
+    print(outputmoney(a2))
+    print(outputmoney(a3))
+    print(outputmoneydown(a4))
+
+    # print(outputmoney(round(a1, 2)))
+    # print(outputmoney(round(a2, 2)))
+    # print(outputmoney(round(a3, 2)))
+    # print(outputmoney(round(a4, 2)))
+
     # print(outputcents(a))
     # print(outputdollars(math.floor(a)))
