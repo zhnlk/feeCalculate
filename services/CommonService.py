@@ -596,6 +596,7 @@ def get_all_ret_daily(cal_date=date.today(), **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
 
     ret_obj = session.query(func.sum(AssetTradeRet.amount).label('total_amount')).filter(AssetTradeRet.is_active,
+                                                                                         AssetTradeRet.amount > 0,
                                                                                          AssetTradeRet.date == cal_date,
                                                                                          AssetTradeRet.type == SV.RET_TYPE_INTEREST).one()
 
