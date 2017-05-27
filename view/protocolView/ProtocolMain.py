@@ -135,10 +135,10 @@ class ProtocolViewMain(BasicFcView):
         # 界面整合
         ##########################
         vbox = QVBoxLayout()
-        vbox.addWidget(self.filterView)
-        vbox.addWidget(self.protocolListView)
         vbox.addWidget(self.filterView2)
-        vbox.addWidget(self.protocolInventory)
+        vbox.addWidget(self.protocolInventory)#存量
+        vbox.addWidget(self.filterView)
+        vbox.addWidget(self.protocolListView)#明细
         self.setLayout(vbox)
         # 将信号连接到refresh函数
 
