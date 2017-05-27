@@ -454,6 +454,20 @@ def get_asset_total_amount_by_class_and_type(cal_date=date.today(), asset_class=
 
 
 @session_deco
+def get_asset_ret_total_amount_by_class_type_date(cal_date=date.today(), asset_class=SV.ASSET_CLASS_AGREEMENT,
+                                                  ret_type=SV.ASSET_TYPE_REDEEM, **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+    ret_obj = session.query(func.sum(AssetTradeRet.amount).label('total_amount')).filter(
+        AssetTradeRet.is_active,
+        AssetTradeRet.amount > 0,
+        AssetTradeRet.type == ret_type,
+        AssetTradeRet.date == cal_date,
+        AssetTradeRet.asset_class_obj.has(AssetClass.type == asset_class)
+    ).one()
+    return ret_obj.total_amount if ret_obj.total_amount else 0.0
+
+
+@session_deco
 def get_asset_ret_total_amount_by_class_and_type(cal_date=date.today(), asset_class=SV.ASSET_CLASS_AGREEMENT,
                                                  ret_type=SV.ASSET_TYPE_REDEEM, **kwargs):
     session = kwargs.get(SV.SESSION_KEY)

@@ -19,7 +19,7 @@ from services.CommonService import (
     is_date_has_ret, is_date_has_fee, get_asset_total_amount_by_asset_and_type, get_asset_date_by_id,
     get_asset_ret_last_date_before_cal_date, get_asset_total_amount_by_class_and_type,
     get_asset_ret_total_amount_by_class_and_type, get_asset_fee_total_amount_by_class_and_type,
-    update_fund_ret_total_amount_not_carry_ret, check_fund_ret_by_date)
+    update_fund_ret_total_amount_not_carry_ret, check_fund_ret_by_date, get_asset_ret_total_amount_by_class_type_date)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
 
@@ -620,8 +620,8 @@ def get_total_management_statistic_by_id(cal_date=date.today(), asset_id=None):
 
     total_ret_amount = get_asset_ret_total_amount_by_asset_and_type(cal_date=cal_date, asset_id=asset_id,
                                                                     ret_type=SV.RET_TYPE_INTEREST)
-    total_carry_ret_amount = get_asset_ret_total_amount_by_asset_and_type(cal_date, asset_id, SV.RET_TYPE_CASH)
-    total_ret_amount -= total_carry_ret_amount
+    # total_carry_ret_amount = get_asset_ret_total_amount_by_asset_and_type(cal_date, asset_id, SV.RET_TYPE_CASH)
+    # total_ret_amount -= total_carry_ret_amount
     return {
         SV.ASSET_KEY_ASSET_ID: asset_id,
         SV.ASSET_KEY_NAME: query_by_id(AssetClass, asset_id).name,
@@ -640,14 +640,14 @@ def get_total_management_statistic_by_date(cal_date=date.today()):
                                                                          SV.ASSET_TYPE_PURCHASE)
     total_redeem_amount = get_asset_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
                                                                    SV.ASSET_TYPE_REDEEM)
-    yes_total_redeem_amount = get_asset_total_amount_by_class_and_type(cal_date - timedelta(days=1),
-                                                                       SV.ASSET_CLASS_MANAGEMENT,
-                                                                       SV.ASSET_TYPE_REDEEM)
+    # yes_total_redeem_amount = get_asset_total_amount_by_class_and_type(cal_date - timedelta(days=1),
+    #                                                                    SV.ASSET_CLASS_MANAGEMENT,
+    #                                                                    SV.ASSET_TYPE_REDEEM)
     total_ret_amount = get_asset_ret_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
                                                                     SV.RET_TYPE_INTEREST)
-    yes_total_ret_amount = get_asset_ret_total_amount_by_class_and_type(cal_date - timedelta(days=1),
-                                                                        SV.ASSET_CLASS_MANAGEMENT,
-                                                                        SV.RET_TYPE_INTEREST)
+    # yes_total_ret_amount = get_asset_ret_total_amount_by_class_and_type(cal_date - timedelta(days=1),
+    #                                                                     SV.ASSET_CLASS_MANAGEMENT,
+    #                                                                     SV.RET_TYPE_INTEREST)
     total_ret_carry = get_asset_ret_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
                                                                    SV.RET_TYPE_CASH)
     total_fee_amount = get_asset_fee_total_amount_by_class_and_type(cal_date, SV.ASSET_CLASS_MANAGEMENT,
@@ -668,7 +668,8 @@ def get_total_management_statistic_by_date(cal_date=date.today()):
         SV.ASSET_KEY_CAL_DATE: cal_date,
         SV.ASSET_KEY_MANAGEMENT_AMOUNT: total_amount,
         SV.ASSET_KEY_PURCHASE_MANAGEMENT: total_purchase_amount - yes_total_purchase_amount,
-        SV.ASSET_KEY_MANAGEMENT_RET: total_ret_amount - yes_total_ret_amount
+        SV.ASSET_KEY_MANAGEMENT_RET: get_asset_ret_total_amount_by_class_type_date(cal_date, SV.ASSET_CLASS_MANAGEMENT,
+                                                                                   SV.RET_TYPE_INTEREST)
     }
 
 
