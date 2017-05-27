@@ -69,14 +69,16 @@ def outputcentsdown(amount):
 
 
 if __name__ == '__main__':
-    a1 = 24424.100
+    a1 = 24424.150
     a2 = 24424.154
     a3 = 24424.155
     a4 = 24424.156
+    a5 = 24424.159
     print(outputmoney(a1))
     print(outputmoney(a2))
     print(outputmoney(a3))
     print(outputmoneydown(a4))
+    print(outputmoneydown(a5))
 
     # print(outputmoney(round(a1, 2)))
     # print(outputmoney(round(a2, 2)))
