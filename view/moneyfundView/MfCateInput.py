@@ -38,7 +38,7 @@ class MfCateInput(BasicFcView):
 
         # 下拉框，用来选择不同的协存项目
         # 设置组件
-        mf_project_name_Label = QLabel("协存项目名称")
+        mf_project_name_Label = QLabel("货基项目名称")
 
         self.mf_project_name_Edit = QLineEdit('渤海基金')
 
