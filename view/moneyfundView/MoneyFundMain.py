@@ -34,7 +34,7 @@ class MoneyFundMain(BasicFcView):
 
         self.filterView.moneyfundCate_list = list()
         # 下拉框，用来选择不同的协存项目
-        moneyfundCate_Label = QLabel("协存项目")
+        moneyfundCate_Label = QLabel("货基类别")
         self.filterView.moneyfundCate = QComboBox()
         self.prepareMoneyfundData()
 
@@ -150,11 +150,11 @@ class MoneyFundMain(BasicFcView):
         # 界面整合
         #########################
         vbox = QVBoxLayout()
-        vbox.addWidget(self.moneyfundInventory)#存量
-        vbox.addWidget(self.moneyfundDetailMain)# 明细
         vbox.addWidget(self.filterView2)
-        vbox.addWidget(self.moneyfundSummaryView) #汇总
+        vbox.addWidget(self.moneyfundInventory)#存量
         vbox.addWidget(self.filterView)
+        vbox.addWidget(self.moneyfundDetailMain)# 明细
+        vbox.addWidget(self.moneyfundSummaryView) #汇总
         self.setLayout(vbox)
         # 将信号接入
 
