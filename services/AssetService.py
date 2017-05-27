@@ -299,10 +299,10 @@ def asset_ret_carry_to_cash(cal_date=date.today(), asset=AssetClass(), amount=0)
     if amount > 0:
 
         add_asset_ret_with_asset_and_type(
-            amount=amount,
+            amount=-amount,
             asset_id=asset.id,
             cal_date=cal_date,
-            ret_type=SV.RET_TYPE_CASH
+            ret_type=SV.RET_TYPE_INTEREST
         )
         add_cash_with_type(amount=amount, cash_type=SV.CASH_TYPE_CARRY, asset_id=asset.id, cal_date=cal_date)
 
