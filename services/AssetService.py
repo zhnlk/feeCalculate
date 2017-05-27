@@ -708,7 +708,7 @@ def get_management_asset_all_ret(asset_id=None):
     asset_rate_list = query_by_id(obj=AssetClass, obj_id=asset_id).asset_ret_rate_list
     asset_rate = get_asset_rate_by_amount(asset_rate_list)
     asset_trade_list = query_by_id(obj=AssetClass, obj_id=asset_id).asset_trade_list
-    asset_trade_amount = asset_trade_list[-1].total_amount
+    asset_trade_amount = asset_trade_list[-1].total_amount if len(asset_trade_list) else 0.0
     asset = query_by_id(obj=AssetClass, obj_id=asset_id)
     return asset_trade_amount * asset_rate.ret_rate * (
         asset.expiry_date - asset.start_date).days / asset_rate.interest_days if asset_rate.interest_days else 0.0
