@@ -64,7 +64,7 @@ def outputcentsdown(amount):
     :return: 
     """
     a = math.floor(amount)
-    amount = round((amount - a) * 100 - 1)
+    amount = math.floor((amount - a) * 100)
     return '.0' + str(amount) if amount < 10 else '.' + str(amount)
 
 
@@ -77,13 +77,14 @@ if __name__ == '__main__':
     print(outputmoney(a1))
     print(outputmoney(a2))
     print(outputmoney(a3))
+    print(outputmoney(a4))
+    print(outputmoney(a5))
+    print()
+    print(outputmoneydown(a1))
+    print(outputmoneydown(a2))
+    print(outputmoneydown(a3))
     print(outputmoneydown(a4))
     print(outputmoneydown(a5))
-
-    # print(outputmoney(round(a1, 2)))
-    # print(outputmoney(round(a2, 2)))
-    # print(outputmoney(round(a3, 2)))
-    # print(outputmoney(round(a4, 2)))
 
     # print(outputcents(a))
     # print(outputdollars(math.floor(a)))

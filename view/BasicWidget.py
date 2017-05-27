@@ -301,7 +301,7 @@ class NumCell(QTableWidgetItem):
     def setContent(self, text):
         """设置内容"""
         try:
-            self.setData(Qt.DisplayRole, outputmoney(round(text, 2)))
+            self.setData(Qt.DisplayRole, outputmoney(text))
         except ValueError:
             self.setText(text)
 
@@ -319,7 +319,7 @@ class Num2Cell(QTableWidgetItem):
     def setContent(self, text):
         """设置内容"""
         try:
-            self.setData(Qt.DisplayRole, outputmoneydown(round(text, 2)))
+            self.setData(Qt.DisplayRole, outputmoneydown(text))
         except ValueError:
             self.setText(text)
 
