@@ -87,8 +87,8 @@ class AssetMgtViewMain(BasicFcView):
         # d['committee_interest'] = {'chinese': '委贷利息', 'cellType': BasicCell}
         d['bank_fee'] = {'chinese': '委贷银行费用', 'cellType': NumCell}
         d['manage_fee'] = {'chinese': '资管计划费用', 'cellType': NumCell}
-        d['asset_ret'] = {'chinese': '资管计划总收益', 'cellType': Num2Cell}
-        d['mamangement_daily_ret'] = {'chinese': '资管计划每日收益', 'cellType': NumCell}
+        d['asset_ret'] = {'chinese': '资管计划总收益', 'cellType': NumCell}
+        d['mamangement_daily_ret'] = {'chinese': '资管计划每日收益', 'cellType': Num2Cell}
         # d['asset_plan_daily_valuation'] = {'chinese': '正常情况资管计划\n每日收益估值', 'cellType': BasicCell}
         d['uuid_view'] = {'chinese': '调整查看', 'cellType': BasicCell}
         d['uuid_input'] = {'chinese': '估值调整', 'cellType': BasicCell}
