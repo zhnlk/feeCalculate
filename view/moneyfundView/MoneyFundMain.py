@@ -150,11 +150,11 @@ class MoneyFundMain(BasicFcView):
         # 界面整合
         #########################
         vbox = QVBoxLayout()
+        vbox.addWidget(self.moneyfundSummaryView) #汇总
         vbox.addWidget(self.filterView)
-        vbox.addWidget(self.moneyfundDetailMain)
+        vbox.addWidget(self.moneyfundDetailMain)# 明细
         vbox.addWidget(self.filterView2)
-        vbox.addWidget(self.moneyfundInventory)
-        vbox.addWidget(self.moneyfundSummaryView)
+        vbox.addWidget(self.moneyfundInventory)#存量
         self.setLayout(vbox)
         # 将信号接入
 
