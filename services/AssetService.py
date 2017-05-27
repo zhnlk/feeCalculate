@@ -20,7 +20,7 @@ from services.CommonService import (
     get_asset_ret_last_date_before_cal_date, get_asset_total_amount_by_class_and_type,
     get_asset_ret_total_amount_by_class_and_type, get_asset_fee_total_amount_by_class_and_type,
     update_fund_ret_total_amount_not_carry_ret, check_fund_ret_by_date, get_asset_ret_total_amount_by_class_type_date,
-    cal_fund_ret_period)
+    cal_fund_ret_period, get_fund_ret_not_carry_by_id_date)
 from services.CommonService import query, purchase, redeem
 from utils import StaticValue as SV
 
@@ -442,7 +442,10 @@ def get_asset_fund_detail(cal_date=date.today(), asset_id=None):
         ret_type=SV.RET_TYPE_PRINCIPAL)
 
     ret.update({SV.ASSET_KEY_RET_CARRY_CASH: total_ret_carry - yes_total_ret_carry})
-    ret.update({SV.ASSET_KEY_RET_NOT_CARRY: total_ret - yes_total_ret_carry + init_ret_amount})  # 未结转收益
+
+    not_carry = get_fund_ret_not_carry_by_id_date(asset_id, cal_date)
+    not_carry_amount = not_carry[-1].total_amount if not_carry.count() else 0.0
+    ret.update({SV.ASSET_KEY_RET_NOT_CARRY: not_carry_amount})
     total_purchase = get_asset_total_amount_by_asset_and_type(
         cal_date=cal_date,
         asset_id=asset_id,

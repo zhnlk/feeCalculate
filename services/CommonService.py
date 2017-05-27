@@ -1067,6 +1067,20 @@ def get_fund_ret_input_by_id_date(fund_id=None, cal_date=date.today(), **kwargs)
 
 
 @session_deco
+def get_fund_ret_not_carry_by_id_date(fund_id=None, cal_date=date.today(), **kwargs):
+    session = kwargs.get(SV.SESSION_KEY)
+
+    ret_carry = session.query(AssetTradeRet).filter(
+        AssetTradeRet.is_active,
+        AssetTradeRet.date == cal_date,
+        AssetTradeRet.asset_class == fund_id,
+        AssetTradeRet.type == SV.RET_TYPE_INTEREST
+    )
+
+    return ret_carry
+
+
+@session_deco
 def update_fund_ret_total_amount_not_carry_ret(fund_id=None, cal_date=date.today(), amount=0, not_carry_amount=0,
                                                **kwargs):
     session = kwargs.get(SV.SESSION_KEY)
@@ -1215,15 +1229,15 @@ def cal_fund_ret(cal_date=date.today(), fund_id=None, **kwargs):
         AssetTradeRet.is_active,
         AssetTradeRet.type == SV.RET_TYPE_INTEREST,
         AssetTradeRet.asset_class == fund_id,
-        AssetTradeRet.date == cal_date - timedelta(days=1)
-    )
+        AssetTradeRet.date < cal_date
+    ).order_by(AssetTradeRet.date)
     yes_not_carry_amount = yes_not_carry[-1].total_amount if yes_not_carry.count() else 0.0
     yes_carry = session.query(AssetTradeRet).filter(
         AssetTradeRet.is_active,
         AssetTradeRet.type == SV.RET_TYPE_PRINCIPAL,
         AssetTradeRet.asset_class == fund_id,
         AssetTradeRet.date == cal_date - timedelta(days=1)
-    )
+    ).order_by(AssetTradeRet.date)
     yes_carry_amount = yes_carry[-1].amount if yes_carry.count() else 0.0
     not_carry = session.query(AssetTradeRet).filter(
         AssetTradeRet.is_active,
@@ -1256,7 +1270,8 @@ def check_fund_ret_by_date(cal_date=date.today(), asset_id=None, **kwargs):
 
 
 if __name__ == '__main__':
-    update_fund_ret_input_by_id('145aceb111e748dba0ad8b7b3b2c8eeb', 300, date(2017, 5, 21))
+    cal_fund_ret(date(2017, 5, 3), 'fdad17390f274466b3394b69b5f7f66d')
+    # update_fund_ret_input_by_id('145aceb111e748dba0ad8b7b3b2c8eeb', 300, date(2017, 5, 21))
     # cal_fund_ret(date.today(), '6a7772b3e47548f4a67c377ea7d560a2')
     # clean_management_record_by_id('f80cf665734241cc853447e4e2dba890')
 # update_fund_ret_input_by_id('aa81c50eb364410ab489d1e3c3a3c8f7', 3000, date(2017, 5, 22))
