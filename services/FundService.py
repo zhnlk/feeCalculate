@@ -84,6 +84,3 @@ def update_fund_input_by_id_date(fund_trade_id=None, cal_date=date.today(), amou
         asset_id = query_by_id(AssetTradeRet, fund_trade_id).asset_class
         update_fund_ret_input_by_id(fund_trade_id, amount, cal_date)
         cal_fund_ret_period(asset_id, cal_date, date.today())
-
-# print(get_fund_input_by_id_date_dic('510f1b314e864680a48c57faa78dd873', date(2017, 5, 22)))
-# update_fund_input_by_id_date('145aceb111e748dba0ad8b7b3b2c8eeb', date(2017, 5, 21), 300, False)
