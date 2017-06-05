@@ -5,7 +5,7 @@ import datetime
 from collections import OrderedDict
 
 import re
-from PyQt5.QtWidgets import QApplication, QVBoxLayout, QFileDialog, QLabel, QLineEdit, QPushButton, QHBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QFileDialog, QLabel, QLineEdit, QPushButton, QHBoxLayout, QMessageBox, QWidget
 
 from controller.EventEngine import Event
 from controller.EventType import EVENT_AM
@@ -29,7 +29,7 @@ class AssetMgtViewMain(BasicFcView):
         ###############################
         # FilterBar
         ###############################
-        self.filterView = BasicFcView(self.mainEngine)
+        self.filterView = QWidget()
 
         filterStartDate_Label = QLabel('开始时间')
         self.filterView.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
@@ -54,7 +54,6 @@ class AssetMgtViewMain(BasicFcView):
         # filterHBox.addWidget(outputBtn)
 
         self.filterView.setLayout(filterHBox)
-        self.filterView.setMaximumHeight(50)
         ##########################
         # AssetDailyInventoryView
         #########################

@@ -5,7 +5,7 @@ import datetime
 import re
 from collections import OrderedDict
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtWidgets import QLabel, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QFileDialog
 
 from view.cashView.DataModifyCashView import CashDataModifyView
@@ -27,7 +27,7 @@ class CashViewMain(BasicFcView):
         ###############################
         # FilterBar
         ###############################
-        self.filterView = BasicFcView(self.mainEngine)
+        self.filterView = QWidget()
 
         filterStartDate_Label = QLabel('开始时间')
         self.filterView.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
@@ -52,7 +52,6 @@ class CashViewMain(BasicFcView):
         # filterHBox.addWidget(outputBtn)
 
         self.filterView.setLayout(filterHBox)
-        self.filterView.setMaximumHeight(50)
         #############################
         # CashListView
         ############################

@@ -6,7 +6,7 @@ import re
 from collections import OrderedDict
 
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox, \
-    QFileDialog
+    QFileDialog, QWidget
 
 from controller.EventType import EVENT_MF, EVENT_MF_INV, EVENT_MF_SUM
 from controller.MainEngine import MainEngine
@@ -30,7 +30,7 @@ class MoneyFundMain(BasicFcView):
         ##########################
         # FilterBar
         ##########################
-        self.filterView = BasicFcView(self.mainEngine)
+        self.filterView = QWidget()
 
         self.filterView.moneyfundCate_list = list()
         # 下拉框，用来选择不同的协存项目
@@ -63,7 +63,6 @@ class MoneyFundMain(BasicFcView):
         # filterHBox.addWidget(outputBtn)
 
         self.filterView.setLayout(filterHBox)
-        self.filterView.setMaximumHeight(50)
         ##########################
         # MoneyFundDetailMain
         ##########################
@@ -88,7 +87,7 @@ class MoneyFundMain(BasicFcView):
         ##########################
         # FilterBar2
         ##########################
-        self.filterView2 = BasicFcView(self.mainEngine)
+        self.filterView2 = QWidget()
 
         filterStartDate_Label = QLabel('开始时间')
         self.filterView2.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
@@ -113,7 +112,6 @@ class MoneyFundMain(BasicFcView):
         # filterHBox.addWidget(outputBtn)
 
         self.filterView2.setLayout(filterHBox)
-        self.filterView2.setMaximumHeight(50)
         ##########################
         # MoneyFundInventory
         ##########################
