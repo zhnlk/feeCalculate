@@ -519,7 +519,6 @@ class TotalValuationMain(BasicFcView):
         self.filterView.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
         filterEndDate_Label = QLabel('结束时间')
         self.filterView.filterEndDate_Edit = QLineEdit(str(datetime.date.today()))
-        self.filterView.filterEndDate_Edit.setMinimumWidth(200)
 
         filterBtn = QPushButton('筛选')
         # outputBtn = QPushButton('导出')
