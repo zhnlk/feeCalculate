@@ -293,9 +293,9 @@ class AssetMgtViewMain(BasicFcView):
             row = list()
             for n, header in enumerate(self.commiteeDetailMain.headerDict.keys()):
                 if header not in ['asset_name', 'ret_rate', 'start_date', 'expiry_date', 'management_due',
-                                  'uuid_view', 'uuid_input']:
+                                  'uuid_view', 'uuid_input','uuid_del']:
                     row.append(outputmoney(c[header]))
-                elif header in ['uuid_view', 'uuid_input']:
+                elif header in ['uuid_view', 'uuid_input','uuid_del']:
                     pass
                 else:
                     row.append(c[header])

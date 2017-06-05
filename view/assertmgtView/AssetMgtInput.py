@@ -34,7 +34,7 @@ class AssetMgtInput(BasicFcView):
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle('输入资管项目字段')
-        self.setMinimumSize(400, 350)
+        self.setMinimumSize(600, 400)
         self.setFont(BASIC_FONT)
         # self.initTable()
         self.initInput()
