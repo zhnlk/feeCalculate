@@ -89,10 +89,8 @@ class MoneyFundMain(BasicFcView):
 
         filterStartDate_Label = QLabel('开始时间')
         self.filterView2.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
-        self.filterView2.filterStartDate_Edit.setMaximumWidth(80)
         filterEndDate_Label = QLabel('结束时间')
         self.filterView2.filterEndDate_Edit = QLineEdit(str(datetime.date.today()))
-        self.filterView2.filterEndDate_Edit.setMaximumWidth(80)
 
         filterBtn = QPushButton('筛选')
         # outputBtn = QPushButton('导出')
