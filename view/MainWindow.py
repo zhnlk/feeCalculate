@@ -9,7 +9,7 @@ import re
 from PyQt5 import QtCore
 
 from PyQt5.QtCore import QSettings
-from PyQt5.QtWidgets import QAction, QApplication, QFileDialog, QHBoxLayout, QPushButton, QLineEdit, QLabel, QVBoxLayout
+from PyQt5.QtWidgets import QAction, QApplication, QFileDialog, QHBoxLayout, QPushButton, QLineEdit, QLabel, QVBoxLayout, QWidget
 from PyQt5.QtWidgets import QDockWidget
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
@@ -514,8 +514,7 @@ class TotalValuationMain(BasicFcView):
         ############################
         # FilterBar
         ############################
-        self.filterView = BasicFcView(self.mainEngine)
-
+        self.filterView = QWidget()
         filterStartDate_Label = QLabel('开始时间')
         self.filterView.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
         self.filterView.filterStartDate_Edit.setMaximumWidth(80)
@@ -539,7 +538,6 @@ class TotalValuationMain(BasicFcView):
         # filterHBox.addWidget(outputBtn)
 
         self.filterView.setLayout(filterHBox)
-        self.filterView.setMaximumHeight(50)
         #############################
         # TotalValuationView
         #############################

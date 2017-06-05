@@ -5,7 +5,7 @@ import datetime
 from collections import OrderedDict
 
 import re
-from PyQt5.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox, QFileDialog
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QComboBox, QFileDialog, QWidget
 from PyQt5.QtWidgets import QApplication
 
 from view.protocolView.DataModifyAgreementView import AgreementDataModifyView
@@ -28,7 +28,7 @@ class ProtocolViewMain(BasicFcView):
         ############################
         # FilterBar
         ############################
-        self.filterView = BasicFcView(self.mainEngine)
+        self.filterView = QWidget()
 
         self.filterView.protocolCate_list = list()
         # 下拉框，用来选择不同的协存项目
@@ -61,7 +61,6 @@ class ProtocolViewMain(BasicFcView):
         # filterHBox.addWidget(outputBtn)
 
         self.filterView.setLayout(filterHBox)
-        self.filterView.setMaximumHeight(50)
         ################################
         # ProtocolListView
         ###############################
@@ -90,7 +89,7 @@ class ProtocolViewMain(BasicFcView):
         ##########################
         # FilterBar2
         ##########################
-        self.filterView2 = BasicFcView(self.mainEngine)
+        self.filterView2 = QWidget()
 
         filterStartDate_Label = QLabel('开始时间')
         self.filterView2.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
@@ -115,7 +114,6 @@ class ProtocolViewMain(BasicFcView):
         # filterHBox.addWidget(outputBtn)
 
         self.filterView2.setLayout(filterHBox)
-        self.filterView2.setMaximumHeight(50)
         ##########################
         # protocolInventory
         ##########################
