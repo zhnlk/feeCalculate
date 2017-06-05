@@ -33,10 +33,8 @@ class AssetMgtViewMain(BasicFcView):
 
         filterStartDate_Label = QLabel('开始时间')
         self.filterView.filterStartDate_Edit = QLineEdit(str(datetime.date.today()))
-        self.filterView.filterStartDate_Edit.resize()
         filterEndDate_Label = QLabel('结束时间')
         self.filterView.filterEndDate_Edit = QLineEdit(str(datetime.date.today()))
-        self.filterView.filterEndDate_Edit.resize()
 
         filterBtn = QPushButton('筛选')
         # outputBtn = QPushButton('导出')
