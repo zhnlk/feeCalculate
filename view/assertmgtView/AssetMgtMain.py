@@ -8,7 +8,7 @@ import re
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QFileDialog, QLabel, QLineEdit, QPushButton, QHBoxLayout, QMessageBox, QWidget
 
 from controller.EventEngine import Event
-from controller.EventType import EVENT_AM
+from controller.EventType import EVENT_AM, EVENT_MAIN_VALUATION
 from controller.MainEngine import MainEngine
 from utils.MoneyFormat import outputmoney
 from view.BasicWidget import BasicFcView, BasicCell, NumCell, BASIC_FONT, Num2Cell
@@ -235,6 +235,8 @@ class AssetMgtViewMain(BasicFcView):
         else:
             pass
         self.mainEngine.eventEngine.put(Event(type_=EVENT_AM))
+        self.mainEngine.eventEngine.put(Event(type_=EVENT_MAIN_VALUATION))
+
 
     def closeEvent(self, event):
         """资管主界面的关闭事件"""
