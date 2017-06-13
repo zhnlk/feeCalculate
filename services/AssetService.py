@@ -528,14 +528,15 @@ def add_management_class(
     asset_rate = AssetRetRate(asset_id=asset_id, ret_rate=ret_rate, interest_days=rate_days, cal_date=cal_date)
 
     asset_fee_rate_bank = AssetFeeRate(asset_class=asset_id, rate=bank_fee_rate, type=SV.FEE_TYPE_LOAN_BANK,
-                                       fee_days=bank_days, cal_date=cal_date)
+                                       fee_days=bank_days, cal_date=cal_date) if bank_fee_rate and bank_days else None
     asset_fee_rate_manage = AssetFeeRate(asset_class=asset_id, rate=manage_fee_rate, type=SV.FEE_TYPE_MANAG_PLAN,
-                                         fee_days=manage_days, cal_date=cal_date)
+                                         fee_days=manage_days,
+                                         cal_date=cal_date) if manage_fee_rate and manage_days else None
     purchase(asset=asset, amount=trade_amount, cal_date=start_date)
 
     save(asset_rate)
-    save(asset_fee_rate_bank)
-    save(asset_fee_rate_manage)
+    save(asset_fee_rate_bank) if asset_fee_rate_bank else None
+    save(asset_fee_rate_manage) if asset_fee_rate_manage else None
 
     cal_all_management_ret_and_fee(cal_date=date.today())
 
